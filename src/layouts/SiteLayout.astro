@@ -1,0 +1,100 @@
+---
+import BaseHead from '../components/BaseHead.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+
+export interface Props {
+  title?: string;
+  description?: string;
+  frontmatter?: {
+    title?: string;
+    description?: string;
+    summary?: string;
+  };
+}
+
+const frontmatter = Astro.props.frontmatter ?? {};
+const title = Astro.props.title ?? frontmatter.title;
+const description = Astro.props.description ?? frontmatter.description ?? frontmatter.summary;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <BaseHead title={title} description={description} />
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">Skip to content</a>
+    <Header />
+    <main id="main-content" class="site-main" tabindex="-1">
+      <div class="maincontent">
+        <slot />
+      </div>
+    </main>
+    <Footer />
+    <script is:inline>
+      (() => {
+        const railQuery = '.content-sidenote__body, .content-margin-note__body';
+        const desktopRail = window.matchMedia('(min-width: 1120px)');
+        const railGap = 12;
+
+        const getAnchorForNote = (note) => {
+          const wrapper = note.parentElement;
+          const input = wrapper?.querySelector('input[id]');
+          return input ? wrapper.querySelector(`label[for="${CSS.escape(input.id)}"]`) : wrapper;
+        };
+
+        const getContainerForNote = (note) => note.closest('.article-layout') ?? note.closest('.maincontent');
+
+        const resetRailNotes = () => {
+          document.querySelectorAll(railQuery).forEach((note) => note.style.removeProperty('top'));
+          document.querySelectorAll('.article-layout, .maincontent').forEach((container) => container.style.removeProperty('padding-bottom'));
+        };
+
+        const positionRailNotes = () => {
+          resetRailNotes();
+          if (!desktopRail.matches) return;
+
+          const notesByContainer = new Map();
+          document.querySelectorAll(railQuery).forEach((note) => {
+            const container = getContainerForNote(note);
+            if (!container) return;
+            const notes = notesByContainer.get(container) ?? [];
+            notes.push(note);
+            notesByContainer.set(container, notes);
+          });
+
+          notesByContainer.forEach((notes, container) => {
+            let previousBottom = -Infinity;
+            const containerRect = container.getBoundingClientRect();
+            const containerTop = containerRect.top;
+
+            notes.forEach((note) => {
+              const anchor = getAnchorForNote(note);
+              const anchorTop = (anchor ?? note).getBoundingClientRect().top - containerTop;
+              const top = Math.max(anchorTop, previousBottom + railGap);
+              note.style.top = `${top}px`;
+              previousBottom = top + note.getBoundingClientRect().height;
+            });
+
+            const overflow = previousBottom - containerRect.height;
+            if (overflow > 0) container.style.paddingBottom = `${overflow}px`;
+          });
+        };
+
+        let railFrame = 0;
+        const scheduleRailNotes = () => {
+          window.cancelAnimationFrame(railFrame);
+          railFrame = window.requestAnimationFrame(positionRailNotes);
+        };
+
+        window.addEventListener('resize', scheduleRailNotes);
+        window.addEventListener('load', scheduleRailNotes, { once: true });
+        document.addEventListener('DOMContentLoaded', scheduleRailNotes, { once: true });
+        document.querySelectorAll(`${railQuery} img`).forEach((image) => image.addEventListener('load', scheduleRailNotes, { once: true }));
+        if (document.readyState !== 'loading') scheduleRailNotes();
+        document.fonts?.ready?.then(scheduleRailNotes).catch(() => {});
+      })();
+    </script>
+  </body>
+</html>

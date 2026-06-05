@@ -1,0 +1,32 @@
+---
+layout: ../layouts/ContentLayout.astro
+title: AI Tools in Research
+description: A pilot-class research site about coding agents, mathematical work, and AI-mediated research practice.
+---
+
+import Sidenote from '../components/Sidenote.astro';
+import MarginNote from '../components/MarginNote.astro';
+import Figure from '../components/Figure.astro';
+
+This site is a working notebook and public record for an academic project on the use of AI tools in research. It is intentionally static-first: durable prose and mathematical exposition, with interactive elements added only where they clarify an idea or document an experiment.<Sidenote>The layout is Tufte-inspired: generous text, quiet typography, and a right-hand rail for marginal material. On smaller screens, notes collapse into inline disclosures.</Sidenote>
+
+## What will live here
+
+- A [research log](/log/) with one entry per session.
+- A [project area](/project/) for background, methods, artifacts, and findings.
+- A [bio page](/bio/) with academic context and contact details.
+- Mathematical notes rendered statically with KaTeX, for example
+
+$$
+\operatorname{utility}(a \mid c) = \mathbb{E}[R \mid A = a, C = c].
+$$
+
+<MarginNote>
+Good candidates for the margin: definitions, reminders, links to source material, short methodological cautions, and comments that should not interrupt the main argumentative line.
+</MarginNote>
+
+## Figure handling
+
+<Figure src="/figures/placeholder.svg" alt="Placeholder geometric figure" caption="A placeholder figure component. Use layout='wide' or layout='margin' when a figure should leave the text column." />
+
+The initial site includes reusable MDX components for sidenotes, margin notes, and figures. The content model is deliberately small so the project can evolve with the class rather than locking in too much structure up front.

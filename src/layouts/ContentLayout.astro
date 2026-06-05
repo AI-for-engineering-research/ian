@@ -1,0 +1,25 @@
+---
+import SiteLayout from './SiteLayout.astro';
+
+export interface Props {
+  title: string;
+  description?: string;
+  eyebrow?: string;
+  date?: Date;
+}
+
+const { title, description, eyebrow, date } = Astro.props;
+const formattedDate = date?.toLocaleDateString('en', { year: 'numeric', month: 'long', day: 'numeric' });
+---
+
+<SiteLayout title={title} description={description}>
+  <article class="article-layout content-page">
+    <header class="content-header">
+      {eyebrow && <p class="content-meta">{eyebrow}</p>}
+      <h1>{title}</h1>
+      {formattedDate && <p class="content-meta"><time datetime={date?.toISOString()}>{formattedDate}</time></p>}
+      {description && <p>{description}</p>}
+    </header>
+    <slot />
+  </article>
+</SiteLayout>

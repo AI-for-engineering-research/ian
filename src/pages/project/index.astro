@@ -1,0 +1,18 @@
+---
+import { getCollection } from 'astro:content';
+import ContentLayout from '../../layouts/ContentLayout.astro';
+
+const pages = (await getCollection('project', ({ data }) => !data.draft))
+  .sort((a, b) => a.data.order - b.data.order || a.data.title.localeCompare(b.data.title));
+---
+
+<ContentLayout title="Project" description="Background, methods, artifacts, and findings for the pilot-class research project.">
+  <ul class="card-list">
+    {pages.map((page) => (
+      <li class="card">
+        <h2><a href={`/project/${page.id}/`}>{page.data.title}</a></h2>
+        <p>{page.data.summary}</p>
+      </li>
+    ))}
+  </ul>
+</ContentLayout>

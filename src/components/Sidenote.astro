@@ -1,0 +1,21 @@
+---
+export interface Props {
+  id?: string;
+  label?: string;
+  open?: boolean;
+}
+
+const counterKey = `__aiResearchSidenoteCounter:${Astro.url.pathname}`;
+const routeId = Astro.url.pathname.replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '') || 'page';
+const counters = globalThis as typeof globalThis & Record<string, number | undefined>;
+const { id, label = 'Show sidenote', open = false } = Astro.props;
+counters[counterKey] = (counters[counterKey] ?? 0) + 1;
+const noteId = id ?? `sidenote-${routeId}-${counters[counterKey]}`;
+const bodyId = `${noteId}-body`;
+---
+
+<span class="content-sidenote" data-content-sidenote>
+  <input class="content-sidenote__toggle" type="checkbox" id={noteId} aria-controls={bodyId} checked={open} />
+  <label class="content-sidenote__ref" for={noteId} aria-label={label}></label>
+  <span class="content-sidenote__body" id={bodyId} role="note"><slot /></span>
+</span>

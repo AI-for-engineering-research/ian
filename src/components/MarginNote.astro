@@ -1,0 +1,22 @@
+---
+export interface Props {
+  id?: string;
+  label?: string;
+  marker?: string;
+  open?: boolean;
+}
+
+const counterKey = `__aiResearchMarginNoteCounter:${Astro.url.pathname}`;
+const routeId = Astro.url.pathname.replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '') || 'page';
+const counters = globalThis as typeof globalThis & Record<string, number | undefined>;
+const { id, label = 'Show margin note', marker = '⊕', open = false } = Astro.props;
+counters[counterKey] = (counters[counterKey] ?? 0) + 1;
+const noteId = id ?? `margin-note-${routeId}-${counters[counterKey]}`;
+const bodyId = `${noteId}-body`;
+---
+
+<span class="content-margin-note" data-content-margin-note>
+  <input class="content-margin-note__toggle" type="checkbox" id={noteId} aria-controls={bodyId} checked={open} />
+  <label class="content-margin-note__ref" for={noteId} aria-label={label}>{marker}</label>
+  <span class="content-margin-note__body" id={bodyId} role="note"><slot /></span>
+</span>

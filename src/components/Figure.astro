@@ -1,0 +1,27 @@
+---
+export interface Props {
+  src: string;
+  alt: string;
+  caption?: string;
+  layout?: 'inline' | 'wide' | 'full' | 'margin';
+  href?: string;
+  width?: number;
+  height?: number;
+  loading?: 'eager' | 'lazy';
+}
+
+const { src, alt, caption, layout = 'inline', href, width, height, loading = 'lazy' } = Astro.props;
+const hasCaption = Boolean(caption) || Astro.slots.has('caption');
+const className = `content-figure content-figure--${layout}`;
+---
+
+<figure class={className}>
+  {href ? (
+    <a href={href} target="_blank" rel="noopener noreferrer">
+      <img src={src} alt={alt} width={width} height={height} loading={loading} decoding="async" />
+    </a>
+  ) : (
+    <img src={src} alt={alt} width={width} height={height} loading={loading} decoding="async" />
+  )}
+  {hasCaption && <figcaption>{caption}<slot name="caption" /></figcaption>}
+</figure>

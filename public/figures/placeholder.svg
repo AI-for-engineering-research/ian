@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 480" role="img" aria-labelledby="title desc">
+  <title id="title">Placeholder geometric figure</title>
+  <desc id="desc">A simple line drawing on a cornsilk background.</desc>
+  <rect width="960" height="480" fill="cornsilk"/>
+  <g fill="none" stroke="#333333" stroke-width="3">
+    <circle cx="320" cy="240" r="120"/>
+    <rect x="460" y="120" width="220" height="220"/>
+    <path d="M80 380 C220 140 380 140 520 300 S760 420 880 120"/>
+  </g>
+  <g fill="#333333">
+    <circle cx="80" cy="380" r="7"/>
+    <circle cx="880" cy="120" r="7"/>
+  </g>
+</svg>

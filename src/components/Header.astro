@@ -1,0 +1,17 @@
+---
+const links = [
+  { href: '/', label: 'Home' },
+  { href: '/bio/', label: 'Bio' },
+  { href: '/log/', label: 'Research log' },
+  { href: '/project/', label: 'Project' },
+];
+---
+
+<header class="site-header">
+  <nav class="site-nav" aria-label="Main navigation">
+    <a class="site-title" href="/">AI Tools in Research</a>
+    <div class="site-links">
+      {links.map((link) => <a href={link.href}>{link.label}</a>)}
+    </div>
+  </nav>
+</header>
