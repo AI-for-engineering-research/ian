@@ -1,0 +1,538 @@
+---
+import { bioLayers } from '../data/bioStrata';
+
+const columnHeight = 900;
+const columnWidth = 250;
+const bandX = 54;
+const bandWidth = 176;
+const totalWeight = bioLayers.reduce((sum, layer) => sum + layer.weight, 0);
+const layersNewestFirst = [...bioLayers].reverse();
+let y = 0;
+const layerGeometry = layersNewestFirst.map((layer) => {
+  const height = (layer.weight / totalWeight) * columnHeight;
+  const geometry = { layer, y, height };
+  y += height;
+  return geometry;
+});
+const fossilColor = (kind: string) => ({
+  dog: '#f0a23a',
+  fault: '#d65c35',
+  instrument: '#40a7a1',
+  model: '#49a078',
+  project: '#6b7fd7',
+  study: '#9c6ade',
+  teaching: '#d982a6',
+  talks: '#cc7a2f',
+  tool: '#8d6e4f',
+  work: '#6a8f3f',
+  research: '#39a9db',
+}[kind] ?? '#8d6e4f');
+
+const fossilPoints = (cx: number, cy: number, index: number) => {
+  const radii = [7, 5.5, 7.8, 6.2, 8.1, 5.8];
+  return radii.map((radius, i) => {
+    const angle = -Math.PI / 2 + i * (Math.PI * 2 / radii.length) + index * 0.37;
+    return `${(cx + Math.cos(angle) * radius).toFixed(1)},${(cy + Math.sin(angle) * radius).toFixed(1)}`;
+  }).join(' ');
+};
+---
+
+<section class="bio-strata" data-bio-strata>
+  <h1>Life as stratigraphy</h1>
+
+  <div class="bio-strata__grid">
+    <aside class="bio-strata__column-wrap" aria-label="Stratigraphic bio column">
+      <svg class="bio-strata__column" viewBox={`0 0 ${columnWidth} ${columnHeight}`} role="img" aria-labelledby="bio-strata-column-title">
+        <title id="bio-strata-column-title">A stratigraphic column of biographical layers, oldest at bottom and newest at top.</title>
+        <defs>
+          <pattern id="strata-fine" width="12" height="12" patternUnits="userSpaceOnUse">
+            <path d="M0 3 C4 1, 8 5, 12 3 M0 9 C4 7, 8 11, 12 9" fill="none" stroke="rgba(47, 59, 70, 0.14)" stroke-width="0.8" />
+          </pattern>
+          <pattern id="strata-dense" width="8" height="8" patternUnits="userSpaceOnUse">
+            <path d="M0 2 H8 M0 5 H8" stroke="rgba(47, 59, 70, 0.18)" stroke-width="0.7" />
+          </pattern>
+          <pattern id="strata-weathered" width="18" height="18" patternUnits="userSpaceOnUse">
+            <path d="M0 6 C5 2, 10 10, 18 5 M0 14 C6 17, 11 11, 18 15" fill="none" stroke="rgba(47, 59, 70, 0.16)" stroke-width="1" />
+          </pattern>
+        </defs>
+
+        <rect class="bio-strata__column-frame" x={bandX} y="1" width={bandWidth} height="898" rx="3" />
+
+        {layerGeometry.map(({ layer, y, height }) => {
+          const outdoors = layer.threads.outdoors ?? 0;
+          const textureId = layer.texture === 'dense' ? 'strata-dense' : layer.texture === 'weathered' ? 'strata-weathered' : 'strata-fine';
+          return (
+            <g class:list={['bio-strata__band', layer.boundary === 'faulted' && 'bio-strata__band--faulted']} data-layer-id={layer.id}>
+              <rect
+                class="bio-strata__band-fill"
+                x={bandX}
+                y={y}
+                width={bandWidth}
+                height={height}
+                fill={layer.color}
+              />
+              {outdoors > 0 && (
+                <rect
+                  class="bio-strata__outdoors-wash"
+                  x={bandX}
+                  y={y}
+                  width={bandWidth}
+                  height={height}
+                  opacity={0.08 + outdoors * 0.055}
+                />
+              )}
+              {layer.texture && layer.texture !== 'plain' && (
+                <rect x={bandX} y={y} width={bandWidth} height={height} fill={`url(#${textureId})`} opacity="0.9" />
+              )}
+              <line class="bio-strata__boundary" x1={bandX} x2={bandX + bandWidth} y1={y} y2={y} />
+              {layer.boundary === 'faulted' && (
+                <path class="bio-strata__fault" d={`M${bandX} ${y + height * 0.18} L${bandX + bandWidth} ${y + height * 0.78}`} />
+              )}
+              <text class="bio-strata__column-date" x={bandX - 10} y={y + height / 2} transform={`rotate(-45 ${bandX - 10} ${y + height / 2})`}>{layer.dates}</text>
+              <title>{layer.title}, {layer.dates}</title>
+            </g>
+          );
+        })}
+        <line class="bio-strata__boundary" x1={bandX} x2={bandX + bandWidth} y1="899" y2="899" />
+
+        {layerGeometry.flatMap(({ layer, y, height }) => (layer.fossils ?? []).slice(0, 4).map((fossil, index) => {
+          const cx = bandX + bandWidth * (0.22 + ((index * 0.23 + layer.id.length * 0.07) % 0.58));
+          const cy = y + height * (0.22 + index * 0.18);
+          return (
+            <a href={`#${layer.id}-fossil-${fossil.id}`} class="bio-strata__fossil-link" aria-label={`${fossil.label} in ${layer.title}`}>
+              <polygon
+                class="bio-strata__fossil-inclusion"
+                data-layer-id={layer.id}
+                points={fossilPoints(cx, cy, index)}
+                fill={fossilColor(fossil.kind)}
+              >
+                <title>{fossil.label}</title>
+              </polygon>
+            </a>
+          );
+        }))}
+      </svg>
+    </aside>
+
+    <svg class="bio-strata__connector" aria-hidden="true" data-strata-connector>
+      <line data-connector-top></line>
+      <line data-connector-bottom></line>
+    </svg>
+
+    <div class="bio-strata__panels">
+      {bioLayers.map((layer) => (
+        <article class="bio-strata__panel" id={layer.id} data-layer-panel data-layer-id={layer.id}>
+          <header class="bio-strata__panel-header">
+            <p class="bio-strata__dates">{layer.dates}</p>
+            <h2>{layer.title}</h2>
+            <ul class="bio-strata__places" aria-label="Places">
+              {layer.places.map((place) => <li>{place}</li>)}
+            </ul>
+          </header>
+
+
+          <p class="bio-strata__vignette">{layer.vignette}</p>
+
+          <section class="bio-strata__remains" aria-labelledby={`${layer.id}-remains`}>
+            <h3 id={`${layer.id}-remains`}>What remains</h3>
+            <ul>
+              {layer.remains.map((item) => <li>{item}</li>)}
+            </ul>
+          </section>
+
+          {(layer.fossils?.length ?? 0) > 0 && (
+            <section class="bio-strata__fossils" aria-label="Fossils">
+              {layer.fossils?.map((fossil) => (
+                <details id={`${layer.id}-fossil-${fossil.id}`} tabindex="-1" style={`--fossil-color: ${fossilColor(fossil.kind)}`}>
+                  <summary>{fossil.label}</summary>
+                  <p>{fossil.note}</p>
+                  {fossil.href && <p><a href={fossil.href}>{fossil.linkLabel ?? 'Open link'}</a></p>}
+                </details>
+              ))}
+            </section>
+          )}
+        </article>
+      ))}
+    </div>
+  </div>
+</section>
+
+<script is:inline>
+  (() => {
+    const root = document.querySelector('[data-bio-strata]');
+    if (!root) return;
+
+    const panels = Array.from(root.querySelectorAll('[data-layer-panel]'));
+    const connector = root.querySelector('[data-strata-connector]');
+    const topLine = root.querySelector('[data-connector-top]');
+    const bottomLine = root.querySelector('[data-connector-bottom]');
+    let activeId = panels[0]?.dataset.layerId;
+
+    const setActiveLayer = (id) => {
+      activeId = id;
+      panels.forEach((panel) => panel.classList.toggle('is-active', panel.dataset.layerId === id));
+      updateConnector();
+    };
+
+    const updateConnector = () => {
+      if (!activeId || !connector || !topLine || !bottomLine) return;
+      const band = root.querySelector(`.bio-strata__band[data-layer-id="${CSS.escape(activeId)}"] .bio-strata__band-fill`);
+      const panel = root.querySelector(`[data-layer-panel][data-layer-id="${CSS.escape(activeId)}"]`);
+      if (!band || !panel) return;
+
+      const bandRect = band.getBoundingClientRect();
+      const panelRect = panel.getBoundingClientRect();
+      const isDesktop = window.matchMedia('(min-width: 880px)').matches;
+      if (!isDesktop) {
+        connector.setAttribute('width', '0');
+        connector.setAttribute('height', '0');
+        return;
+      }
+
+      const width = Math.max(1, window.innerWidth);
+      const height = Math.max(1, window.innerHeight);
+      connector.setAttribute('width', `${width}`);
+      connector.setAttribute('height', `${height}`);
+      connector.setAttribute('viewBox', `0 0 ${width} ${height}`);
+
+      const x1 = bandRect.right;
+      const y1Top = bandRect.top;
+      const y1Bottom = bandRect.bottom;
+      const x2 = panelRect.left;
+      const y2Top = panelRect.top;
+      const y2Bottom = panelRect.bottom;
+
+      topLine.setAttribute('x1', `${x1}`);
+      topLine.setAttribute('y1', `${y1Top}`);
+      topLine.setAttribute('x2', `${x2}`);
+      topLine.setAttribute('y2', `${y2Top}`);
+      bottomLine.setAttribute('x1', `${x1}`);
+      bottomLine.setAttribute('y1', `${y1Bottom}`);
+      bottomLine.setAttribute('x2', `${x2}`);
+      bottomLine.setAttribute('y2', `${y2Bottom}`);
+    };
+
+    const hysteresisPx = 110;
+    let activeFrame = 0;
+
+    const updateActiveFromScroll = () => {
+      activeFrame = 0;
+      const anchorY = window.innerHeight * 0.46;
+      const currentPanel = activeId ? root.querySelector(`[data-layer-panel][data-layer-id="${CSS.escape(activeId)}"]`) : null;
+      const currentDistance = currentPanel
+        ? Math.abs(currentPanel.getBoundingClientRect().top + currentPanel.getBoundingClientRect().height / 2 - anchorY)
+        : Infinity;
+
+      const nearest = panels
+        .map((panel) => {
+          const rect = panel.getBoundingClientRect();
+          return {
+            panel,
+            distance: Math.abs(rect.top + rect.height / 2 - anchorY),
+          };
+        })
+        .sort((a, b) => a.distance - b.distance)[0];
+
+      if (nearest && nearest.panel.dataset.layerId !== activeId && nearest.distance + hysteresisPx < currentDistance) {
+        setActiveLayer(nearest.panel.dataset.layerId);
+      } else {
+        updateConnector();
+      }
+    };
+
+    const scheduleActiveUpdate = () => {
+      if (activeFrame) return;
+      activeFrame = window.requestAnimationFrame(updateActiveFromScroll);
+    };
+
+    root.querySelectorAll('.bio-strata__fossil-link').forEach((link) => {
+      link.addEventListener('click', (event) => {
+        event.preventDefault();
+        const id = link.getAttribute('href')?.slice(1);
+        const details = id ? document.getElementById(id) : null;
+        if (!(details instanceof HTMLDetailsElement)) return;
+
+        details.open = true;
+        const panel = details.closest('[data-layer-panel]');
+        const layerId = panel?.dataset.layerId;
+        if (layerId) setActiveLayer(layerId);
+        window.requestAnimationFrame(() => {
+          details.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          details.focus({ preventScroll: true });
+        });
+      });
+    });
+
+    setActiveLayer(activeId);
+    scheduleActiveUpdate();
+    window.addEventListener('resize', () => {
+      updateConnector();
+      scheduleActiveUpdate();
+    });
+    window.addEventListener('scroll', scheduleActiveUpdate, { passive: true });
+    document.fonts?.ready?.then(() => {
+      updateConnector();
+      scheduleActiveUpdate();
+    }).catch(() => {});
+  })();
+</script>
+
+<style>
+  .bio-strata {
+    --strata-gap: clamp(1.5rem, 4vw, 4rem);
+    max-width: min(100%, 76rem);
+    margin: 0 auto;
+  }
+
+  .bio-strata h1 {
+    margin-top: 0;
+    margin-bottom: var(--space-6);
+    margin-left: calc(min(18rem, 24vw) + var(--strata-gap));
+  }
+
+  .bio-strata__grid {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(14rem, 18rem) minmax(0, 44rem);
+    gap: var(--strata-gap);
+    align-items: start;
+  }
+
+  .bio-strata__column-wrap {
+    grid-column: 1;
+    position: fixed;
+    top: 8rem;
+    width: min(18rem, 24vw);
+    z-index: 2;
+  }
+
+  .bio-strata__column {
+    display: block;
+    width: min(100%, 17rem);
+    height: min(78vh, 49rem);
+    overflow: visible;
+  }
+
+  .bio-strata__column-frame {
+    fill: color-mix(in srgb, white 18%, var(--color-paper));
+    stroke: color-mix(in srgb, var(--color-ink) 55%, var(--color-paper));
+    stroke-width: 2.4;
+  }
+
+  .bio-strata__band-fill,
+  .bio-strata__outdoors-wash {
+    clip-path: inset(0 round 0);
+  }
+
+  .bio-strata__outdoors-wash {
+    fill: #6d7f45;
+  }
+
+  .bio-strata__boundary {
+    stroke: rgba(38, 32, 24, 0.48);
+    stroke-width: 1.4;
+  }
+
+  .bio-strata__fault {
+    stroke: rgba(70, 34, 20, 0.72);
+    stroke-width: 2.6;
+    stroke-dasharray: 7 5;
+  }
+
+  .bio-strata__fossil-link {
+    cursor: pointer;
+    outline: none;
+  }
+
+  .bio-strata__fossil-inclusion {
+    stroke: rgba(43, 32, 23, 0.82);
+    stroke-width: 1.6;
+    opacity: 0.92;
+    filter: drop-shadow(0 1px 0 rgba(255, 255, 255, 0.25));
+    transition: transform 140ms ease, opacity 140ms ease;
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+
+  .bio-strata__fossil-link:hover .bio-strata__fossil-inclusion,
+  .bio-strata__fossil-link:focus-visible .bio-strata__fossil-inclusion {
+    opacity: 1;
+    transform: scale(1.35);
+  }
+
+  .bio-strata__column-date {
+    fill: color-mix(in srgb, var(--color-ink) 70%, var(--color-paper));
+    font-family: var(--font-ui);
+    font-size: 13px;
+    dominant-baseline: middle;
+    text-anchor: end;
+    letter-spacing: 0.035em;
+  }
+
+  .bio-strata__connector {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    overflow: visible;
+  }
+
+  .bio-strata__connector line {
+    stroke: rgba(39, 31, 22, 0.58);
+    stroke-width: 1.35;
+    vector-effect: non-scaling-stroke;
+  }
+
+  .bio-strata__panels {
+    grid-column: 2;
+    display: grid;
+    gap: clamp(0.75rem, 2vh, 1.375rem);
+    padding-bottom: 20vh;
+    position: relative;
+    z-index: 2;
+  }
+
+  .bio-strata__panel {
+    scroll-margin-top: 2rem;
+    border: 1px solid var(--color-rule-strong);
+    border-radius: 0;
+    padding: var(--space-5);
+    background: color-mix(in srgb, white 24%, var(--color-paper));
+    box-shadow: 0 0.25rem 1rem rgba(52, 38, 20, 0.06);
+  }
+
+  .bio-strata__panel.is-active {
+    border-color: color-mix(in srgb, var(--color-ink) 60%, var(--color-paper));
+    box-shadow: 0 0.45rem 1.4rem rgba(52, 38, 20, 0.10);
+  }
+
+  .bio-strata__panel-header {
+    margin-bottom: var(--space-3);
+  }
+
+  .bio-strata__dates {
+    margin: 0 0 0.15rem;
+    color: var(--color-muted);
+    font-size: 0.82rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .bio-strata__panel h2 {
+    margin: 0 0 var(--space-2);
+    font-size: clamp(1.45rem, 1.1rem + 1vw, 2rem);
+  }
+
+  .bio-strata__places {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem 0.45rem;
+    margin: 0 0 var(--space-3);
+    padding: 0;
+    list-style: none;
+  }
+
+  .bio-strata__places li {
+    margin: 0;
+    border: 1px solid var(--color-rule);
+    border-radius: 999px;
+    padding: 0.08rem 0.48rem;
+    color: var(--color-muted);
+    font-size: 0.78rem;
+    line-height: 1.45;
+  }
+
+  .bio-strata__vignette {
+    color: var(--color-ink-soft);
+    font-size: 1.04rem;
+  }
+
+  .bio-strata__remains h3 {
+    margin: var(--space-4) 0 var(--space-2);
+    font-size: 0.95rem;
+    font-style: normal;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .bio-strata__remains ul {
+    padding-left: 1.1em;
+  }
+
+  .bio-strata__fossils {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+    margin-top: var(--space-4);
+  }
+
+  .bio-strata__fossils details {
+    max-width: min(100%, 18rem);
+    border: 1px solid color-mix(in srgb, var(--fossil-color, var(--color-rule-strong)) 45%, var(--color-rule));
+    border-radius: var(--radius-sm);
+    background: color-mix(in srgb, white 20%, var(--color-paper));
+  }
+
+  .bio-strata__fossils summary {
+    cursor: pointer;
+    padding: 0.18rem 0.55rem;
+    color: color-mix(in srgb, var(--fossil-color, var(--color-link)) 68%, var(--color-ink));
+    font-size: 0.84rem;
+    font-weight: 600;
+  }
+
+  .bio-strata__fossils details[open] {
+    flex-basis: min(100%, 24rem);
+    padding-bottom: 0.35rem;
+  }
+
+  .bio-strata__fossils details p {
+    margin: 0;
+    padding: 0.2rem 0.65rem;
+    color: var(--color-muted);
+    font-size: 0.86rem;
+    line-height: 1.35;
+  }
+
+  @media (max-width: 879px) {
+    .bio-strata h1 {
+      margin-left: 0;
+    }
+
+    .bio-strata__grid {
+      display: block;
+    }
+
+    .bio-strata__column-wrap {
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      margin: 0 calc(-1 * var(--space-4)) var(--space-5);
+      padding: var(--space-3) var(--space-4);
+      border-block: var(--rule);
+      background: color-mix(in srgb, var(--color-paper) 92%, white);
+    }
+
+    .bio-strata__column {
+      width: 100%;
+      height: 9.5rem;
+    }
+
+    .bio-strata__column-date {
+      display: none;
+    }
+
+    .bio-strata__legend {
+      margin-top: var(--space-2);
+      font-size: 0.72rem;
+    }
+
+    .bio-strata__connector {
+      display: none;
+    }
+
+    .bio-strata__panels {
+      gap: var(--space-3);
+    }
+  }
+</style>
