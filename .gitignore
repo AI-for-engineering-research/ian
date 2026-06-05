@@ -8,6 +8,7 @@ dist/
 # local caches
 .npm-cache/
 .xdg/
+.pi/
 
 # environment
 .env
