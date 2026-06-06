@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "title": "First session transcript fixture",
+  "summary": "A minimal public transcript fixture used to validate the sessions content collection.",
+  "source": {
+    "kind": "pi",
+    "sessionId": "fixture-001",
+    "importedAt": "2026-06-06T20:30:00.000Z"
+  },
+  "participants": [
+    {
+      "id": "user",
+      "name": "Researcher",
+      "role": "user"
+    },
+    {
+      "id": "assistant",
+      "name": "Pi",
+      "role": "assistant"
+    }
+  ],
+  "entries": [
+    {
+      "id": "entry-1",
+      "index": 0,
+      "role": "user",
+      "content": [
+        {
+          "type": "text",
+          "text": "Set up the first research-log page."
+        }
+      ]
+    },
+    {
+      "id": "entry-2",
+      "index": 1,
+      "role": "assistant",
+      "content": [
+        {
+          "type": "text",
+          "text": "Created a starter structure and noted future transcript-linking needs."
+        }
+      ]
+    }
+  ],
+  "highlights": [
+    {
+      "id": "setup",
+      "title": "Initial setup",
+      "summary": "The session established the shape of future research-log entries.",
+      "entries": ["entry-1", "entry-2"]
+    }
+  ],
+  "redactionSummary": []
+}
