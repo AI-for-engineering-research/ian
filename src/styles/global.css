@@ -184,7 +184,7 @@ th, td { border-bottom: var(--rule); padding: 0.35rem 0.55rem; text-align: left;
 .media-grid :where(figcaption) { max-width: none; }
 .media-grid :where(:last-child) { margin-bottom: 0; }
 
-.lorenz-attractor {
+.lorenz-attractor, .hopf-bifurcation {
   position: relative;
   display: block;
   width: 100%;
@@ -192,14 +192,15 @@ th, td { border-bottom: var(--rule); padding: 0.35rem 0.55rem; text-align: left;
   min-height: 12rem;
   border: var(--rule);
   background: color-mix(in srgb, white 28%, var(--color-paper));
-  cursor: pointer;
 }
-.lorenz-attractor canvas {
+.lorenz-attractor { cursor: pointer; }
+.hopf-bifurcation { cursor: default; }
+.lorenz-attractor canvas, .hopf-bifurcation canvas {
   display: block;
   width: 100%;
   height: 100%;
 }
-.lorenz-attractor canvas:focus-visible {
+.lorenz-attractor canvas:focus-visible, .hopf-bifurcation canvas:focus-visible {
   outline: 2px solid var(--color-focus);
   outline-offset: -4px;
   box-shadow: inset var(--focus-ring);

@@ -8,6 +8,7 @@ import Sidenote from '../../components/Sidenote.astro';
 import Figure from '../../components/Figure.astro';
 import MediaGrid from '../../components/MediaGrid.astro';
 import LorenzAttractor from '../../components/visualizations/LorenzAttractor.astro';
+import HopfBifurcation from '../../components/visualizations/HopfBifurcation.astro';
 
 This page should describe the research question, the pilot-class context, and the kinds of evidence you expect to collect.
 
@@ -30,10 +31,10 @@ How do AI tools alter the practice of research, especially when the work include
     <figcaption>Research artifact placeholder.</figcaption>
   </figure>
   <figure>
-    <span class="media-grid__frame media-grid__frame--contain">
-      <img src="/figures/placeholder.svg" alt="Second placeholder geometric figure" loading="lazy" decoding="async" />
+    <span class="media-grid__frame">
+      <HopfBifurcation ariaLabel="Animated supercritical Hopf bifurcation with grey vector-field arrows, an origin stability marker, and a dark-red limit cycle after mu crosses zero." />
     </span>
-    <figcaption>Comparative output placeholder.</figcaption>
+    <figcaption>Supercritical Hopf bifurcation: the parameter μ sweeps across zero, turning the stable origin into an unstable origin surrounded by a stable limit cycle.</figcaption>
   </figure>
   <figure>
     <span class="media-grid__frame">

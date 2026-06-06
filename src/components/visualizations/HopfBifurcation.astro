@@ -1,0 +1,60 @@
+---
+import { DEFAULT_HOPF_CONFIG, type HopfConfig } from '../../lib/visualizations/hopf.ts';
+
+export interface Props {
+  title?: string;
+  ariaLabel?: string;
+  muMin?: number;
+  muMax?: number;
+  cycleSeconds?: number;
+  domain?: number;
+  gridDensity?: number;
+  omega?: number;
+  highlightColor?: string;
+  backgroundColor?: string;
+  class?: string;
+}
+
+const {
+  title = 'Supercritical Hopf bifurcation',
+  ariaLabel = DEFAULT_HOPF_CONFIG.ariaLabel,
+  muMin = DEFAULT_HOPF_CONFIG.muMin,
+  muMax = DEFAULT_HOPF_CONFIG.muMax,
+  cycleSeconds = DEFAULT_HOPF_CONFIG.cycleSeconds,
+  domain = DEFAULT_HOPF_CONFIG.domain,
+  gridDensity = DEFAULT_HOPF_CONFIG.gridDensity,
+  omega = DEFAULT_HOPF_CONFIG.omega,
+  highlightColor = DEFAULT_HOPF_CONFIG.highlightColor,
+  backgroundColor = DEFAULT_HOPF_CONFIG.backgroundColor,
+  class: extraClass,
+} = Astro.props;
+
+const config: HopfConfig = {
+  ariaLabel,
+  muMin,
+  muMax,
+  cycleSeconds,
+  domain,
+  gridDensity,
+  omega,
+  highlightColor,
+  backgroundColor,
+};
+
+const className = ['hopf-bifurcation', extraClass].filter(Boolean).join(' ');
+const configJson = JSON.stringify(config).replaceAll('</', '<\\/');
+---
+
+<div class={className} data-hopf-bifurcation>
+  <canvas aria-label={ariaLabel} role="img" title={title} tabindex="0">
+    {ariaLabel}
+  </canvas>
+  <script is:inline type="application/json" data-hopf-config set:html={configJson} />
+</div>
+
+<script>
+  import { initializeHopfBifurcations } from '../../lib/visualizations/hopf.ts';
+
+  initializeHopfBifurcations();
+  document.addEventListener('astro:page-load', () => initializeHopfBifurcations());
+</script>
