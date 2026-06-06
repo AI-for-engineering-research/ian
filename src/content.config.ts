@@ -61,6 +61,7 @@ const transcriptToolResultBlockSchema = z
     content: z.string(),
     status: z.enum(['success', 'error']).default('success'),
     truncated: z.boolean().default(false),
+    collapsed: z.boolean().default(false),
   })
   .strict();
 
@@ -92,6 +93,13 @@ const transcriptOmissionSchema = z
     kind: z.literal('thinking'),
     count: z.number().int().positive(),
     reason: z.string().min(1),
+  })
+  .strict();
+
+const transcriptRedactionMetadataSchema = z
+  .object({
+    status: z.enum(['processed', 'needs_review']).default('processed'),
+    reviewNotes: z.array(z.string().min(1)).default([]),
   })
   .strict();
 
@@ -150,6 +158,7 @@ const session = defineCollection({
       entries: z.array(transcriptEntrySchema).min(1),
       highlights: z.array(transcriptHighlightSchema).default([]),
       redactionSummary: z.array(transcriptRedactionSchema).default([]),
+      redaction: transcriptRedactionMetadataSchema.default({ status: 'processed', reviewNotes: [] }),
     })
     .strict()
     .refine(

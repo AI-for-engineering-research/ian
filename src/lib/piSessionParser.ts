@@ -1,8 +1,11 @@
+import { processTranscriptForPublicSafety } from './transcriptSafety.ts';
+import type { TranscriptRedaction, TranscriptRedactionMetadata } from './transcriptSafety.ts';
+
 export type TranscriptRole = 'user' | 'assistant' | 'system' | 'tool';
 export type TranscriptContentBlock =
   | { type: 'text'; text: string; format?: 'markdown' | 'plain' }
   | { type: 'tool_call'; toolCallId: string; name: string; arguments?: unknown }
-  | { type: 'tool_result'; toolCallId: string; content: string; status?: 'success' | 'error'; truncated?: boolean }
+  | { type: 'tool_result'; toolCallId: string; content: string; status?: 'success' | 'error'; truncated?: boolean; collapsed?: boolean }
   | { type: 'error'; message: string; code?: string };
 
 export interface TranscriptOmission {
@@ -23,7 +26,7 @@ export interface NormalizedTranscriptEntry {
   title?: string;
   content: TranscriptContentBlock[];
   omissions?: TranscriptOmission[];
-  redactions?: unknown[];
+  redactions?: TranscriptRedaction[];
   truncated?: boolean;
 }
 
@@ -39,7 +42,8 @@ export interface NormalizedSessionTranscript {
   participants: Array<{ id: string; name: string; role: TranscriptRole }>;
   entries: NormalizedTranscriptEntry[];
   highlights: unknown[];
-  redactionSummary: unknown[];
+  redactionSummary: TranscriptRedaction[];
+  redaction: TranscriptRedactionMetadata;
 }
 
 export interface ParsePiJsonlOptions {
@@ -77,7 +81,7 @@ export function parsePiJsonlSession(jsonl: string, options: ParsePiJsonlOptions 
 
   const importedAt = options.importedAt instanceof Date ? options.importedAt.toISOString() : options.importedAt;
 
-  return {
+  return processTranscriptForPublicSafety({
     schemaVersion: 1,
     title: options.title ?? inferTitle(entries),
     ...(options.summary ? { summary: options.summary } : {}),
@@ -90,7 +94,8 @@ export function parsePiJsonlSession(jsonl: string, options: ParsePiJsonlOptions 
     entries,
     highlights: [],
     redactionSummary: [],
-  };
+    redaction: { status: 'processed', reviewNotes: [] },
+  });
 }
 
 function parseJsonlRecords(jsonl: string): ParsedRecord[] {
