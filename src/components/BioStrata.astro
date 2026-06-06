@@ -75,6 +75,15 @@ const fossilPoints = (cx: number, cy: number, seedText: string) => {
 
         {layerGeometry.map(({ layer, y, height }) => {
           const textureId = layer.texture === 'dense' ? 'strata-dense' : layer.texture === 'weathered' ? 'strata-weathered' : 'strata-fine';
+          const faultD = [
+            [bandX, y + height * 0.13],
+            [bandX + bandWidth * 0.18, y + height * 0.30],
+            [bandX + bandWidth * 0.32, y + height * 0.27],
+            [bandX + bandWidth * 0.47, y + height * 0.50],
+            [bandX + bandWidth * 0.62, y + height * 0.47],
+            [bandX + bandWidth * 0.78, y + height * 0.70],
+            [bandX + bandWidth, y + height * 0.84],
+          ].map(([x, yy], index) => `${index === 0 ? 'M' : 'L'}${x} ${yy}`).join(' ');
           return (
             <g class:list={['bio-strata__band', layer.boundary === 'faulted' && 'bio-strata__band--faulted']} data-layer-id={layer.id}>
               <rect
@@ -90,7 +99,14 @@ const fossilPoints = (cx: number, cy: number, seedText: string) => {
               )}
               <line class="bio-strata__boundary" x1={bandX} x2={bandX + bandWidth} y1={y} y2={y} />
               {layer.boundary === 'faulted' && (
-                <path class="bio-strata__fault" d={`M${bandX} ${y + height * 0.18} L${bandX + bandWidth} ${y + height * 0.78}`} />
+                <g class="bio-strata__fault-zone" tabindex="0" role="img" aria-label="PhD attempt #1: Mars Climate Orbiter lost." data-tooltip="PhD attempt #1: Mars Climate Orbiter lost.">
+                  <path class="bio-strata__fault-gouge" d={faultD} />
+                  <path class="bio-strata__fault-light" d={faultD} />
+                  <path class="bio-strata__fault" d={faultD} />
+                  <path class="bio-strata__fault-crack" d={`M${bandX + bandWidth * 0.18} ${y + height * 0.12} L${bandX + bandWidth * 0.28} ${y + height * 0.31} L${bandX + bandWidth * 0.24} ${y + height * 0.44}`} />
+                  <path class="bio-strata__fault-crack" d={`M${bandX + bandWidth * 0.55} ${y + height * 0.31} L${bandX + bandWidth * 0.62} ${y + height * 0.48} L${bandX + bandWidth * 0.58} ${y + height * 0.68}`} />
+                  <path class="bio-strata__fault-crack" d={`M${bandX + bandWidth * 0.79} ${y + height * 0.58} L${bandX + bandWidth * 0.86} ${y + height * 0.74} L${bandX + bandWidth * 0.82} ${y + height * 0.88}`} />
+                </g>
               )}
               <text class="bio-strata__column-date" x={bandX - 10} y={y + height / 2} transform={`rotate(-45 ${bandX - 10} ${y + height / 2})`}>{layer.dates}</text>
             </g>
@@ -293,12 +309,15 @@ const fossilPoints = (cx: number, cy: number, seedText: string) => {
       window.setTimeout(step, 50);
     };
 
+    root.querySelectorAll('[data-tooltip]').forEach((tooltipTarget) => {
+      tooltipTarget.addEventListener('mouseenter', (event) => showTooltip(tooltipTarget, event));
+      tooltipTarget.addEventListener('mousemove', (event) => showTooltip(tooltipTarget, event));
+      tooltipTarget.addEventListener('focus', (event) => showTooltip(tooltipTarget, event));
+      tooltipTarget.addEventListener('mouseleave', hideTooltip);
+      tooltipTarget.addEventListener('blur', hideTooltip);
+    });
+
     root.querySelectorAll('.bio-strata__fossil-link').forEach((link) => {
-      link.addEventListener('mouseenter', (event) => showTooltip(link, event));
-      link.addEventListener('mousemove', (event) => showTooltip(link, event));
-      link.addEventListener('focus', (event) => showTooltip(link, event));
-      link.addEventListener('mouseleave', hideTooltip);
-      link.addEventListener('blur', hideTooltip);
       link.addEventListener('click', (event) => {
         event.preventDefault();
         hideTooltip();
@@ -386,10 +405,41 @@ const fossilPoints = (cx: number, cy: number, seedText: string) => {
     stroke-width: 1.4;
   }
 
+  .bio-strata__fault-zone {
+    filter: drop-shadow(0 1px 1px rgba(40, 16, 10, 0.45));
+    mix-blend-mode: multiply;
+  }
+
+  .bio-strata__fault-gouge {
+    fill: none;
+    stroke: rgba(78, 28, 18, 0.34);
+    stroke-width: 24;
+    stroke-linecap: butt;
+    stroke-linejoin: bevel;
+  }
+
+  .bio-strata__fault-light {
+    fill: none;
+    stroke: rgba(255, 238, 193, 0.52);
+    stroke-width: 10;
+    stroke-linecap: butt;
+    stroke-linejoin: bevel;
+  }
+
   .bio-strata__fault {
-    stroke: rgba(70, 34, 20, 0.72);
-    stroke-width: 2.6;
-    stroke-dasharray: 7 5;
+    fill: none;
+    stroke: rgba(55, 18, 12, 0.92);
+    stroke-width: 3.8;
+    stroke-linecap: square;
+    stroke-linejoin: bevel;
+  }
+
+  .bio-strata__fault-crack {
+    fill: none;
+    stroke: rgba(55, 18, 12, 0.72);
+    stroke-width: 2;
+    stroke-linecap: square;
+    stroke-linejoin: bevel;
   }
 
   .bio-strata__fossil-link {
