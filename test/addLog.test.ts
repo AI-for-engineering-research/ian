@@ -1,15 +1,12 @@
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { access, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { test } from 'node:test';
 import { addLog, parseAddLogArgs } from '../scripts/add-log.ts';
 
-const fixtureJsonl = [
-  JSON.stringify({ sessionId: 'session-add-log', id: 'u1', role: 'user', createdAt: '2026-06-06T20:00:00.000Z', content: 'Please fix the failing tests.' }),
-  JSON.stringify({ id: 'a1', parentId: 'u1', role: 'assistant', content: [{ type: 'tool_call', id: 'test-1', name: 'bash', arguments: { command: 'npm test' } }] }),
-  JSON.stringify({ id: 't1', parentId: 'a1', role: 'tool', content: [{ type: 'tool_result', toolCallId: 'test-1', content: 'tests passed', status: 'success' }] }),
-].join('\n');
+const fixtureJsonl = readFileSync(new URL('./fixtures/pi-session-representative.jsonl', import.meta.url), 'utf8');
 
 test('parses the npm add-log CLI options required by TASK-1.5', () => {
   assert.deepEqual(parseAddLogArgs(['session.jsonl', '--slug', '002-fixture', '--title', 'Fixture', '--date', '2026-06-06', '--no-analysis', '--force', '--dry-run', '--model', 'pi-model']), {
@@ -54,7 +51,7 @@ test('imports a JSONL session into private work artifacts, public transcript JSO
 
     const publicTranscript = JSON.parse(await readFile(result.sessionOutputPath, 'utf8'));
     assert.equal(publicTranscript.title, 'Add Log Fixture');
-    assert.equal(publicTranscript.source.sessionId, 'session-add-log');
+    assert.equal(publicTranscript.source.sessionId, 'fixture-session-001');
     assert.ok(publicTranscript.highlights.some((highlight: { entries: string[] }) => highlight.entries.includes('entry-2')));
 
     const mdx = await readFile(result.logOutputPath, 'utf8');

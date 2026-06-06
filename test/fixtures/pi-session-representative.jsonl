@@ -1,0 +1,10 @@
+{"sessionId":"fixture-session-001","id":"u1","role":"user","createdAt":"2026-06-06T20:00:00.000Z","content":"Please edit the page, inspect the test fixture, and verify the transcript import."}
+{"id":"a1","parentId":"u1","role":"assistant","createdAt":"2026-06-06T20:00:01.000Z","branch":"main","content":[{"type":"thinking","text":"Synthetic private reasoning that must not be published."},{"type":"text","text":"I will inspect it and call a read tool."},{"type":"tool_call","id":"call-read","name":"read","arguments":{"path":"README.md"}}]}
+{"id":"t1","parentId":"a1","role":"tool","content":[{"type":"tool_result","toolCallId":"call-read","content":"# Synthetic README fixture","status":"success"}]}
+{"id":"a2","parentId":"u1","role":"assistant","branch":"main","content":[{"type":"tool_call","id":"edit-1","name":"edit","arguments":{"path":"src/page.ts"}}]}
+{"id":"t2","parentId":"a2","role":"tool","content":[{"type":"tool_result","toolCallId":"edit-1","content":"Patch failed in the synthetic fixture","status":"error"}]}
+{"id":"u2","parentId":"u1","role":"user","branch":"alternate","content":"Actually, backtrack and use a different approach."}
+{"id":"a3","parentId":"u2","role":"assistant","content":[{"type":"tool_call","id":"edit-2","name":"edit","arguments":{"path":"src/page.ts"}},{"type":"tool_call","id":"call-test","name":"bash","arguments":{"command":"npm test"}}]}
+{"id":"t3","parentId":"a3","role":"tool","content":[{"type":"tool_result","toolCallId":"call-test","content":"tests passed","status":"success"}]}
+{"id":"s1","type":"summary","compactionNote":"Conversation summary: branch notes were compacted for this synthetic fixture."}
+{"id":"a4","parentId":"u2","role":"assistant","content":"I found synthetic local references: /home/example-user/project and /home/example-user/.pi/sessions/session.jsonl. Use FAKE_API_TOKEN=not-a-real-token-value only as placeholder text."}

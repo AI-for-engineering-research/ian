@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { mkdtemp, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
@@ -6,17 +7,10 @@ import { test } from 'node:test';
 import { parsePiJsonlSession } from '../src/lib/piSessionParser.ts';
 import { analyzeSessionHeuristically, analyzeSessionWithOptionalPiJson } from '../src/lib/sessionAnalysis.ts';
 
+const representativePiJsonlFixture = readFileSync(new URL('./fixtures/pi-session-representative.jsonl', import.meta.url), 'utf8');
+
 function fixtureTranscript() {
-  const jsonl = [
-    JSON.stringify({ id: 'u1', role: 'user', content: 'Please edit the page.' }),
-    JSON.stringify({ id: 'a1', parentId: 'u1', role: 'assistant', branch: 'main', content: [{ type: 'tool_call', id: 'edit-1', name: 'edit', arguments: { path: 'src/page.ts' } }] }),
-    JSON.stringify({ id: 't1', parentId: 'a1', role: 'tool', content: [{ type: 'tool_result', toolCallId: 'edit-1', content: 'Patch failed', status: 'error' }] }),
-    JSON.stringify({ id: 'u2', parentId: 'u1', role: 'user', branch: 'alternate', content: 'Actually, backtrack and use a different approach.' }),
-    JSON.stringify({ id: 'a2', parentId: 'u2', role: 'assistant', content: [{ type: 'tool_call', id: 'edit-2', name: 'edit', arguments: { path: 'src/page.ts' } }] }),
-    JSON.stringify({ id: 'a3', parentId: 'a2', role: 'assistant', content: [{ type: 'tool_call', id: 'test-1', name: 'bash', arguments: { command: 'npm test' } }] }),
-    JSON.stringify({ id: 't2', parentId: 'a3', role: 'tool', content: [{ type: 'tool_result', toolCallId: 'test-1', content: 'tests passed', status: 'success' }] }),
-  ].join('\n');
-  return parsePiJsonlSession(jsonl, { importedAt: '2026-06-06T20:10:00.000Z' });
+  return parsePiJsonlSession(representativePiJsonlFixture, { importedAt: '2026-06-06T20:10:00.000Z' });
 }
 
 test('heuristic analysis identifies correction, backtrack, error, failed tool, repeated edit, branch, and verification candidates', () => {
@@ -43,7 +37,7 @@ test('Pi JSON-mode analysis saves prompt, input, raw output, and parsed artifact
       model: 'pi-json-test-model',
       piJsonRunner: async ({ prompt, transcript, heuristicHighlights, model }) => {
         assert.match(prompt, /Return strict JSON only/);
-        assert.equal(transcript.entries.length, 7);
+        assert.equal(transcript.entries.length, 10);
         assert.ok(heuristicHighlights.length > 0);
         assert.equal(model, 'pi-json-test-model');
         return JSON.stringify({

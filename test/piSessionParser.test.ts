@@ -1,50 +1,30 @@
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
 import { parsePiJsonlSession } from '../src/lib/piSessionParser.ts';
 import { TOOL_OUTPUT_COLLAPSE_THRESHOLD, TOOL_OUTPUT_TRUNCATE_THRESHOLD } from '../src/lib/transcriptSafety.ts';
 
-test('converts valid Pi JSONL into the normalized transcript schema', () => {
-  const jsonl = [
-    JSON.stringify({
-      sessionId: 'session-abc',
-      id: 'source-user-1',
-      role: 'user',
-      createdAt: '2026-06-06T20:00:00.000Z',
-      content: 'Please inspect the files.',
-    }),
-    JSON.stringify({
-      id: 'source-assistant-1',
-      parentId: 'source-user-1',
-      role: 'assistant',
-      createdAt: '2026-06-06T20:00:01.000Z',
-      branch: 'main',
-      content: [
-        { type: 'text', text: 'I will inspect them.' },
-        { type: 'tool_call', id: 'call-read', name: 'read', arguments: { path: 'README.md' } },
-      ],
-    }),
-    JSON.stringify({
-      id: 'source-tool-1',
-      parentId: 'source-assistant-1',
-      role: 'tool',
-      content: [{ type: 'tool_result', toolCallId: 'call-read', content: '# README', status: 'success' }],
-    }),
-  ].join('\n');
+const representativePiJsonlFixture = readFileSync(new URL('./fixtures/pi-session-representative.jsonl', import.meta.url), 'utf8');
 
-  const transcript = parsePiJsonlSession(jsonl, {
+test('representative Pi JSONL fixture contains only synthetic non-private data', () => {
+  assert.doesNotMatch(representativePiJsonlFixture, /\/home\/iross|\/Users\/|ghp_|github_pat_|sk-[A-Za-z0-9_-]{20,}/);
+});
+
+test('converts representative Pi JSONL fixture into the normalized transcript schema', () => {
+  const transcript = parsePiJsonlSession(representativePiJsonlFixture, {
     title: 'Fixture session',
     importedAt: '2026-06-06T20:10:00.000Z',
   });
 
   assert.equal(transcript.schemaVersion, 1);
   assert.equal(transcript.title, 'Fixture session');
-  assert.equal(transcript.source.sessionId, 'session-abc');
+  assert.equal(transcript.source.sessionId, 'fixture-session-001');
   assert.equal(transcript.source.importedAt, '2026-06-06T20:10:00.000Z');
   assert.deepEqual(
     transcript.participants.map((participant) => participant.role),
-    ['user', 'assistant', 'tool'],
+    ['user', 'assistant', 'tool', 'system'],
   );
-  assert.equal(transcript.entries.length, 3);
+  assert.equal(transcript.entries.length, 10);
   assert.deepEqual(transcript.entries[1].content[1], {
     type: 'tool_call',
     toolCallId: 'call-read',
@@ -54,10 +34,41 @@ test('converts valid Pi JSONL into the normalized transcript schema', () => {
   assert.deepEqual(transcript.entries[2].content[0], {
     type: 'tool_result',
     toolCallId: 'call-read',
-    content: '# README',
+    content: '# Synthetic README fixture',
     status: 'success',
     truncated: false,
   });
+  assert.deepEqual(transcript.entries[4].content[0], {
+    type: 'tool_result',
+    toolCallId: 'edit-1',
+    content: 'Patch failed in the synthetic fixture',
+    status: 'error',
+    truncated: false,
+  });
+  assert.equal(transcript.entries[5].branch, 'alternate');
+  assert.equal(transcript.entries[8].role, 'system');
+  assert.match(transcript.entries[8].content[0].type === 'text' ? transcript.entries[8].content[0].text : '', /branch notes were compacted/);
+});
+
+test('representative fixture omits thinking and redacts synthetic sensitive-looking values', () => {
+  const transcript = parsePiJsonlSession(representativePiJsonlFixture, { importedAt: '2026-06-06T20:10:00.000Z' });
+
+  assert.deepEqual(transcript.entries[1].omissions, [
+    { kind: 'thinking', count: 1, reason: 'Thinking content is omitted from public transcripts.' },
+  ]);
+  assert.equal(JSON.stringify(transcript).includes('Synthetic private reasoning'), false);
+
+  const redactedEntry = transcript.entries[9];
+  const textBlock = redactedEntry.content[0];
+  assert.equal(textBlock.type, 'text');
+  if (textBlock.type === 'text') {
+    assert.doesNotMatch(textBlock.text, /\/home\/example-user|not-a-real-token-value/);
+    assert.match(textBlock.text, /\[REDACTED_LOCAL_PATH\]/);
+    assert.match(textBlock.text, /\[REDACTED_PI_SESSION_PATH\]/);
+    assert.match(textBlock.text, /\[REDACTED_ENV:FAKE_API_TOKEN\]/);
+  }
+  assert.equal(transcript.redaction.status, 'needs_review');
+  assert.ok(redactedEntry.redactions?.some((redaction) => redaction.kind === 'environment-value'));
 });
 
 test('assigns stable display IDs in render order while preserving source IDs and parents', () => {
