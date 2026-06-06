@@ -1,5 +1,5 @@
 ---
-import { escapeHtml, renderSanitizedMarkdown } from '../lib/sanitizedMarkdown.ts';
+import { escapeHtml, renderSafeMarkdown } from '../lib/sanitizedMarkdown.ts';
 import type { TranscriptContentBlock } from '../lib/piSessionParser.ts';
 
 export interface Props {
@@ -16,7 +16,7 @@ function formatJson(value: unknown): string {
 ---
 
 {block.type === 'text' && (
-  <div class={`session-block session-block--text session-block--${block.format ?? 'markdown'}`} set:html={renderSanitizedMarkdown(block.text)} />
+  <div class={`session-block session-block--text session-block--${block.format ?? 'markdown'}`} set:html={renderSafeMarkdown(block.text)} />
 )}
 
 {block.type === 'tool_call' && (

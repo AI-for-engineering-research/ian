@@ -7,17 +7,28 @@ const ESCAPE_LOOKUP: Record<string, string> = {
 };
 
 const SAFE_PROTOCOLS = new Set(['http:', 'https:', 'mailto:']);
+const CODE_PLACEHOLDER_PREFIX = '\u0000CODE';
 
 export function escapeHtml(value: string): string {
   return value.replace(/[&<>"']/g, (character) => ESCAPE_LOOKUP[character] ?? character);
 }
 
-export function renderSanitizedMarkdown(markdown: string): string {
+/**
+ * Render untrusted transcript Markdown to a deliberately small, sanitized HTML subset.
+ *
+ * This is intentionally dependency-free for now: transcript text only needs common prose
+ * Markdown, and keeping the renderer constrained makes the URL and raw-HTML behavior
+ * explicit. Raw HTML is always escaped. Links are emitted only for relative, hash,
+ * http(s), and mailto targets; unsafe schemes such as javascript: and data: are
+ * rendered as plain link text.
+ */
+export function renderSafeMarkdown(markdown: string): string {
   const normalized = markdown.replace(/\r\n?/g, '\n');
   const lines = normalized.split('\n');
   const html: string[] = [];
   let paragraph: string[] = [];
-  let listItems: string[] = [];
+  let unorderedItems: string[] = [];
+  let orderedItems: string[] = [];
   let blockquote: string[] = [];
   let inCodeFence = false;
   let codeFenceLanguage = '';
@@ -29,20 +40,32 @@ export function renderSanitizedMarkdown(markdown: string): string {
     paragraph = [];
   };
 
-  const flushList = () => {
-    if (listItems.length === 0) return;
-    html.push(`<ul>${listItems.map((item) => `<li>${renderInline(item)}</li>`).join('')}</ul>`);
-    listItems = [];
+  const flushUnorderedList = () => {
+    if (unorderedItems.length === 0) return;
+    html.push(`<ul>${unorderedItems.map((item) => `<li>${renderInline(item)}</li>`).join('')}</ul>`);
+    unorderedItems = [];
+  };
+
+  const flushOrderedList = () => {
+    if (orderedItems.length === 0) return;
+    html.push(`<ol>${orderedItems.map((item) => `<li>${renderInline(item)}</li>`).join('')}</ol>`);
+    orderedItems = [];
+  };
+
+  const flushLists = () => {
+    flushUnorderedList();
+    flushOrderedList();
   };
 
   const flushBlockquote = () => {
     if (blockquote.length === 0) return;
-    html.push(`<blockquote>${renderSanitizedMarkdown(blockquote.join('\n'))}</blockquote>`);
+    html.push(`<blockquote>${renderSafeMarkdown(blockquote.join('\n'))}</blockquote>`);
     blockquote = [];
   };
 
   const flushCodeFence = () => {
-    const languageClass = codeFenceLanguage ? ` class="language-${escapeHtml(codeFenceLanguage)}"` : '';
+    const language = sanitizeCodeFenceLanguage(codeFenceLanguage);
+    const languageClass = language ? ` class="language-${language}"` : '';
     html.push(`<pre><code${languageClass}>${escapeHtml(codeFenceLines.join('\n'))}</code></pre>`);
     inCodeFence = false;
     codeFenceLanguage = '';
@@ -56,7 +79,7 @@ export function renderSanitizedMarkdown(markdown: string): string {
         flushCodeFence();
       } else {
         flushParagraph();
-        flushList();
+        flushLists();
         flushBlockquote();
         inCodeFence = true;
         codeFenceLanguage = fence[1] ?? '';
@@ -72,7 +95,7 @@ export function renderSanitizedMarkdown(markdown: string): string {
 
     if (/^\s*$/.test(line)) {
       flushParagraph();
-      flushList();
+      flushLists();
       flushBlockquote();
       continue;
     }
@@ -80,51 +103,63 @@ export function renderSanitizedMarkdown(markdown: string): string {
     const heading = line.match(/^(#{1,3})\s+(.+)$/);
     if (heading) {
       flushParagraph();
-      flushList();
+      flushLists();
       flushBlockquote();
       const level = heading[1].length + 2;
       html.push(`<h${level}>${renderInline(heading[2])}</h${level}>`);
       continue;
     }
 
-    const listItem = line.match(/^[-*]\s+(.+)$/);
-    if (listItem) {
+    const unorderedItem = line.match(/^[-*]\s+(.+)$/);
+    if (unorderedItem) {
       flushParagraph();
+      flushOrderedList();
       flushBlockquote();
-      listItems.push(listItem[1]);
+      unorderedItems.push(unorderedItem[1]);
+      continue;
+    }
+
+    const orderedItem = line.match(/^\d+[.)]\s+(.+)$/);
+    if (orderedItem) {
+      flushParagraph();
+      flushUnorderedList();
+      flushBlockquote();
+      orderedItems.push(orderedItem[1]);
       continue;
     }
 
     const quote = line.match(/^>\s?(.*)$/);
     if (quote) {
       flushParagraph();
-      flushList();
+      flushLists();
       blockquote.push(quote[1]);
       continue;
     }
 
-    flushList();
+    flushLists();
     flushBlockquote();
     paragraph.push(line);
   }
 
   if (inCodeFence) flushCodeFence();
   flushParagraph();
-  flushList();
+  flushLists();
   flushBlockquote();
 
   return html.join('\n');
 }
 
+export const renderSanitizedMarkdown = renderSafeMarkdown;
+
 function renderInline(value: string): string {
   const codePlaceholders: string[] = [];
   let escaped = escapeHtml(value).replace(/`([^`]+)`/g, (_match, code) => {
-    const token = `\u0000CODE${codePlaceholders.length}\u0000`;
+    const token = `${CODE_PLACEHOLDER_PREFIX}${codePlaceholders.length}\u0000`;
     codePlaceholders.push(`<code>${code}</code>`);
     return token;
   });
 
-  escaped = escaped.replace(/\[([^\]\n]+)\]\(([^)\s]+)\)/g, (_match, text, href) => {
+  escaped = escaped.replace(/\[([^\]\n]+)\]\(([^)]*)\)/g, (_match, text, href) => {
     const safeHref = sanitizeHref(unescapeBasicEntities(href));
     if (!safeHref) return text;
     return `<a href="${escapeHtml(safeHref)}">${text}</a>`;
@@ -134,17 +169,27 @@ function renderInline(value: string): string {
   escaped = escaped.replace(/\*([^*\n]+)\*/g, '<em>$1</em>');
   escaped = escaped.replace(/\n/g, '<br>');
 
-  return codePlaceholders.reduce((output, code, index) => output.replace(`\u0000CODE${index}\u0000`, code), escaped);
+  return codePlaceholders.reduce((output, code, index) => output.replace(`${CODE_PLACEHOLDER_PREFIX}${index}\u0000`, code), escaped);
 }
 
 function sanitizeHref(href: string): string | undefined {
-  if (href.startsWith('/') || href.startsWith('#')) return href;
+  const trimmed = href.trim();
+  const normalized = removeAsciiControlCharacters(trimmed);
+  if (normalized.startsWith('/') || normalized.startsWith('#')) return normalized;
   try {
-    const url = new URL(href);
-    return SAFE_PROTOCOLS.has(url.protocol) ? href : undefined;
+    const url = new URL(normalized);
+    return SAFE_PROTOCOLS.has(url.protocol) ? normalized : undefined;
   } catch {
     return undefined;
   }
+}
+
+function sanitizeCodeFenceLanguage(language: string): string {
+  return language.replace(/[^A-Za-z0-9_-]/g, '');
+}
+
+function removeAsciiControlCharacters(value: string): string {
+  return value.replace(/[\u0000-\u001F\u007F\s]+/g, '');
 }
 
 function unescapeBasicEntities(value: string): string {
