@@ -28,11 +28,27 @@ const fossilColor = (kind: string) => ({
   research: '#39a9db',
 }[kind] ?? '#8d6e4f');
 
-const fossilPoints = (cx: number, cy: number, index: number) => {
-  const radii = [7, 5.5, 7.8, 6.2, 8.1, 5.8];
-  return radii.map((radius, i) => {
-    const angle = -Math.PI / 2 + i * (Math.PI * 2 / radii.length) + index * 0.37;
-    return `${(cx + Math.cos(angle) * radius).toFixed(1)},${(cy + Math.sin(angle) * radius).toFixed(1)}`;
+const hashString = (value: string) => [...value].reduce((hash, char) => ((hash << 5) - hash + char.charCodeAt(0)) | 0, 0);
+const seeded = (seed: number) => {
+  const x = Math.sin(seed) * 10000;
+  return x - Math.floor(x);
+};
+const fossilPoints = (cx: number, cy: number, seedText: string) => {
+  const seed = Math.abs(hashString(seedText));
+  const count = 5 + Math.floor(seeded(seed + 1) * 3);
+  const rx = 11 + seeded(seed + 2) * 8;
+  const ry = 3.8 + seeded(seed + 3) * 3.4;
+  const rotation = (seeded(seed + 4) - 0.5) * 0.22;
+
+  return Array.from({ length: count }, (_, i) => {
+    const angle = -Math.PI + i * (Math.PI * 2 / count) + seeded(seed + i + 10) * 0.34;
+    const localRx = rx * (0.76 + seeded(seed + i + 20) * 0.34);
+    const localRy = ry * (0.76 + seeded(seed + i + 30) * 0.38);
+    const x = Math.cos(angle) * localRx;
+    const yy = Math.sin(angle) * localRy;
+    const rotatedX = x * Math.cos(rotation) - yy * Math.sin(rotation);
+    const rotatedY = x * Math.sin(rotation) + yy * Math.cos(rotation);
+    return `${(cx + rotatedX).toFixed(1)},${(cy + rotatedY).toFixed(1)}`;
   }).join(' ');
 };
 ---
@@ -42,8 +58,7 @@ const fossilPoints = (cx: number, cy: number, index: number) => {
 
   <div class="bio-strata__grid">
     <aside class="bio-strata__column-wrap" aria-label="Stratigraphic bio column">
-      <svg class="bio-strata__column" viewBox={`0 0 ${columnWidth} ${columnHeight}`} role="img" aria-labelledby="bio-strata-column-title">
-        <title id="bio-strata-column-title">A stratigraphic column of biographical layers, oldest at bottom and newest at top.</title>
+      <svg class="bio-strata__column" viewBox={`0 0 ${columnWidth} ${columnHeight}`} role="img" aria-label="A stratigraphic column of biographical layers, oldest at bottom and newest at top.">
         <defs>
           <pattern id="strata-fine" width="12" height="12" patternUnits="userSpaceOnUse">
             <path d="M0 3 C4 1, 8 5, 12 3 M0 9 C4 7, 8 11, 12 9" fill="none" stroke="rgba(47, 59, 70, 0.14)" stroke-width="0.8" />
@@ -89,7 +104,6 @@ const fossilPoints = (cx: number, cy: number, index: number) => {
                 <path class="bio-strata__fault" d={`M${bandX} ${y + height * 0.18} L${bandX + bandWidth} ${y + height * 0.78}`} />
               )}
               <text class="bio-strata__column-date" x={bandX - 10} y={y + height / 2} transform={`rotate(-45 ${bandX - 10} ${y + height / 2})`}>{layer.dates}</text>
-              <title>{layer.title}, {layer.dates}</title>
             </g>
           );
         })}
@@ -99,15 +113,13 @@ const fossilPoints = (cx: number, cy: number, index: number) => {
           const cx = bandX + bandWidth * (0.22 + ((index * 0.23 + layer.id.length * 0.07) % 0.58));
           const cy = y + height * (0.22 + index * 0.18);
           return (
-            <a href={`#${layer.id}-fossil-${fossil.id}`} class="bio-strata__fossil-link" aria-label={`${fossil.label} in ${layer.title}`}>
+            <a href={`#${layer.id}-fossil-${fossil.id}`} class="bio-strata__fossil-link" aria-label={`${fossil.label} in ${layer.title}`} data-tooltip={fossil.label}>
               <polygon
                 class="bio-strata__fossil-inclusion"
                 data-layer-id={layer.id}
-                points={fossilPoints(cx, cy, index)}
+                points={fossilPoints(cx, cy, `${layer.id}-${fossil.id}-${index}`)}
                 fill={fossilColor(fossil.kind)}
-              >
-                <title>{fossil.label}</title>
-              </polygon>
+              />
             </a>
           );
         }))}
@@ -141,14 +153,17 @@ const fossilPoints = (cx: number, cy: number, index: number) => {
           </section>
 
           {(layer.fossils?.length ?? 0) > 0 && (
-            <section class="bio-strata__fossils" aria-label="Fossils">
-              {layer.fossils?.map((fossil) => (
-                <details id={`${layer.id}-fossil-${fossil.id}`} tabindex="-1" style={`--fossil-color: ${fossilColor(fossil.kind)}`}>
-                  <summary>{fossil.label}</summary>
-                  <p>{fossil.note}</p>
-                  {fossil.href && <p><a href={fossil.href}>{fossil.linkLabel ?? 'Open link'}</a></p>}
-                </details>
-              ))}
+            <section class="bio-strata__fossils" aria-labelledby={`${layer.id}-fossils`}>
+              <h3 id={`${layer.id}-fossils`}>Fossils</h3>
+              <ul>
+                {layer.fossils?.map((fossil) => (
+                  <li id={`${layer.id}-fossil-${fossil.id}`} tabindex="-1" style={`--fossil-color: ${fossilColor(fossil.kind)}`}>
+                    <strong>{fossil.label}</strong>
+                    <span>{fossil.note}</span>
+                    {fossil.href && <a href={fossil.href}>{fossil.linkLabel ?? 'Open link'}</a>}
+                  </li>
+                ))}
+              </ul>
             </section>
           )}
         </article>
@@ -245,20 +260,74 @@ const fossilPoints = (cx: number, cy: number, index: number) => {
       activeFrame = window.requestAnimationFrame(updateActiveFromScroll);
     };
 
+    const tooltip = document.createElement('div');
+    tooltip.className = 'bio-strata__quick-tooltip';
+    tooltip.hidden = true;
+    document.body.append(tooltip);
+
+    const showTooltip = (link, event) => {
+      const label = link.dataset.tooltip;
+      if (!label) return;
+      tooltip.textContent = label;
+      tooltip.hidden = false;
+      const rect = link.getBoundingClientRect();
+      const x = event?.clientX ?? rect.left + rect.width / 2;
+      const y = event?.clientY ?? rect.top;
+      tooltip.style.left = `${x + 10}px`;
+      tooltip.style.top = `${y - 10}px`;
+    };
+
+    const hideTooltip = () => {
+      tooltip.hidden = true;
+    };
+
+    const waitForScrollToSettle = (callback) => {
+      let lastY = window.scrollY;
+      let stableFor = 0;
+      let elapsed = 0;
+      const step = () => {
+        const currentY = window.scrollY;
+        elapsed += 50;
+        if (Math.abs(currentY - lastY) < 1) {
+          stableFor += 50;
+        } else {
+          stableFor = 0;
+          lastY = currentY;
+        }
+
+        if (stableFor >= 150 || elapsed >= 1600) {
+          callback();
+        } else {
+          window.setTimeout(step, 50);
+        }
+      };
+      window.setTimeout(step, 50);
+    };
+
     root.querySelectorAll('.bio-strata__fossil-link').forEach((link) => {
+      link.addEventListener('mouseenter', (event) => showTooltip(link, event));
+      link.addEventListener('mousemove', (event) => showTooltip(link, event));
+      link.addEventListener('focus', (event) => showTooltip(link, event));
+      link.addEventListener('mouseleave', hideTooltip);
+      link.addEventListener('blur', hideTooltip);
       link.addEventListener('click', (event) => {
         event.preventDefault();
+        hideTooltip();
         const id = link.getAttribute('href')?.slice(1);
-        const details = id ? document.getElementById(id) : null;
-        if (!(details instanceof HTMLDetailsElement)) return;
+        const fossilLine = id ? document.getElementById(id) : null;
+        if (!fossilLine) return;
 
-        details.open = true;
-        const panel = details.closest('[data-layer-panel]');
+        const panel = fossilLine.closest('[data-layer-panel]');
         const layerId = panel?.dataset.layerId;
         if (layerId) setActiveLayer(layerId);
         window.requestAnimationFrame(() => {
-          details.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          details.focus({ preventScroll: true });
+          fossilLine.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          waitForScrollToSettle(() => {
+            fossilLine.focus({ preventScroll: true });
+            fossilLine.classList.remove('is-glowing');
+            void fossilLine.offsetWidth;
+            fossilLine.classList.add('is-glowing');
+          });
         });
       });
     });
@@ -460,38 +529,80 @@ const fossilPoints = (cx: number, cy: number, index: number) => {
   }
 
   .bio-strata__fossils {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.45rem;
     margin-top: var(--space-4);
   }
 
-  .bio-strata__fossils details {
-    max-width: min(100%, 18rem);
-    border: 1px solid color-mix(in srgb, var(--fossil-color, var(--color-rule-strong)) 45%, var(--color-rule));
-    border-radius: var(--radius-sm);
-    background: color-mix(in srgb, white 20%, var(--color-paper));
+  .bio-strata__fossils h3 {
+    margin: var(--space-4) 0 var(--space-2);
+    font-size: 0.95rem;
+    font-style: normal;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
   }
 
-  .bio-strata__fossils summary {
-    cursor: pointer;
-    padding: 0.18rem 0.55rem;
-    color: color-mix(in srgb, var(--fossil-color, var(--color-link)) 68%, var(--color-ink));
-    font-size: 0.84rem;
-    font-weight: 600;
-  }
-
-  .bio-strata__fossils details[open] {
-    flex-basis: min(100%, 24rem);
-    padding-bottom: 0.35rem;
-  }
-
-  .bio-strata__fossils details p {
+  .bio-strata__fossils ul {
+    display: grid;
+    gap: 0.45rem;
     margin: 0;
-    padding: 0.2rem 0.65rem;
+    padding: 0;
+    list-style: none;
+  }
+
+  .bio-strata__fossils li {
+    margin: 0;
+    border-left: 0.28rem solid var(--fossil-color);
+    padding: 0.25rem 0.55rem;
     color: var(--color-muted);
-    font-size: 0.86rem;
+    font-size: 0.88rem;
     line-height: 1.35;
+    transition: background-color 180ms ease, box-shadow 180ms ease;
+  }
+
+  .bio-strata__fossils li:focus-visible {
+    outline-color: var(--fossil-color);
+  }
+
+  .bio-strata__fossils strong {
+    display: inline;
+    margin-right: 0.35rem;
+    color: color-mix(in srgb, var(--fossil-color) 68%, var(--color-ink));
+  }
+
+  .bio-strata__fossils a {
+    margin-left: 0.5rem;
+  }
+
+  .bio-strata__fossils li.is-glowing {
+    animation: fossil-glow 2200ms ease-out;
+  }
+
+  @keyframes fossil-glow {
+    0% {
+      background: color-mix(in srgb, var(--fossil-color) 28%, transparent);
+      box-shadow: 0 0 0 0 color-mix(in srgb, var(--fossil-color) 55%, transparent);
+    }
+    35% {
+      background: color-mix(in srgb, var(--fossil-color) 20%, transparent);
+      box-shadow: 0 0 1.1rem 0.12rem color-mix(in srgb, var(--fossil-color) 45%, transparent);
+    }
+    100% {
+      background: transparent;
+      box-shadow: 0 0 0 0 transparent;
+    }
+  }
+
+  :global(.bio-strata__quick-tooltip) {
+    position: fixed;
+    z-index: 1000;
+    max-width: 16rem;
+    border: 1px solid color-mix(in srgb, var(--color-ink) 45%, var(--color-paper));
+    background: color-mix(in srgb, var(--color-ink) 92%, black);
+    color: var(--color-paper);
+    padding: 0.16rem 0.42rem;
+    font-size: 0.78rem;
+    line-height: 1.25;
+    pointer-events: none;
+    transform: translateY(-100%);
   }
 
   @media (max-width: 879px) {
