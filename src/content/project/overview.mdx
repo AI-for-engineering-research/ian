@@ -5,12 +5,33 @@ order: 1
 ---
 
 import Sidenote from '../../components/Sidenote.astro';
-import Figure from '../../components/Figure.astro';
 import MediaGrid from '../../components/MediaGrid.astro';
 import LorenzAttractor from '../../components/visualizations/LorenzAttractor.astro';
 import HopfBifurcation from '../../components/visualizations/HopfBifurcation.astro';
+import ReactionDiffusion from '../../components/visualizations/ReactionDiffusion.astro';
 
 This page should describe the research question, the pilot-class context, and the kinds of evidence you expect to collect.
+
+<MediaGrid layout="wide" aria-label="Animated model visualizations" gap="var(--space-5)">
+  <figure class="media-card">
+    <span class="media-grid__frame">
+      <LorenzAttractor ariaLabel="Animated Lorenz attractor on a white drawing surface with a dark red point tracing a fading grey-red trail; click to restart from a new initial condition." />
+    </span>
+    <figcaption>Lorenz attractor: a dark-red tracer follows a fading trajectory through deterministic chaos; click to randomize initial conditions.</figcaption>
+  </figure>
+  <figure class="media-card">
+    <span class="media-grid__frame">
+      <HopfBifurcation ariaLabel="Animated supercritical Hopf bifurcation on a white drawing surface with restrained grey vector-field arrows, an origin stability marker, and a dark-red limit cycle after mu crosses zero." />
+    </span>
+    <figcaption>Supercritical Hopf bifurcation: μ crosses zero, changing a stable origin into a stable limit cycle.</figcaption>
+  </figure>
+  <figure class="media-card">
+    <span class="media-grid__frame">
+      <ReactionDiffusion ariaLabel="Animated FitzHugh-Nagumo reaction-diffusion simulation using a Belousov-Zhabotinsky-style navy, cyan, cream, orange, and dark-red colormap; click to randomize the chemical field." />
+    </span>
+    <figcaption>FitzHugh-Nagumo reaction-diffusion: wrapped diffusion evolves a BZ-style maze pattern.</figcaption>
+  </figure>
+</MediaGrid>
 
 ## Working question
 
@@ -23,25 +44,3 @@ How do AI tools alter the practice of research, especially when the work include
 - Compare outcomes across tools and task types.
 - Separate subjective experience from externally checkable artifacts.
 
-<MediaGrid layout="wide" aria-label="Example research media" gap="var(--space-5)">
-  <figure>
-    <span class="media-grid__frame media-grid__frame--contain">
-      <img src="/figures/placeholder.svg" alt="Placeholder geometric figure" loading="lazy" decoding="async" />
-    </span>
-    <figcaption>Research artifact placeholder.</figcaption>
-  </figure>
-  <figure>
-    <span class="media-grid__frame">
-      <HopfBifurcation ariaLabel="Animated supercritical Hopf bifurcation with grey vector-field arrows, an origin stability marker, and a dark-red limit cycle after mu crosses zero." />
-    </span>
-    <figcaption>Supercritical Hopf bifurcation: the parameter μ sweeps across zero, turning the stable origin into an unstable origin surrounded by a stable limit cycle.</figcaption>
-  </figure>
-  <figure>
-    <span class="media-grid__frame">
-      <LorenzAttractor ariaLabel="Animated Lorenz attractor with a dark red point tracing a fading trail; click to restart from a new initial condition." />
-    </span>
-    <figcaption>Lorenz attractor simulation; click to randomize initial conditions while keeping canonical parameters fixed.</figcaption>
-  </figure>
-</MediaGrid>
-
-<Figure src="/figures/placeholder.svg" alt="Placeholder geometric figure" layout="wide" caption="A wide figure spanning the text column and margin rail." />

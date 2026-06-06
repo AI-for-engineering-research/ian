@@ -36,7 +36,7 @@ export const DEFAULT_HOPF_CONFIG: HopfConfig = {
   gridDensity: 13,
   omega: 1.15,
   highlightColor: '#7f1d1d',
-  backgroundColor: 'rgba(255, 248, 220, 0.45)',
+  backgroundColor: '#ffffff',
 };
 
 const PADDING = 18;
@@ -212,7 +212,7 @@ function drawOrigin(context: CanvasRenderingContext2D, transform: HopfTransform,
   context.save();
   context.lineWidth = 2;
   context.strokeStyle = mu > 0 ? highlightColor : 'rgba(51, 51, 51, 0.86)';
-  context.fillStyle = mu > 0 ? 'rgba(255, 248, 220, 0.86)' : 'rgba(51, 51, 51, 0.86)';
+  context.fillStyle = mu > 0 ? 'rgba(255, 255, 255, 0.9)' : 'rgba(51, 51, 51, 0.86)';
   context.beginPath();
   context.arc(origin.x, origin.y, 5, 0, Math.PI * 2);
   context.fill();

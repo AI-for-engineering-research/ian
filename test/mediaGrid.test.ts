@@ -28,6 +28,9 @@ test('MediaGrid CSS supports wide placement, responsive columns, and opt-in aspe
   assert.match(css, /repeat\(var\(--media-grid-mobile-columns, 1\)/);
   assert.match(css, /\.media-grid :where\(\.media-grid__frame\)/);
   assert.match(css, /aspect-ratio: var\(--media-grid-aspect-ratio, 4 \/ 3\)/);
+  assert.match(css, /\.media-card \{/);
+  assert.match(css, /background: white/);
+  assert.match(css, /box-shadow: none/);
 });
 
 test('Project overview demonstrates MediaGrid without moving captions into the grid component', async () => {
@@ -36,5 +39,7 @@ test('Project overview demonstrates MediaGrid without moving captions into the g
   assert.match(overview, /import MediaGrid/);
   assert.match(overview, /<MediaGrid layout="wide"/);
   assert.match(overview, /class="media-grid__frame/);
-  assert.match(overview, /<figcaption>Research artifact placeholder\.<\/figcaption>/);
+  assert.match(overview, /<figure class="media-card">/);
+  assert.match(overview, /<figcaption>Lorenz attractor:/);
+  assert.doesNotMatch(overview, /placeholder\.svg|Placeholder geometric figure|Research artifact placeholder/);
 });

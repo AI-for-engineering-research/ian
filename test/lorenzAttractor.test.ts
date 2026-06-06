@@ -11,6 +11,7 @@ import {
 } from '../src/lib/visualizations/lorenz.ts';
 
 const componentPath = new URL('../src/components/visualizations/LorenzAttractor.astro', import.meta.url);
+const libPath = new URL('../src/lib/visualizations/lorenz.ts', import.meta.url);
 const overviewPath = new URL('../src/content/project/overview.mdx', import.meta.url);
 
 test('Lorenz defaults expose canonical parameters and sanitized overridable options', () => {
@@ -67,6 +68,7 @@ test('projection uses a fixed oblique transform and fit preserves equal x/y scal
 
 test('Lorenz component emits accessible canvas config and overview uses it in the media grid', async () => {
   const component = await readFile(componentPath, 'utf8');
+  const lib = await readFile(libPath, 'utf8');
   assert.match(component, /sigma = DEFAULT_LORENZ_CONFIG\.sigma/);
   assert.match(component, /rho = DEFAULT_LORENZ_CONFIG\.rho/);
   assert.match(component, /beta = DEFAULT_LORENZ_CONFIG\.beta/);
@@ -74,6 +76,7 @@ test('Lorenz component emits accessible canvas config and overview uses it in th
   assert.match(component, /<canvas aria-label=\{ariaLabel\} role="img"/);
   assert.match(component, /data-lorenz-config/);
   assert.match(component, /initializeLorenzAttractors/);
+  assert.match(lib, /context\.fillStyle = '#ffffff'/);
 
   const overview = await readFile(overviewPath, 'utf8');
   assert.match(overview, /import LorenzAttractor/);

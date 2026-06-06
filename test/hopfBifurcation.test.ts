@@ -20,6 +20,7 @@ test('Hopf defaults expose tunable bifurcation parameters and sanitize invalid o
   assert.equal(DEFAULT_HOPF_CONFIG.domain, 2);
   assert.equal(DEFAULT_HOPF_CONFIG.gridDensity, 13);
   assert.equal(DEFAULT_HOPF_CONFIG.highlightColor, '#7f1d1d');
+  assert.equal(DEFAULT_HOPF_CONFIG.backgroundColor, '#ffffff');
 
   const config = normalizeConfig({ muMin: 2, muMax: -2, cycleSeconds: -1, domain: Number.NaN, gridDensity: 1 });
   assert.equal(config.muMin, -2);

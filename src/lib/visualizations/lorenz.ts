@@ -219,7 +219,7 @@ function drawLorenz(frame: CanvasVisualizationFrame, state: LorenzState): void {
   const { context, width, height, delta, reducedMotion } = frame;
   fitState(state, width, height);
   context.clearRect(0, 0, width, height);
-  context.fillStyle = 'rgba(255, 248, 220, 0.45)';
+  context.fillStyle = '#ffffff';
   context.fillRect(0, 0, width, height);
 
   if (state.fitted.length < 2) return;
@@ -274,7 +274,7 @@ function drawTrail(context: CanvasRenderingContext2D, points: FittedPoint[], cur
 function drawPoint(context: CanvasRenderingContext2D, point: FittedPoint, color: string): void {
   context.save();
   context.fillStyle = color;
-  context.strokeStyle = 'rgba(255, 248, 220, 0.9)';
+  context.strokeStyle = 'rgba(255, 255, 255, 0.92)';
   context.lineWidth = 1.5;
   context.beginPath();
   context.arc(point.x, point.y, 3.8, 0, Math.PI * 2);

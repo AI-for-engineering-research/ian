@@ -16,6 +16,7 @@ import {
 } from '../src/lib/visualizations/reactionDiffusion.ts';
 
 const componentPath = new URL('../src/components/visualizations/ReactionDiffusion.astro', import.meta.url);
+const overviewPath = new URL('../src/content/project/overview.mdx', import.meta.url);
 
 test('reaction-diffusion defaults expose mini-maze model and simulation controls', () => {
   assert.deepEqual(MINI_MAZE_MODEL, { a: 0.7, b: 0.8, I: 0.5, Du: 1, Dv: 20 });
@@ -116,7 +117,7 @@ test('BZ colormap interpolates from navy through cream to dark red', () => {
   assert.deepEqual(middle, [255, 247, 214]);
 });
 
-test('ReactionDiffusion component emits accessible click-capable canvas config', async () => {
+test('ReactionDiffusion component emits accessible click-capable canvas config and overview uses it', async () => {
   const component = await readFile(componentPath, 'utf8');
   assert.match(component, /model = \{\}/);
   assert.match(component, /timestep/);
@@ -129,4 +130,9 @@ test('ReactionDiffusion component emits accessible click-capable canvas config',
   assert.match(component, /<canvas aria-label=\{ariaLabel\} role="img"/);
   assert.match(component, /data-reaction-diffusion-config/);
   assert.match(component, /initializeReactionDiffusions/);
+
+  const overview = await readFile(overviewPath, 'utf8');
+  assert.match(overview, /import ReactionDiffusion/);
+  assert.match(overview, /<ReactionDiffusion ariaLabel=/);
+  assert.match(overview, /BZ-style maze pattern|Belousov-Zhabotinsky-style/);
 });
