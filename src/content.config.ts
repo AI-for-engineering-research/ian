@@ -64,10 +64,19 @@ const transcriptToolResultBlockSchema = z
   })
   .strict();
 
+const transcriptErrorBlockSchema = z
+  .object({
+    type: z.literal('error'),
+    message: z.string().min(1),
+    code: z.string().min(1).optional(),
+  })
+  .strict();
+
 const transcriptContentBlockSchema = z.discriminatedUnion('type', [
   transcriptTextBlockSchema,
   transcriptToolCallBlockSchema,
   transcriptToolResultBlockSchema,
+  transcriptErrorBlockSchema,
 ]);
 
 const transcriptRedactionSchema = z
@@ -78,17 +87,27 @@ const transcriptRedactionSchema = z
   })
   .strict();
 
+const transcriptOmissionSchema = z
+  .object({
+    kind: z.literal('thinking'),
+    count: z.number().int().positive(),
+    reason: z.string().min(1),
+  })
+  .strict();
+
 const transcriptEntrySchema = z
   .object({
     id: z.string().regex(/^[a-z0-9][a-z0-9_-]*$/),
     index: z.number().int().nonnegative(),
     role: z.enum(['user', 'assistant', 'system', 'tool']),
     source: z.enum(['pi', 'importer']).default('pi'),
+    sourceId: z.string().min(1).optional(),
     createdAt: z.iso.datetime({ offset: true }).optional(),
     parentId: z.string().min(1).optional(),
     branch: z.string().min(1).optional(),
     title: z.string().min(1).optional(),
     content: z.array(transcriptContentBlockSchema).min(1),
+    omissions: z.array(transcriptOmissionSchema).default([]),
     redactions: z.array(transcriptRedactionSchema).default([]),
     truncated: z.boolean().default(false),
   })

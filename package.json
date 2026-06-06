@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "ASTRO_TELEMETRY_DISABLED=1 astro dev",
     "build": "ASTRO_TELEMETRY_DISABLED=1 astro check && ASTRO_TELEMETRY_DISABLED=1 astro build",
+    "test": "node --test test/*.test.ts",
     "preview": "ASTRO_TELEMETRY_DISABLED=1 astro preview"
   },
   "dependencies": {
@@ -18,5 +19,7 @@
     "remark-math": "latest",
     "typescript": "latest"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "@types/node": "^25.9.2"
+  }
 }
