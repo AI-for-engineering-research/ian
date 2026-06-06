@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "title": "First session transcript fixture",
-  "summary": "A minimal public transcript fixture used to validate the sessions content collection.",
+  "summary": "A public transcript fixture covering readable session rendering states.",
   "source": {
     "kind": "pi",
     "sessionId": "fixture-001",
@@ -17,6 +17,11 @@
       "id": "assistant",
       "name": "Pi",
       "role": "assistant"
+    },
+    {
+      "id": "tool",
+      "name": "Tool",
+      "role": "tool"
     }
   ],
   "entries": [
@@ -27,7 +32,7 @@
       "content": [
         {
           "type": "text",
-          "text": "Set up the first research-log page."
+          "text": "Set up the **first** research-log page and link to [the project](/project/). <script>alert('no')</script>"
         }
       ]
     },
@@ -35,12 +40,63 @@
       "id": "entry-2",
       "index": 1,
       "role": "assistant",
+      "branch": "main",
       "content": [
         {
           "type": "text",
           "text": "Created a starter structure and noted future transcript-linking needs."
+        },
+        {
+          "type": "tool_call",
+          "toolCallId": "call-1",
+          "name": "bash",
+          "arguments": {
+            "command": "npm test"
+          }
+        },
+        {
+          "type": "tool_result",
+          "toolCallId": "call-1",
+          "content": "test output line 1\ntest output line 2",
+          "status": "success",
+          "collapsed": true
+        }
+      ],
+      "omissions": [
+        {
+          "kind": "thinking",
+          "count": 1,
+          "reason": "Thinking content is omitted from public transcripts."
         }
       ]
+    },
+    {
+      "id": "entry-3",
+      "index": 2,
+      "role": "tool",
+      "parentId": "call-2",
+      "content": [
+        {
+          "type": "tool_result",
+          "toolCallId": "call-2",
+          "content": "A very long output was truncated for publication.",
+          "status": "error",
+          "truncated": true
+        },
+        {
+          "type": "error",
+          "message": "Command failed with exit code 1",
+          "code": "EXIT_1"
+        }
+      ],
+      "redactions": [
+        {
+          "kind": "path",
+          "replacement": "[REDACTED_PATH]",
+          "count": 2
+        }
+      ],
+      "truncated": true
     }
   ],
   "highlights": [
@@ -51,5 +107,15 @@
       "entries": ["entry-1", "entry-2"]
     }
   ],
-  "redactionSummary": []
+  "redactionSummary": [
+    {
+      "kind": "path",
+      "replacement": "[REDACTED_PATH]",
+      "count": 2
+    }
+  ],
+  "redaction": {
+    "status": "needs_review",
+    "reviewNotes": ["Fixture exercises the public review banner."]
+  }
 }

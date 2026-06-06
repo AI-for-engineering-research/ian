@@ -1,0 +1,16 @@
+---
+import { getCollection } from 'astro:content';
+import ContentLayout from '../../layouts/ContentLayout.astro';
+import SessionTranscript from '../../components/SessionTranscript.astro';
+
+export async function getStaticPaths() {
+  const sessions = await getCollection('session');
+  return sessions.map((session) => ({ params: { slug: session.id }, props: { session } }));
+}
+
+const { session } = Astro.props;
+---
+
+<ContentLayout title={session.data.title} description={session.data.summary} eyebrow="Session transcript">
+  <SessionTranscript transcript={session.data} slug={session.id} />
+</ContentLayout>

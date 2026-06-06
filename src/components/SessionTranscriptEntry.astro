@@ -1,0 +1,53 @@
+---
+import SessionContentBlock from './SessionContentBlock.astro';
+import type { NormalizedTranscriptEntry } from '../lib/piSessionParser.ts';
+
+export interface Props {
+  entry: NormalizedTranscriptEntry;
+}
+
+const { entry } = Astro.props;
+const timestamp = entry.createdAt ? new Date(entry.createdAt) : undefined;
+const formattedTime = timestamp?.toLocaleString('en', { dateStyle: 'medium', timeStyle: 'short' });
+---
+
+<article id={entry.id} class={`session-entry session-entry--${entry.role}`}>
+  <header class="session-entry__header">
+    <div>
+      <a class="session-entry__anchor" href={`#${entry.id}`}>#{entry.id}</a>
+      <span class="session-entry__role">{entry.role}</span>
+      {entry.title && <span class="session-entry__title">{entry.title}</span>}
+    </div>
+    <div class="session-entry__meta">
+      <span>Entry {entry.index + 1}</span>
+      {formattedTime && <time datetime={entry.createdAt}>{formattedTime}</time>}
+    </div>
+  </header>
+
+  {entry.branch && (
+    <p class="session-entry__annotation"><strong>Branch:</strong> {entry.branch}</p>
+  )}
+
+  {entry.parentId && (
+    <p class="session-entry__annotation"><strong>Parent source ID:</strong> <code>{entry.parentId}</code></p>
+  )}
+
+  {entry.omissions && entry.omissions.length > 0 && (
+    <aside class="session-entry__notice" aria-label="Omitted content">
+      {entry.omissions.map((omission) => <p>{omission.count} {omission.kind} block(s) omitted: {omission.reason}</p>)}
+    </aside>
+  )}
+
+  {entry.redactions && entry.redactions.length > 0 && (
+    <aside class="session-entry__notice session-entry__notice--redaction" aria-label="Entry redactions">
+      <strong>Redactions in this entry:</strong>
+      <ul>
+        {entry.redactions.map((redaction) => <li>{redaction.count} × {redaction.kind} replaced with <code>{redaction.replacement}</code></li>)}
+      </ul>
+    </aside>
+  )}
+
+  <div class="session-entry__content">
+    {entry.content.map((block) => <SessionContentBlock block={block} />)}
+  </div>
+</article>

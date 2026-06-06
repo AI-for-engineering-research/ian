@@ -1,0 +1,54 @@
+---
+import { escapeHtml, renderSanitizedMarkdown } from '../lib/sanitizedMarkdown.ts';
+import type { TranscriptContentBlock } from '../lib/piSessionParser.ts';
+
+export interface Props {
+  block: TranscriptContentBlock;
+}
+
+const { block } = Astro.props;
+
+function formatJson(value: unknown): string {
+  if (value === undefined) return '';
+  if (typeof value === 'string') return value;
+  return JSON.stringify(value, null, 2);
+}
+---
+
+{block.type === 'text' && (
+  <div class={`session-block session-block--text session-block--${block.format ?? 'markdown'}`} set:html={renderSanitizedMarkdown(block.text)} />
+)}
+
+{block.type === 'tool_call' && (
+  <section class="session-block session-block--tool-call" aria-label={`Tool call ${block.name}`}>
+    <header class="session-block__header">
+      <span>Tool call</span>
+      <code>{block.name}</code>
+      <small>{block.toolCallId}</small>
+    </header>
+    {block.arguments !== undefined && <pre><code>{formatJson(block.arguments)}</code></pre>}
+  </section>
+)}
+
+{block.type === 'tool_result' && (
+  <details class={`session-block session-block--tool-result session-block--${block.status ?? 'success'}`} open={!block.collapsed}>
+    <summary>
+      <span>Tool result</span>
+      <code>{block.toolCallId}</code>
+      {(block.status ?? 'success') === 'error' && <strong>failed</strong>}
+      {block.truncated && <strong>truncated</strong>}
+      {block.collapsed && <strong>collapsed output</strong>}
+    </summary>
+    <pre><code>{block.content}</code></pre>
+  </details>
+)}
+
+{block.type === 'error' && (
+  <section class="session-block session-block--error" aria-label="Transcript failure">
+    <header class="session-block__header">
+      <strong>Failure</strong>
+      {block.code && <code>{block.code}</code>}
+    </header>
+    <p set:html={escapeHtml(block.message)} />
+  </section>
+)}
