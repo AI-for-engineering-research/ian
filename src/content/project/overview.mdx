@@ -7,6 +7,7 @@ order: 1
 import Sidenote from '../../components/Sidenote.astro';
 import Figure from '../../components/Figure.astro';
 import MediaGrid from '../../components/MediaGrid.astro';
+import LorenzAttractor from '../../components/visualizations/LorenzAttractor.astro';
 
 This page should describe the research question, the pilot-class context, and the kinds of evidence you expect to collect.
 
@@ -34,10 +35,12 @@ How do AI tools alter the practice of research, especially when the work include
     </span>
     <figcaption>Comparative output placeholder.</figcaption>
   </figure>
-  <div>
-    <div class="media-grid__frame" aria-label="Future visualization placeholder"></div>
-    <p>Any slotted media or custom visualization can occupy a grid cell.</p>
-  </div>
+  <figure>
+    <span class="media-grid__frame">
+      <LorenzAttractor ariaLabel="Animated Lorenz attractor with a dark red point tracing a fading trail; click to restart from a new initial condition." />
+    </span>
+    <figcaption>Lorenz attractor simulation; click to randomize initial conditions while keeping canonical parameters fixed.</figcaption>
+  </figure>
 </MediaGrid>
 
 <Figure src="/figures/placeholder.svg" alt="Placeholder geometric figure" layout="wide" caption="A wide figure spanning the text column and margin rail." />

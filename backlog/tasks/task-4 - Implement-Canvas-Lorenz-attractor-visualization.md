@@ -1,11 +1,11 @@
 ---
 id: TASK-4
 title: Implement Canvas Lorenz attractor visualization
-status: In Progress
+status: Done
 assignee:
   - '@pi'
 created_date: '2026-06-06 21:43'
-updated_date: '2026-06-06 21:46'
+updated_date: '2026-06-06 22:39'
 labels:
   - visualization
   - canvas
@@ -21,11 +21,11 @@ Add a reusable Canvas-based Lorenz attractor component for the overview media gr
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Component renders a faint grey precomputed Lorenz attractor plus a dark-red fading trail and highlighted current point.
-- [ ] #2 Component uses standard default parameters sigma=10, rho=28, beta=8/3 exposed as overridable props.
-- [ ] #3 Component uses a fixed oblique 3D-to-2D projection with equal-scale geometry and no camera interaction.
-- [ ] #4 Clicking the visualization randomizes initial conditions, applies burn-in, and recomputes the trajectory while keeping parameters fixed.
-- [ ] #5 Component is multi-instance safe, idempotently initialized, and includes an accessible canvas description.
+- [x] #1 Component renders a faint grey precomputed Lorenz attractor plus a dark-red fading trail and highlighted current point.
+- [x] #2 Component uses standard default parameters sigma=10, rho=28, beta=8/3 exposed as overridable props.
+- [x] #3 Component uses a fixed oblique 3D-to-2D projection with equal-scale geometry and no camera interaction.
+- [x] #4 Clicking the visualization randomizes initial conditions, applies burn-in, and recomputes the trajectory while keeping parameters fixed.
+- [x] #5 Component is multi-instance safe, idempotently initialized, and includes an accessible canvas description.
 <!-- AC:END -->
 
 ## Implementation Plan
@@ -39,3 +39,28 @@ Add a reusable Canvas-based Lorenz attractor component for the overview media gr
 6. Wire lifecycle utility for resize, visibility pause, reduced-motion static frame, and click-to-recompute from new random initial conditions.
 7. Confirm multi-instance safety and accessible canvas labeling.
 <!-- SECTION:PLAN:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+- Implemented reusable Astro Lorenz attractor component and TypeScript canvas initializer with RK4 integration, fixed projection, fitting, click-to-randomize, and lifecycle integration.
+- Added Lorenz component to the project overview media grid.
+- Added node:test coverage for defaults, trajectory generation, projection fitting, component wiring, and overview usage.
+- Validation passed: npm test; npm run build.
+<!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Implemented a reusable Canvas-based Lorenz attractor visualization for TASK-4.
+
+Changes:
+- Added a LorenzAttractor Astro component with accessible canvas labeling and canonical sigma/rho/beta defaults exposed as props.
+- Added a TypeScript Lorenz visualization module using RK4 integration, burn-in, random initial conditions, fixed oblique projection, equal-scale fitting, faint full-attractor rendering, dark-red fading trail, highlighted current point, and idempotent lifecycle initialization.
+- Wired the component into the project overview media grid.
+- Added tests covering defaults/config normalization, trajectory integration, projection fitting, component wiring, and overview usage.
+
+Validation:
+- npm test
+- npm run build
+<!-- SECTION:FINAL_SUMMARY:END -->

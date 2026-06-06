@@ -184,6 +184,27 @@ th, td { border-bottom: var(--rule); padding: 0.35rem 0.55rem; text-align: left;
 .media-grid :where(figcaption) { max-width: none; }
 .media-grid :where(:last-child) { margin-bottom: 0; }
 
+.lorenz-attractor {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 12rem;
+  border: var(--rule);
+  background: color-mix(in srgb, white 28%, var(--color-paper));
+  cursor: pointer;
+}
+.lorenz-attractor canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.lorenz-attractor canvas:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: -4px;
+  box-shadow: inset var(--focus-ring);
+}
+
 .content-sidenote, .content-margin-note { color: var(--color-muted); font-size: 0.82rem; line-height: 1.4; }
 .content-sidenote__toggle, .content-margin-note__toggle { position: absolute; inline-size: 1px; block-size: 1px; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; }
 .content-sidenote__ref, .content-margin-note__ref { color: var(--color-link); cursor: pointer; font-weight: 700; }

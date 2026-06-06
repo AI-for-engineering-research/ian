@@ -1,0 +1,66 @@
+---
+import { DEFAULT_LORENZ_CONFIG, type LorenzConfig } from '../../lib/visualizations/lorenz.ts';
+
+export interface Props {
+  title?: string;
+  ariaLabel?: string;
+  sigma?: number;
+  rho?: number;
+  beta?: number;
+  highlightColor?: string;
+  trailColor?: string;
+  trailLength?: number;
+  trajectoryLength?: number;
+  burnInSteps?: number;
+  dt?: number;
+  speed?: number;
+  class?: string;
+}
+
+const {
+  title = 'Lorenz attractor',
+  ariaLabel = DEFAULT_LORENZ_CONFIG.ariaLabel,
+  sigma = DEFAULT_LORENZ_CONFIG.sigma,
+  rho = DEFAULT_LORENZ_CONFIG.rho,
+  beta = DEFAULT_LORENZ_CONFIG.beta,
+  highlightColor = DEFAULT_LORENZ_CONFIG.highlightColor,
+  trailColor = DEFAULT_LORENZ_CONFIG.trailColor,
+  trailLength = DEFAULT_LORENZ_CONFIG.trailLength,
+  trajectoryLength = DEFAULT_LORENZ_CONFIG.trajectoryLength,
+  burnInSteps = DEFAULT_LORENZ_CONFIG.burnInSteps,
+  dt = DEFAULT_LORENZ_CONFIG.dt,
+  speed = DEFAULT_LORENZ_CONFIG.speed,
+  class: extraClass,
+} = Astro.props;
+
+const config: LorenzConfig = {
+  ariaLabel,
+  sigma,
+  rho,
+  beta,
+  highlightColor,
+  trailColor,
+  trailLength,
+  trajectoryLength,
+  burnInSteps,
+  dt,
+  speed,
+};
+
+const className = ['lorenz-attractor', extraClass].filter(Boolean).join(' ');
+const configJson = JSON.stringify(config).replaceAll('</', '<\\/');
+---
+
+<div class={className} data-lorenz-attractor>
+  <canvas aria-label={ariaLabel} role="img" title={title} tabindex="0">
+    {ariaLabel}
+  </canvas>
+  <script is:inline type="application/json" data-lorenz-config set:html={configJson} />
+</div>
+
+<script>
+  import { initializeLorenzAttractors } from '../../lib/visualizations/lorenz.ts';
+
+  initializeLorenzAttractors();
+  document.addEventListener('astro:page-load', () => initializeLorenzAttractors());
+</script>
