@@ -74,7 +74,6 @@ const fossilPoints = (cx: number, cy: number, seedText: string) => {
         <rect class="bio-strata__column-frame" x={bandX} y="1" width={bandWidth} height="898" rx="3" />
 
         {layerGeometry.map(({ layer, y, height }) => {
-          const outdoors = layer.threads.outdoors ?? 0;
           const textureId = layer.texture === 'dense' ? 'strata-dense' : layer.texture === 'weathered' ? 'strata-weathered' : 'strata-fine';
           return (
             <g class:list={['bio-strata__band', layer.boundary === 'faulted' && 'bio-strata__band--faulted']} data-layer-id={layer.id}>
@@ -86,16 +85,6 @@ const fossilPoints = (cx: number, cy: number, seedText: string) => {
                 height={height}
                 fill={layer.color}
               />
-              {outdoors > 0 && (
-                <rect
-                  class="bio-strata__outdoors-wash"
-                  x={bandX}
-                  y={y}
-                  width={bandWidth}
-                  height={height}
-                  opacity={0.08 + outdoors * 0.055}
-                />
-              )}
               {layer.texture && layer.texture !== 'plain' && (
                 <rect x={bandX} y={y} width={bandWidth} height={height} fill={`url(#${textureId})`} opacity="0.9" />
               )}
@@ -388,13 +377,8 @@ const fossilPoints = (cx: number, cy: number, seedText: string) => {
     stroke-width: 2.4;
   }
 
-  .bio-strata__band-fill,
-  .bio-strata__outdoors-wash {
+  .bio-strata__band-fill {
     clip-path: inset(0 round 0);
-  }
-
-  .bio-strata__outdoors-wash {
-    fill: #6d7f45;
   }
 
   .bio-strata__boundary {
