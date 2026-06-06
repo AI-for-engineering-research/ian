@@ -6,6 +6,7 @@ order: 1
 
 import Sidenote from '../../components/Sidenote.astro';
 import Figure from '../../components/Figure.astro';
+import MediaGrid from '../../components/MediaGrid.astro';
 
 This page should describe the research question, the pilot-class context, and the kinds of evidence you expect to collect.
 
@@ -19,5 +20,24 @@ How do AI tools alter the practice of research, especially when the work include
 - Preserve prompts, agent outputs, code diffs, and reflections where appropriate.
 - Compare outcomes across tools and task types.
 - Separate subjective experience from externally checkable artifacts.
+
+<MediaGrid layout="wide" aria-label="Example research media" gap="var(--space-5)">
+  <figure>
+    <span class="media-grid__frame media-grid__frame--contain">
+      <img src="/figures/placeholder.svg" alt="Placeholder geometric figure" loading="lazy" decoding="async" />
+    </span>
+    <figcaption>Research artifact placeholder.</figcaption>
+  </figure>
+  <figure>
+    <span class="media-grid__frame media-grid__frame--contain">
+      <img src="/figures/placeholder.svg" alt="Second placeholder geometric figure" loading="lazy" decoding="async" />
+    </span>
+    <figcaption>Comparative output placeholder.</figcaption>
+  </figure>
+  <div>
+    <div class="media-grid__frame" aria-label="Future visualization placeholder"></div>
+    <p>Any slotted media or custom visualization can occupy a grid cell.</p>
+  </div>
+</MediaGrid>
 
 <Figure src="/figures/placeholder.svg" alt="Placeholder geometric figure" layout="wide" caption="A wide figure spanning the text column and margin rail." />

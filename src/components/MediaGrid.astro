@@ -1,0 +1,42 @@
+---
+export interface Props {
+  /** Layout width within ContentLayout: inline text column, wide text+rail, or full content shell. */
+  layout?: 'inline' | 'wide' | 'full';
+  /** Desktop column count. Defaults to three columns. */
+  columns?: number | string;
+  /** Tablet column count. Defaults to two columns. */
+  tabletColumns?: number | string;
+  /** Mobile column count. Defaults to one column. */
+  mobileColumns?: number | string;
+  /** Grid gap as any valid CSS length. */
+  gap?: string;
+  /** Aspect ratio made available to opt-in child media frames. */
+  aspectRatio?: string;
+  class?: string;
+  'aria-label'?: string;
+}
+
+const {
+  layout = 'inline',
+  columns = 3,
+  tabletColumns = 2,
+  mobileColumns = 1,
+  gap = 'var(--space-4)',
+  aspectRatio = '4 / 3',
+  class: extraClass,
+  ...attrs
+} = Astro.props;
+
+const className = ['media-grid', `media-grid--${layout}`, extraClass].filter(Boolean).join(' ');
+const style = [
+  `--media-grid-columns: ${columns}`,
+  `--media-grid-tablet-columns: ${tabletColumns}`,
+  `--media-grid-mobile-columns: ${mobileColumns}`,
+  `--media-grid-gap: ${gap}`,
+  `--media-grid-aspect-ratio: ${aspectRatio}`,
+].join('; ');
+---
+
+<div {...attrs} class={className} style={style}>
+  <slot />
+</div>
