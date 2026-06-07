@@ -61,7 +61,7 @@ test('imports a JSONL session into private work artifacts, public transcript JSO
     assert.doesNotMatch(mdx, /^# Add Log Fixture$/m);
     assert.match(mdx, /^transcript:$/m);
     assert.match(mdx, /Imported at: 2026-06-06T20:10:00.000Z/);
-    assert.match(mdx, /\/sessions\/002-add-log-fixture\/#entry-2/);
+    assert.match(mdx, /\.\.\/\.\.\/sessions\/002-add-log-fixture\/#entry-2/);
     assert.match(mdx, /TODO: Decide whether this span supports a claim/);
   } finally {
     await rm(cwd, { recursive: true, force: true });

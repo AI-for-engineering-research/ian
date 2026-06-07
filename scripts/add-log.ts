@@ -187,8 +187,8 @@ export function generateDraftMdx({
     highlight.entries.map((entryId) => ({ entryId, label: `${highlight.kind}: ${highlight.title}` })),
   );
   const uniqueSpans = Array.from(new Map(spans.map((span) => [`${span.entryId}:${span.label}`, span])).values());
-  const transcriptHref = `/sessions/${slug}/`;
-  const highlightSection = analysis.highlights.length > 0 ? renderHighlightSection(slug, analysis.highlights) : renderTodoSection(slug, transcript);
+  const transcriptHref = `../../sessions/${slug}/`;
+  const highlightSection = analysis.highlights.length > 0 ? renderHighlightSection(transcriptHref, analysis.highlights) : renderTodoSection(transcriptHref, transcript);
 
   return `---\ntitle: ${yamlString(title)}\ndate: ${date}\ntags:\n  - agent-logs\nagents:\n  - Pi\ndraft: true\ntranscript:\n  session: ${yamlString(slug)}\n  title: ${yamlString(transcript.title)}\n  href: ${yamlString(transcriptHref)}\n  spans:\n${renderFrontmatterSpans(uniqueSpans)}---\n\n> TODO: Review the generated transcript, redactions, and highlights before publishing.\n\n## Transcript metadata\n\n- Transcript: [${slug}](${transcriptHref})\n- Imported at: ${transcript.source.importedAt}\n- Entries: ${transcript.entries.length}\n- Participants: ${transcript.participants.map((participant) => participant.name).join(', ')}\n- Redaction status: ${transcript.redaction.status}\n- Analysis status: ${analysis.status}\n\n${highlightSection}\n\n## Notes\n\nTODO: Add interpretation, methodological context, and takeaways.\n`;
 }
@@ -198,18 +198,18 @@ function renderFrontmatterSpans(spans: Array<{ entryId: string; label: string }>
   return spans.map((span) => `    - entryId: ${yamlString(span.entryId)}\n      label: ${yamlString(span.label)}\n`).join('');
 }
 
-function renderHighlightSection(slug: string, highlights: SessionHighlightCandidate[]): string {
+function renderHighlightSection(transcriptHref: string, highlights: SessionHighlightCandidate[]): string {
   return `## Generated highlight candidates\n\n${highlights
     .map((highlight) => {
-      const links = highlight.entries.map((entryId) => `[${entryId}](/sessions/${slug}/#${entryId})`).join(', ');
+      const links = highlight.entries.map((entryId) => `[${entryId}](${transcriptHref}#${entryId})`).join(', ');
       return `### ${highlight.title}\n\n- Kind: ${highlight.kind}\n- Confidence: ${highlight.confidence}\n- Source: ${highlight.source}\n- Transcript spans: ${links}\n\n${highlight.summary}\n\nTODO: Decide whether this span supports a claim in the final log entry.`;
     })
     .join('\n\n')}\n`;
 }
 
-function renderTodoSection(slug: string, transcript: NormalizedSessionTranscript): string {
+function renderTodoSection(transcriptHref: string, transcript: NormalizedSessionTranscript): string {
   const firstEntry = transcript.entries[0]?.id ?? 'entry-1';
-  return `## Highlight TODOs\n\n- TODO: Select noteworthy transcript spans, starting with [${firstEntry}](/sessions/${slug}/#${firstEntry}).\n`;
+  return `## Highlight TODOs\n\n- TODO: Select noteworthy transcript spans, starting with [${firstEntry}](${transcriptHref}#${firstEntry}).\n`;
 }
 
 function validateImportOptions(options: AddLogOptions): void {
@@ -252,7 +252,7 @@ function validatePublicTranscript(transcript: NormalizedSessionTranscript): void
 
 function validateDraftMdx(mdx: string, slug: string): void {
   if (!/^draft: true$/m.test(mdx)) throw new Error('Generated MDX must be draft: true.');
-  if (!mdx.includes(`/sessions/${slug}/`)) throw new Error('Generated MDX must link to the transcript page.');
+  if (!mdx.includes(`../../sessions/${slug}/`)) throw new Error('Generated MDX must link to the transcript page.');
   if (!/^transcript:$/m.test(mdx)) throw new Error('Generated MDX must include transcript metadata.');
 }
 

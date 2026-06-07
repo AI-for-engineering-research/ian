@@ -45,6 +45,8 @@ function remarkGlobalMdxComponents() {
 }
 
 export default defineConfig({
+  site: 'https://AI-for-engineering-research.github.io',
+  base: '/ian',
   output: 'static',
   markdown: {
     processor: unified({

@@ -7,8 +7,19 @@ Static Astro + MDX site for an academic pilot project on AI tools in research.
 ```sh
 npm install
 npm run dev
+npm test
 npm run build
 ```
+
+## Deployment
+
+The site is configured for GitHub Pages at:
+
+```txt
+https://AI-for-engineering-research.github.io/ian/
+```
+
+Pushes to `main` run `.github/workflows/deploy.yml`, which installs with `npm ci`, runs tests, builds Astro, adds `dist/.nojekyll`, and deploys `dist/` via GitHub Pages Actions. In the repository settings, set **Pages → Build and deployment → Source** to **GitHub Actions**.
 
 ## Content
 

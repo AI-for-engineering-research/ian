@@ -1,6 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import ContentLayout from '../../layouts/ContentLayout.astro';
+import { withBase } from '../../lib/sitePaths.ts';
 
 const pages = (await getCollection('project', ({ data }) => !data.draft))
   .sort((a, b) => a.data.order - b.data.order || a.data.title.localeCompare(b.data.title));
@@ -10,7 +11,7 @@ const pages = (await getCollection('project', ({ data }) => !data.draft))
   <ul class="card-list">
     {pages.map((page) => (
       <li class="card">
-        <h2><a href={`/project/${page.id}/`}>{page.data.title}</a></h2>
+        <h2><a href={withBase(`/project/${page.id}/`)}>{page.data.title}</a></h2>
         <p>{page.data.summary}</p>
       </li>
     ))}
