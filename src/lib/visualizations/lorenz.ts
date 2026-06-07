@@ -19,6 +19,12 @@ export interface ProjectedPoint {
 
 export interface FittedPoint extends ProjectedPoint {}
 
+export interface LorenzViewpoint {
+  x: number;
+  y: number;
+  z: number;
+}
+
 export interface LorenzConfig extends LorenzParameters {
   ariaLabel: string;
   highlightColor: string;
@@ -28,6 +34,7 @@ export interface LorenzConfig extends LorenzParameters {
   burnInSteps: number;
   dt: number;
   speed: number;
+  viewpoint: LorenzViewpoint;
 }
 
 export const DEFAULT_LORENZ_CONFIG: LorenzConfig = {
@@ -41,7 +48,8 @@ export const DEFAULT_LORENZ_CONFIG: LorenzConfig = {
   trajectoryLength: 6000,
   burnInSteps: 1200,
   dt: 0.008,
-  speed: 72,
+  speed: 144,
+  viewpoint: { x: 1.5, y: -2.2, z: 1.1 },
 };
 
 const INITIAL_RANGE = 18;
@@ -106,6 +114,7 @@ export function normalizeConfig(config: Partial<LorenzConfig>): LorenzConfig {
     burnInSteps: integerAtLeast(merged.burnInSteps, 0, DEFAULT_LORENZ_CONFIG.burnInSteps),
     dt: positiveOrDefault(merged.dt, DEFAULT_LORENZ_CONFIG.dt),
     speed: positiveOrDefault(merged.speed, DEFAULT_LORENZ_CONFIG.speed),
+    viewpoint: normalizeViewpoint(merged.viewpoint),
   };
 }
 
@@ -152,13 +161,25 @@ export function rk4Step(point: LorenzPoint, parameters: LorenzParameters, dt: nu
   };
 }
 
-export function projectLorenzPoint(point: LorenzPoint): ProjectedPoint {
-  // Fixed oblique projection. The same coefficient space is later fit with one scalar,
-  // preserving equal geometry in screen x/y rather than stretching each axis independently.
+export function projectLorenzPoint(point: LorenzPoint, viewpoint: LorenzViewpoint = DEFAULT_LORENZ_CONFIG.viewpoint): ProjectedPoint {
+  // Orthographic projection onto a plane perpendicular to the viewing direction.
+  // The projected coefficient space is later fit with one scalar, preserving equal
+  // geometry in screen x/y rather than stretching each axis independently.
+  const basis = projectionBasis(viewpoint);
   return {
-    x: point.x + point.z * 0.42,
-    y: point.y - point.z * 0.28,
+    x: dot(point, basis.right),
+    y: dot(point, basis.up),
   };
+}
+
+export function projectionBasis(viewpoint: LorenzViewpoint): { right: LorenzPoint; up: LorenzPoint; forward: LorenzPoint } {
+  const forward = normalizeVector(viewpoint, DEFAULT_LORENZ_CONFIG.viewpoint);
+  const yUp = { x: 0, y: 1, z: 0 };
+  const zUp = { x: 0, y: 0, z: 1 };
+  const upHint = Math.abs(dot(forward, yUp)) > 0.96 ? zUp : yUp;
+  const right = normalizeVector(cross(upHint, forward), { x: 1, y: 0, z: 0 });
+  const up = normalizeVector(cross(forward, right), yUp);
+  return { right, up, forward };
 }
 
 export function fitProjectedPoints(points: ProjectedPoint[], width: number, height: number, padding = OUTER_PADDING): FittedPoint[] {
@@ -190,7 +211,7 @@ export function fitProjectedPoints(points: ProjectedPoint[], width: number, heig
 
 function createState(config: LorenzConfig): LorenzState {
   const trajectory = generateLorenzTrajectory(config, config);
-  const projected = trajectory.map(projectLorenzPoint);
+  const projected = trajectory.map((point) => projectLorenzPoint(point, config.viewpoint));
   return {
     config,
     trajectory,
@@ -204,7 +225,7 @@ function createState(config: LorenzConfig): LorenzState {
 
 function resetState(state: LorenzState): void {
   state.trajectory = generateLorenzTrajectory(state.config, state.config);
-  state.projected = state.trajectory.map(projectLorenzPoint);
+  state.projected = state.trajectory.map((point) => projectLorenzPoint(point, state.config.viewpoint));
   state.offset = 0;
 }
 
@@ -251,15 +272,18 @@ function drawPolyline(context: CanvasRenderingContext2D, points: FittedPoint[], 
 }
 
 function drawTrail(context: CanvasRenderingContext2D, points: FittedPoint[], currentIndex: number, trailLength: number, color: string): void {
-  const segments = Math.min(trailLength, points.length - 1);
+  const startIndex = Math.max(1, currentIndex - trailLength + 1);
+  const segments = currentIndex - startIndex + 1;
+  if (segments <= 0) return;
+
   context.save();
   context.lineCap = 'round';
   context.lineJoin = 'round';
 
-  for (let segment = segments; segment > 0; segment--) {
-    const from = points[(currentIndex - segment + points.length) % points.length];
-    const to = points[(currentIndex - segment + 1 + points.length) % points.length];
-    const alpha = 1 - segment / segments;
+  for (let index = startIndex; index <= currentIndex; index++) {
+    const from = points[index - 1];
+    const to = points[index];
+    const alpha = (index - startIndex + 1) / segments;
     context.beginPath();
     context.moveTo(from.x, from.y);
     context.lineTo(to.x, to.y);
@@ -296,6 +320,39 @@ function addScaled(point: LorenzPoint, derivative: LorenzPoint, scale: number): 
     x: point.x + derivative.x * scale,
     y: point.y + derivative.y * scale,
     z: point.z + derivative.z * scale,
+  };
+}
+
+function normalizeViewpoint(value: LorenzViewpoint | undefined): LorenzViewpoint {
+  if (!value) return { ...DEFAULT_LORENZ_CONFIG.viewpoint };
+  const viewpoint = {
+    x: finiteOrDefault(value.x, DEFAULT_LORENZ_CONFIG.viewpoint.x),
+    y: finiteOrDefault(value.y, DEFAULT_LORENZ_CONFIG.viewpoint.y),
+    z: finiteOrDefault(value.z, DEFAULT_LORENZ_CONFIG.viewpoint.z),
+  };
+  const length = Math.hypot(viewpoint.x, viewpoint.y, viewpoint.z);
+  return length > 1e-9 ? viewpoint : { ...DEFAULT_LORENZ_CONFIG.viewpoint };
+}
+
+function dot(a: LorenzPoint, b: LorenzPoint): number {
+  return a.x * b.x + a.y * b.y + a.z * b.z;
+}
+
+function cross(a: LorenzPoint, b: LorenzPoint): LorenzPoint {
+  return {
+    x: a.y * b.z - a.z * b.y,
+    y: a.z * b.x - a.x * b.z,
+    z: a.x * b.y - a.y * b.x,
+  };
+}
+
+function normalizeVector(vector: LorenzPoint, fallback: LorenzPoint): LorenzPoint {
+  const length = Math.hypot(vector.x, vector.y, vector.z);
+  if (!Number.isFinite(length) || length <= 1e-9) return fallback;
+  return {
+    x: vector.x / length,
+    y: vector.y / length,
+    z: vector.z / length,
   };
 }
 

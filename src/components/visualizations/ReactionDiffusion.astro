@@ -1,4 +1,5 @@
 ---
+import PointerIcon from '../icons/PointerIcon.astro';
 import {
   DEFAULT_REACTION_DIFFUSION_CONFIG,
   type ColorStop,
@@ -56,6 +57,7 @@ const configJson = JSON.stringify(config).replaceAll('</', '<\\/');
   <canvas aria-label={ariaLabel} role="img" title={title} tabindex="0">
     {ariaLabel}
   </canvas>
+  <PointerIcon />
   <script is:inline type="application/json" data-reaction-diffusion-config set:html={configJson} />
 </div>
 

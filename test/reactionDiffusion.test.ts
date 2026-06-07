@@ -22,7 +22,7 @@ test('reaction-diffusion defaults expose mini-maze model and simulation controls
   assert.deepEqual(MINI_MAZE_MODEL, { a: 0.7, b: 0.8, I: 0.5, Du: 1, Dv: 20 });
   assert.equal(DEFAULT_REACTION_DIFFUSION_CONFIG.simWidth, 160);
   assert.equal(DEFAULT_REACTION_DIFFUSION_CONFIG.simHeight, 120);
-  assert.equal(DEFAULT_REACTION_DIFFUSION_CONFIG.dt, 0.2);
+  assert.equal(DEFAULT_REACTION_DIFFUSION_CONFIG.dt, 0.002);
   assert.equal(DEFAULT_REACTION_DIFFUSION_CONFIG.stepsPerFrame, 2);
   assert.deepEqual(DEFAULT_REACTION_DIFFUSION_CONFIG.colorStops, DEFAULT_BZ_COLOR_STOPS);
 
@@ -126,8 +126,10 @@ test('ReactionDiffusion component emits accessible click-capable canvas config a
   assert.match(component, /simWidth = simulationResolution\?\.width \?\? DEFAULT_REACTION_DIFFUSION_CONFIG\.simWidth/);
   assert.match(component, /simHeight = simulationResolution\?\.height \?\? DEFAULT_REACTION_DIFFUSION_CONFIG\.simHeight/);
   assert.match(component, /colorStops = DEFAULT_REACTION_DIFFUSION_CONFIG\.colorStops/);
+  assert.match(component, /import PointerIcon/);
   assert.match(component, /data-reaction-diffusion/);
   assert.match(component, /<canvas aria-label=\{ariaLabel\} role="img"/);
+  assert.match(component, /<PointerIcon \/>/);
   assert.match(component, /data-reaction-diffusion-config/);
   assert.match(component, /initializeReactionDiffusions/);
 

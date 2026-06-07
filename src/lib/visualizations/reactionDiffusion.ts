@@ -60,7 +60,7 @@ export const DEFAULT_REACTION_DIFFUSION_CONFIG: ReactionDiffusionConfig = {
   ...MINI_MAZE_MODEL,
   simWidth: 160,
   simHeight: 120,
-  dt: 0.2,
+  dt: 0.002,
   stepsPerFrame: 2,
   colorStops: DEFAULT_BZ_COLOR_STOPS,
 };

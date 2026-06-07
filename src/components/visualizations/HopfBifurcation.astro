@@ -12,6 +12,12 @@ export interface Props {
   omega?: number;
   highlightColor?: string;
   backgroundColor?: string;
+  particleColor?: string;
+  particleSpawnRate?: number;
+  maxParticles?: number;
+  particleLifetime?: number;
+  particleRadius?: number;
+  particleDt?: number;
   class?: string;
 }
 
@@ -26,6 +32,12 @@ const {
   omega = DEFAULT_HOPF_CONFIG.omega,
   highlightColor = DEFAULT_HOPF_CONFIG.highlightColor,
   backgroundColor = DEFAULT_HOPF_CONFIG.backgroundColor,
+  particleColor = DEFAULT_HOPF_CONFIG.particleColor,
+  particleSpawnRate = DEFAULT_HOPF_CONFIG.particleSpawnRate,
+  maxParticles = DEFAULT_HOPF_CONFIG.maxParticles,
+  particleLifetime = DEFAULT_HOPF_CONFIG.particleLifetime,
+  particleRadius = DEFAULT_HOPF_CONFIG.particleRadius,
+  particleDt = DEFAULT_HOPF_CONFIG.particleDt,
   class: extraClass,
 } = Astro.props;
 
@@ -39,6 +51,12 @@ const config: HopfConfig = {
   omega,
   highlightColor,
   backgroundColor,
+  particleColor,
+  particleSpawnRate,
+  maxParticles,
+  particleLifetime,
+  particleRadius,
+  particleDt,
 };
 
 const className = ['hopf-bifurcation', extraClass].filter(Boolean).join(' ');

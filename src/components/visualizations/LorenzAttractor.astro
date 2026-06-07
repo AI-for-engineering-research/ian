@@ -1,5 +1,6 @@
 ---
-import { DEFAULT_LORENZ_CONFIG, type LorenzConfig } from '../../lib/visualizations/lorenz.ts';
+import PointerIcon from '../icons/PointerIcon.astro';
+import { DEFAULT_LORENZ_CONFIG, type LorenzConfig, type LorenzViewpoint } from '../../lib/visualizations/lorenz.ts';
 
 export interface Props {
   title?: string;
@@ -14,6 +15,7 @@ export interface Props {
   burnInSteps?: number;
   dt?: number;
   speed?: number;
+  viewpoint?: LorenzViewpoint;
   class?: string;
 }
 
@@ -30,6 +32,7 @@ const {
   burnInSteps = DEFAULT_LORENZ_CONFIG.burnInSteps,
   dt = DEFAULT_LORENZ_CONFIG.dt,
   speed = DEFAULT_LORENZ_CONFIG.speed,
+  viewpoint = DEFAULT_LORENZ_CONFIG.viewpoint,
   class: extraClass,
 } = Astro.props;
 
@@ -45,6 +48,7 @@ const config: LorenzConfig = {
   burnInSteps,
   dt,
   speed,
+  viewpoint,
 };
 
 const className = ['lorenz-attractor', extraClass].filter(Boolean).join(' ');
@@ -55,6 +59,7 @@ const configJson = JSON.stringify(config).replaceAll('</', '<\\/');
   <canvas aria-label={ariaLabel} role="img" title={title} tabindex="0">
     {ariaLabel}
   </canvas>
+  <PointerIcon />
   <script is:inline type="application/json" data-lorenz-config set:html={configJson} />
 </div>
 

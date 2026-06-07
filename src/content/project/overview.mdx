@@ -12,24 +12,24 @@ import ReactionDiffusion from '../../components/visualizations/ReactionDiffusion
 
 This page should describe the research question, the pilot-class context, and the kinds of evidence you expect to collect.
 
-<MediaGrid layout="wide" aria-label="Animated model visualizations" gap="var(--space-5)">
+<MediaGrid layout="wide" aria-label="Animated model visualizations">
   <figure class="media-card">
     <span class="media-grid__frame">
-      <LorenzAttractor ariaLabel="Animated Lorenz attractor on a white drawing surface with a dark red point tracing a fading grey-red trail; click to restart from a new initial condition." />
+      <LorenzAttractor viewpoint={{x: 0, y: 1, z: 0}} ariaLabel="Animated Lorenz attractor on a white drawing surface with a dark red point tracing a fading grey-red trail; click to restart from a new initial condition." />
     </span>
-    <figcaption>Lorenz attractor: a dark-red tracer follows a fading trajectory through deterministic chaos; click to randomize initial conditions.</figcaption>
+    <figcaption>Lorenz attractor.</figcaption>
   </figure>
   <figure class="media-card">
     <span class="media-grid__frame">
-      <HopfBifurcation ariaLabel="Animated supercritical Hopf bifurcation on a white drawing surface with restrained grey vector-field arrows, an origin stability marker, and a dark-red limit cycle after mu crosses zero." />
+      <HopfBifurcation ariaLabel="Animated supercritical Hopf bifurcation on a white drawing surface with restrained grey vector-field arrows, moving sample points, a black origin stability marker, and a black limit cycle after mu crosses zero." />
     </span>
-    <figcaption>Supercritical Hopf bifurcation: μ crosses zero, changing a stable origin into a stable limit cycle.</figcaption>
+    <figcaption>Supercritical Hopf bifurcation.</figcaption>
   </figure>
   <figure class="media-card">
     <span class="media-grid__frame">
       <ReactionDiffusion ariaLabel="Animated FitzHugh-Nagumo reaction-diffusion simulation using a Belousov-Zhabotinsky-style navy, cyan, cream, orange, and dark-red colormap; click to randomize the chemical field." />
     </span>
-    <figcaption>FitzHugh-Nagumo reaction-diffusion: wrapped diffusion evolves a BZ-style maze pattern.</figcaption>
+    <figcaption>FitzHugh-Nagumo reaction-diffusion.</figcaption>
   </figure>
 </MediaGrid>
 
