@@ -1,0 +1,218 @@
+{
+  "schemaVersion": 1,
+  "title": "Choosing a static site generator",
+  "source": {
+    "kind": "pi",
+    "importedAt": "2026-06-07T11:57:24.485Z",
+    "sessionStartedAt": "2026-06-05T20:39:23.978Z"
+  },
+  "participants": [
+    {
+      "id": "user",
+      "name": "User",
+      "role": "user"
+    },
+    {
+      "id": "assistant",
+      "name": "Pi",
+      "role": "assistant"
+    }
+  ],
+  "entries": [
+    {
+      "id": "entry-1",
+      "index": 0,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "df1afd07",
+      "parentId": "414be4e5",
+      "content": [
+        {
+          "type": "text",
+          "text": "I would like to build a static website for an academic project as part of a pilot class on the use of AI tools in research. This site will have a landing page, a bio page for myself, a research log (blog-like, with one entry per \"session\" highlighting interesting aspects of interaction with coding agents), plus pages relating to the research project I'm going to be doing. The site will require good mathematics rendering and good handling of figures. There will be many interactive elements. I was thinking of using Astro for this project, with all pages using MDX files. Can you evaluate my options in terms of static site generators and give me some idea whether Astro is the most appropriate choice for this project?",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-2",
+      "index": 1,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "bfbba388",
+      "parentId": "df1afd07",
+      "content": [
+        {
+          "type": "text",
+          "text": "Astro is very likely a strong choice for this project, especially if you want a mostly-static academic site with MDX-authored pages, good math/figure support, and selective interactive components. I would put it near the top of the list, but there are a few alternatives worth considering depending on how “research-log / publishing” versus “interactive web app” the site becomes.\n\n## Short recommendation\n\nUse **Astro + MDX** unless you already know you want a full React app or a documentation-first framework.\n\nSuggested stack:\n\n- **Astro** for static site generation\n- **MDX** for pages, research log entries, and project notes\n- **KaTeX or MathJax via remark/rehype plugins** for math\n- **Astro content collections** for structured metadata\n- **React/Svelte/Vue islands** only where interactivity is needed\n- **Shiki / Expressive Code** for code blocks\n- **figure/asset components** for captions, cross-references, and responsive images\n- Optional: **D3, Observable Plot, or Svelte components** for interactive research visualizations\n\nThis gives you a scholarly writing environment without turning the whole site into a JavaScript-heavy app.\n\n---\n\n## What you need from the site\n\nYour project has several overlapping needs:\n\n1. **Academic publishing**\n   - Bio page\n   - Landing page\n   - Research project pages\n   - Research log / session-based blog\n   - Equations, citations, figures, code snippets\n\n2. **Good authoring experience**\n   - MDX pages\n   - Reusable components for figures, callouts, annotations, agent transcripts, etc.\n   - Easy metadata for dates, tags, sessions, tools used\n\n3. **Mathematics rendering**\n   - Inline and display math\n   - Probably theorem-like blocks, definitions, derivations, etc.\n\n4. **Figures and media**\n   - Captions\n   - Responsive images\n   - Possibly diagrams, generated plots, screenshots, SVGs\n\n5. **Interactive elements**\n   - Agent interaction demos\n   - Collapsible transcripts\n   - Sliders, visualizations, code examples\n   - Maybe embedded notebooks or structured experiment logs\n\n6. **Long-term maintainability**\n   - Static output\n   - Easy hosting\n   - Durable content files\n   - Minimal backend complexity\n\nAstro fits these very well.\n\n---\n\n## Astro: why it is a good fit\n\n### Strengths\n\n#### 1. Excellent static-first model\n\nAstro is designed around shipping mostly static HTML and only hydrating interactive components when needed. This is ideal for an academic/research site where most pages are prose, math, figures, logs, and explanations, but some pages contain interactive widgets.\n\nYou can write:\n\n```mdx\n# Session 03: Agent Refactoring Failure Modes\n\nSome math:\n\n$$\nL(\\theta) = \\sum_i \\ell(f_\\theta(x_i), y_i)\n$$\n\n<AgentTranscript session=\"2026-06-05-refactor\" />\n\n<InteractivePlot data={...} />\n```\n\nThe prose stays static; only `AgentTranscript` or `InteractivePlot` needs client-side JavaScript.\n\n#### 2. MDX support is mature enough\n\nAstro supports MDX well. You can use content collections to define structured schemas for research log entries:\n\n```ts\nconst researchLog = defineCollection({\n  schema: z.object({\n    title: z.string(),\n    date: z.date(),\n    agents: z.array(z.string()).optional(),\n    tags: z.array(z.string()).optional(),\n    summary: z.string(),\n  }),\n});\n```\n\nThis is useful for a research log because every “session” can have consistent metadata.\n\n#### 3. Framework-agnostic interactivity\n\nAstro lets you use React, Svelte, Vue, Solid, or plain web components. This is one of its biggest advantages over Next.js or Docusaurus.\n\nFor example:\n\n- Use plain Astro components for layout.\n- Use React for existing ecosystem components.\n- Use Svelte for lightweight interactive visualizations.\n- Use D3 or Observable Plot for research figures.\n\nYou do not have to commit the whole site to one frontend framework.\n\n#### 4. Good for performance\n\nAstro’s “islands architecture” avoids shipping unnecessary JavaScript. For an academic site, this matters because many readers will be there to read, not run an app.\n\n#### 5. Easy deployment\n\nAstro can deploy cleanly to:\n\n- GitHub Pages\n- Netlify\n- Vercel\n- Cloudflare Pages\n- Any static host\n\nFor a pilot class or academic project, this is valuable.\n\n---\n\n## Potential weaknesses of Astro\n\nAstro is not perfect.\n\n### 1. Academic citation workflows need setup\n\nAstro does not give you scholarly citation handling out of the box. If you need BibTeX, CSL, bibliographies, footnotes, cross-references, theorem numbering, and equation numbering, you will need to assemble that pipeline yourself with remark/rehype plugins or custom components.\n\nThis is manageable, but not as turnkey as Quarto.\n\n### 2. Figure numbering and cross-references require design\n\nMarkdown/MDX alone does not give you robust LaTeX-like references:\n\n```mdx\nSee Figure 3.\n```\n\nYou may want custom components like:\n\n```mdx\n<Figure id=\"agent-loop-diagram\" src=\"/figures/loop.svg\" caption=\"Agent interaction loop.\" />\n```\n\nand maybe later:\n\n```mdx\n<FigRef id=\"agent-loop-diagram\" />\n```\n\nAstro can support this, but you need to create the convention.\n\n### 3. MDX can become messy\n\nMDX is powerful, but if every post becomes a mixture of prose, JSX components, data imports, and embedded logic, the content can become harder to maintain.\n\nYou will want a small design system of components early:\n\n- `Figure`\n- `MathBlock`\n- `AgentTranscript`\n- `SessionSummary`\n- `Callout`\n- `Aside`\n- `CodeComparison`\n- `PromptResponse`\n- `ExperimentCard`\n\n### 4. Not as documentation-native as Docusaurus\n\nIf the research project pages become documentation-heavy, with versioning, sidebars, generated navigation, and docs search, Docusaurus may feel more turnkey.\n\nAstro can do it, but Docusaurus gives you more docs machinery by default.\n\n---\n\n## Comparison with other options\n\n### Astro\n\nBest if you want:\n\n- A custom academic/research site\n- Static pages with selective interactivity\n- MDX-first writing\n- Flexible visual design\n- Framework-agnostic interactive components\n- Good performance\n\nLikely best overall choice for your described project.\n\n---\n\n### Quarto\n\nBest if you want:\n\n- Academic publishing first\n- Math, citations, figures, cross-references, bibliographies\n- Computational notebooks\n- PDF/HTML/Word output\n- Reproducible research documents\n\nQuarto is arguably better than Astro for scholarly apparatus. It has first-class support for:\n\n- LaTeX math\n- Citations\n- Cross-references\n- Figure numbering\n- Tables\n- Bibliographies\n- Computational notebooks\n- Academic publishing formats\n\nBut it is less natural if you want many custom interactive web components and a polished custom website.\n\nUse Quarto if the site is more like a digital research notebook or scholarly publication hub.\n\nUse Astro if the site is more like a custom public-facing research website with interactive web-native elements.\n\nA hybrid is possible: use Quarto to generate research artifacts and embed/link them from Astro.\n\n---\n\n### Next.js\n\nBest if you want:\n\n- A React application\n- Complex interactivity\n- Dynamic routes\n- Server-side rendering\n- API routes\n- Authentication\n- App-like behavior\n\nFor your case, Next.js may be more than you need. It is excellent, but if most pages are static MDX content, Astro is simpler and lighter.\n\nChoose Next.js only if the interactive portions become the dominant part of the project.\n\n---\n\n### Docusaurus\n\nBest if you want:\n\n- Documentation site\n- Sidebar navigation\n- Versioned docs\n- MDX support\n- Search\n- Blog + docs structure out of the box\n\nDocusaurus could work well if your research project pages are documentation-like. But it has a stronger “docs product” feel. For a personal academic project site with landing page, bio, research log, and custom visual pages, Astro will likely feel less constrained.\n\n---\n\n### Hugo\n\nBest if you want:\n\n- Very fast static builds\n- Simple content-focused site\n- Mature blogging system\n- Minimal JavaScript\n\nHugo is reliable, but its templating and component model are less pleasant if you want MDX-like authoring and modern interactive components. I would not choose it for a site with many interactive elements.\n\n---\n\n### Eleventy / 11ty\n\nBest if you want:\n\n- Simple static generation\n- Full control\n- Minimal framework\n- Markdown-centered site\n\n11ty is excellent, but you will assemble more yourself. It is less naturally suited than Astro for MDX plus framework components plus interactive islands.\n\n---\n\n### Jekyll\n\nBest if you want:\n\n- GitHub Pages-native simplicity\n- Traditional academic/personal website\n- Minimal setup\n\nBut for MDX, interactivity, and modern component workflows, Jekyll is not ideal.\n\n---\n\n## My ranking for your use case\n\nGiven your description:\n\n1. **Astro**\n2. **Quarto**\n3. **Docusaurus**\n4. **Next.js**\n5. **Eleventy**\n6. **Hugo**\n7. **Jekyll**\n\nIf “academic publishing features” become the central requirement, move **Quarto** to #1.\n\nIf “interactive app-like demos” become the central requirement, move **Next.js** to #1.\n\nBut for the balanced case — academic prose, MDX, static output, figures, math, and islands of interaction — **Astro is probably the best fit**.\n\n---\n\n## Suggested architecture if you choose Astro\n\n```text\nsrc/\n  content/\n    log/\n      2026-06-05-session-01.mdx\n      2026-06-12-session-02.mdx\n    projects/\n      ai-research-methods.mdx\n  components/\n    Figure.astro\n    FigRef.astro\n    MathAside.astro\n    AgentTranscript.astro\n    SessionMetadata.astro\n    InteractivePlot.tsx / .svelte\n  layouts/\n    BaseLayout.astro\n    ResearchLogLayout.astro\n    ProjectLayout.astro\n  pages/\n    index.astro\n    bio.mdx\n    log/\n      [slug].astro\n    projects/\n      [slug].astro\npublic/\n  figures/\n  transcripts/\n  data/\n```\n\nUse content collections for:\n\n- research log entries\n- project pages\n- possibly publications/resources\n\nEach research log entry might have frontmatter like:\n\n```yaml\ntitle: \"Session 04: Debugging with Coding Agents\"\ndate: 2026-06-05\nsummary: \"A session exploring how coding agents recover from failed assumptions.\"\ntags: [\"coding-agents\", \"debugging\", \"research-log\"]\nagents: [\"Claude\", \"Codex\", \"Pi\"]\nproject: \"ai-tools-in-research\"\n```\n\n---\n\n## Math rendering\n\nAstro can support math using the unified ecosystem:\n\n- `remark-math`\n- `rehype-katex` for fast static rendering\n- or MathJax if you need more dynamic rendering\n\nFor static academic pages, I would start with **KaTeX**.\n\n---\n\n## Figures\n\nI would not rely only on raw Markdown image syntax. Use a component:\n\n```mdx\n<Figure\n  src=\"/figures/agent-loop.svg\"\n  alt=\"Diagram of the coding agent interaction loop\"\n  caption=\"A simplified interaction loop between researcher, coding agent, and codebase.\"\n/>\n```\n\nThis gives you consistent captions, styling, responsive behavior, and eventually numbering/cross-reference support.\n\n---\n\n## Bottom line\n\nYes: **Astro is an appropriate and probably excellent choice** for this project.\n\nIts main advantage is that it lets you treat the site as a static academic publication while still adding rich interactive components where needed. The main caveat is that you will need to build or configure some scholarly infrastructure yourself: math, citations, figure handling, cross-references, and possibly bibliography support.\n\nIf you want maximal academic publishing support, consider Quarto. If you want maximal web interactivity, consider Next.js. But for your mixed use case, I would choose **Astro + MDX**.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-3",
+      "index": 2,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "55fd4b94",
+      "parentId": "bfbba388",
+      "content": [
+        {
+          "type": "text",
+          "text": "Good. Can you set up an Astro site in this directory to get me started? In terms of styling and layout, I would like something \"Tufte-inspired\", but not slavishly following the usual tufte-css formatting. I like a slightly wider text region than tufte-css, but I would like side notes and margin notes and figures. For colors, use X11 cornsilk for the background and #333333 grey for the foreground. For fonts, use the standard KaTeX math fonts along with STIX Two for the body font. The website should be fully responsive. (For side notes, margin notes and layout/spacing, take a look at [REDACTED_LOCAL_PATH], since that has this stuff all set up already. In particular, the text measure and right-hand rail dimensioning there is worth copying, along with the media queries for collapsing marginal material on smaller screens.)",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [
+        {
+          "kind": "path",
+          "replacement": "[REDACTED_LOCAL_PATH]",
+          "count": 1
+        }
+      ],
+      "truncated": false
+    },
+    {
+      "id": "entry-4",
+      "index": 3,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "420691ea",
+      "parentId": "142fcb95",
+      "content": [
+        {
+          "type": "text",
+          "text": "Sorry. Permissions problem. Try again: you should be able to read [REDACTED_LOCAL_PATH] now.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [
+        {
+          "kind": "path",
+          "replacement": "[REDACTED_LOCAL_PATH]",
+          "count": 1
+        }
+      ],
+      "truncated": false
+    },
+    {
+      "id": "entry-5",
+      "index": 4,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "f9d6b9ed",
+      "parentId": "fdef8b93",
+      "content": [
+        {
+          "type": "text",
+          "text": "Set up the Astro site in this directory.\n\nImplemented:\n\n- Astro + MDX + static output\n- KaTeX math rendering via `remark-math` + `rehype-katex`\n- STIX Two Text body font\n- `cornsilk` background and `#333333` foreground\n- Tufte-inspired responsive layout\n  - 85ch main text measure\n  - 18rem right-hand margin rail\n  - side/margin notes collapse below 1120px\n  - note collision-avoidance script copied/adapted from `[REDACTED_LOCAL_PATH]`\n- Components:\n  - `src/components/Sidenote.astro`\n  - `src/components/MarginNote.astro`\n  - `src/components/Figure.astro`\n- Pages:\n  - `src/pages/index.mdx`\n  - `src/pages/bio.mdx`\n  - `src/pages/log/index.astro`\n  - `src/pages/log/[...slug].astro`\n  - `src/pages/project/index.astro`\n  - `src/pages/project/[...slug].astro`\n- Content collections:\n  - `src/content/log/`\n  - `src/content/project/`\n- Starter entries:\n  - `src/content/log/001-first-session.mdx`\n  - `src/content/project/overview.mdx`\n- Placeholder figure:\n  - `public/figures/placeholder.svg`\n\nValidation:\n\n```sh\nnpm run build\n```\n\npasses with 0 errors, 0 warnings, 0 hints.\n\nRun locally with:\n\n```sh\nnpm run dev\n```",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [
+        {
+          "kind": "path",
+          "replacement": "[REDACTED_LOCAL_PATH]",
+          "count": 1
+        }
+      ],
+      "truncated": false
+    },
+    {
+      "id": "entry-6",
+      "index": 5,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "4a7c9f2f",
+      "parentId": "f9d6b9ed",
+      "content": [
+        {
+          "type": "text",
+          "text": "Please commit the changes.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-7",
+      "index": 6,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "c3bf7bbd",
+      "parentId": "2121345c",
+      "content": [
+        {
+          "type": "text",
+          "text": "Committed changes.\n\nCommit:\n\n```text\nfbb3e2b Initialize Astro research site\n```\n\nNote: `.pi/` remains untracked; I left it out of the commit.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-8",
+      "index": 7,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "6794d8d4",
+      "parentId": "c3bf7bbd",
+      "content": [
+        {
+          "type": "text",
+          "text": "Please add .pi/ to the .gitignore. We won't be committing any of that.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-9",
+      "index": 8,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "41b0961d",
+      "parentId": "ab1acbed",
+      "content": [
+        {
+          "type": "text",
+          "text": "Added `.pi/` to `.gitignore` and committed it.\n\nCommit:\n\n```text\n2b567b1 Ignore pi workspace metadata\n```\n\nThere is also an untracked `prompts/` directory; I left it untouched.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    }
+  ],
+  "highlights": [],
+  "redactionSummary": [
+    {
+      "kind": "path",
+      "replacement": "[REDACTED_LOCAL_PATH]",
+      "count": 3
+    }
+  ],
+  "redaction": {
+    "status": "processed",
+    "reviewNotes": [
+      "Automated public-safety pass completed. Review generated transcript before publishing.",
+      "One or more sensitive-looking values were replaced with explicit redaction markers."
+    ]
+  }
+}

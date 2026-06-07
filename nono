@@ -1,0 +1,3 @@
+#!/bin/bash
+nono run --profile pi --allow ~/research/ongoing/ai-class/website --allow-cwd -- pi $*
+

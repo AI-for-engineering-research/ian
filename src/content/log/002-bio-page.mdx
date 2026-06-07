@@ -1,0 +1,42 @@
+---
+title: "Making a bio page"
+date: 2026-06-05
+tags:
+  - agent-logs
+agents:
+  - Pi
+draft: false
+---
+
+[Transcript](/sessions/002-bio-page/)
+
+- This was a relatively simple session to make a strange-looking bio page
+  based on the idea of a stratigraphic column showing "layers" through life.
+  It worked pretty well, although I think I would spend more time on the
+  styling before using it for something more than a pilot.
+- I wrote some notes on what I wanted (based on a ChatGPT conversation) that
+  are in the `prompts` directory in the repo and then I used Matt Pocock's
+  [`grill-me`](https://github.com/mattpocock/skills/blob/main/skills/productivity/grill-me/SKILL.md)
+  skill to work out an implementation. **TODO: UPDATE THIS WITH LINKS**
+- One thing that this exercise highlighted is the cheesy "inspirational"
+  marketing language LLMs come out with if you leave them to their own
+  devices. I've not tried tuning ChatGPT or Claude with a "tone" prompt (apart
+  from a skill I have called `fight-me`, which is more or less what it sounds
+  like!). I've not used an agent for this sort of more personal output before,
+  and I really had to poke it a [couple](/sessions/002-bio-page/#entry-15) of
+  [times](/sessions/002-bio-page/#entry-19) to not sound like a Californian
+  startup CEO.
+- The first version that the model produced looked OK, but I got it to make
+  some changes to improve things. Batching up a list of problems like
+  [this](/sessions/002-bio-page/#entry-93) and
+  [this](/sessions/002-bio-page/#entry-95) is usually more effective than
+  asking for one change at a time.
+- One other thing this session highlights is that it's important to get the
+  agent to *write code to do the things you want*, **not** to just *ask it to
+  do the things you want*. It is much easier for the agent to correct code and
+  rerun it than for it to remember exactly what it did and do it again with a
+  small variation. You can think of code as an additional kind of external
+  memory for the agent. In this case, making the generation of the biography
+  page completely data-driven made it easy to split the rendering (which was
+  built by iterating with the agent) and filling in the actual biographical
+  data (which all goes into a TypeScript file).

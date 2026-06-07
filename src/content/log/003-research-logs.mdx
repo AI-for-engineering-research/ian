@@ -1,0 +1,36 @@
+---
+title: "Research log processing"
+date: 2026-06-06
+tags:
+  - agent-logs
+agents:
+  - Pi
+draft: false
+---
+
+[Transcript](/sessions/003-research-logs/)
+
+- This session was all about taking Pi session logs and turning them into
+  pages in the research log. I wanted transcripts, but I also wanted a
+  comments/highlights page for each session. I got the agent to write an
+  additional NPM `add-log` command to take a Pi JSONL transcript file and turn
+  it into redacted JSON data suitable for rendering a transcript page and an
+  MDX page with suggestions for the "interesting bits" of the session.
+- The "interesting bits" analysis was done with a small number of simple
+  heuristics plus a run of an agent over the transcript: a nice example of a
+  sort of recursive/programmatic use of an agent.
+- Again, I used the `grill-me` skill to do the analysis of what needed to be
+  built. This one was fairly typical: a lot of the questions from the agent
+  just needed agreement, because the model I was using (ChatGPT 5.5) does a
+  pretty good job with these kinds of things. There is really a lot of yes,
+  yes, agreed, yes, with just occasional additions of context the agent might
+  not know or suggestions to guide it. The models are really good at these
+  kinds of routine programming tasks now.
+- Again, once the first pass at the solution was done by the agent, I played
+  around with a little and requested some changes. The end result is pretty
+  good!
+- And again, there was a [permissions
+  problem](/sessions/003-research-logs/#entry-70) that I had to fix. I'm
+  trying to be honest with this project, and only use Pi with the Nono
+  sandbox, so there have been a few teething troubles, but I think it's mostly
+  good now.
