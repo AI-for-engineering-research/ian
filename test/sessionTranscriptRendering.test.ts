@@ -80,6 +80,7 @@ test('Astro build generates session transcript pages with stable anchors and tra
 
   const html = await readFile('dist/sessions/001-first-session/index.html', 'utf8');
   assert.match(html, /id="entry-1"/);
+  assert.match(html, /June 5, 2026 at 8:39 PM UTC/);
   assert.match(html, /class="session-entry session-entry--user"/);
   assert.match(html, /class="session-entry session-entry--assistant"/);
   assert.match(html, /class="session-entry session-entry--tool"/);

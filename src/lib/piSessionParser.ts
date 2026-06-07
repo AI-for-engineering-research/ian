@@ -38,6 +38,7 @@ export interface NormalizedSessionTranscript {
     kind: 'pi';
     sessionId?: string;
     importedAt: string;
+    sessionStartedAt?: string;
   };
   participants: Array<{ id: string; name: string; role: TranscriptRole }>;
   entries: NormalizedTranscriptEntry[];
@@ -51,6 +52,7 @@ export interface ParsePiJsonlOptions {
   summary?: string;
   sessionId?: string;
   importedAt?: string | Date;
+  sessionStartedAt?: string | Date;
 }
 
 interface ParsedRecord {
@@ -80,6 +82,7 @@ export function parsePiJsonlSession(jsonl: string, options: ParsePiJsonlOptions 
   }
 
   const importedAt = options.importedAt instanceof Date ? options.importedAt.toISOString() : options.importedAt;
+  const sessionStartedAt = options.sessionStartedAt instanceof Date ? options.sessionStartedAt.toISOString() : options.sessionStartedAt;
 
   return processTranscriptForPublicSafety({
     schemaVersion: 1,
@@ -89,6 +92,7 @@ export function parsePiJsonlSession(jsonl: string, options: ParsePiJsonlOptions 
       kind: 'pi',
       ...(options.sessionId ? { sessionId: options.sessionId } : inferSessionId(records)),
       importedAt: importedAt ?? new Date().toISOString(),
+      ...(sessionStartedAt ? { sessionStartedAt } : {}),
     },
     participants: inferParticipants(entries),
     entries,

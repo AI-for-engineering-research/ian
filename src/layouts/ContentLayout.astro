@@ -6,10 +6,12 @@ export interface Props {
   description?: string;
   eyebrow?: string;
   date?: Date;
+  dateFormat?: Intl.DateTimeFormatOptions;
+  showDescription?: boolean;
 }
 
-const { title, description, eyebrow, date } = Astro.props;
-const formattedDate = date?.toLocaleDateString('en', { year: 'numeric', month: 'long', day: 'numeric' });
+const { title, description, eyebrow, date, dateFormat, showDescription = true } = Astro.props;
+const formattedDate = date?.toLocaleString('en', dateFormat ?? { year: 'numeric', month: 'long', day: 'numeric' });
 ---
 
 <SiteLayout title={title} description={description}>
@@ -18,7 +20,7 @@ const formattedDate = date?.toLocaleDateString('en', { year: 'numeric', month: '
       {eyebrow && <p class="content-meta">{eyebrow}</p>}
       <h1>{title}</h1>
       {formattedDate && <p class="content-meta"><time datetime={date?.toISOString()}>{formattedDate}</time></p>}
-      {description && <p>{description}</p>}
+      {showDescription && description && <p>{description}</p>}
     </header>
     <slot />
   </article>

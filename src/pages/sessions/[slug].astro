@@ -9,8 +9,18 @@ export async function getStaticPaths() {
 }
 
 const { session } = Astro.props;
+const sessionStartedAt = session.data.source.sessionStartedAt ? new Date(session.data.source.sessionStartedAt) : undefined;
+const sessionDateFormat: Intl.DateTimeFormatOptions = {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+  hour: 'numeric',
+  minute: '2-digit',
+  timeZone: 'UTC',
+  timeZoneName: 'short',
+};
 ---
 
-<ContentLayout title={session.data.title} description={session.data.summary} eyebrow="Session transcript">
+<ContentLayout title={session.data.title} description={session.data.summary} eyebrow="Session transcript" date={sessionStartedAt} dateFormat={sessionDateFormat} showDescription={false}>
   <SessionTranscript transcript={session.data} />
 </ContentLayout>

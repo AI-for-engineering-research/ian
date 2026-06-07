@@ -142,6 +142,7 @@ const session = defineCollection({
           kind: z.literal('pi'),
           sessionId: z.string().min(1).optional(),
           importedAt: z.iso.datetime({ offset: true }),
+          sessionStartedAt: z.iso.datetime({ offset: true }).optional(),
         })
         .strict(),
       participants: z

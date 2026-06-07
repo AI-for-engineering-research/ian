@@ -269,6 +269,7 @@ th, td { border-bottom: var(--rule); padding: 0.35rem 0.55rem; text-align: left;
   padding: var(--space-3);
 }
 .session-redaction-banner { border-left: 4px solid var(--color-focus); }
+.session-transcript__entries > .session-entry:first-child { margin-top: 0; }
 .session-entry {
   max-width: var(--measure);
   margin: var(--space-5) 0;

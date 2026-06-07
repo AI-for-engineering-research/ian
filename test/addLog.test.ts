@@ -30,7 +30,7 @@ test('parses the npm add-log CLI options required by TASK-1.5', () => {
 test('imports a JSONL session into private work artifacts, public transcript JSON, and draft MDX after validation', async () => {
   const cwd = await mkdtemp(path.join(tmpdir(), 'add-log-'));
   try {
-    const inputPath = path.join(cwd, 'fixture.jsonl');
+    const inputPath = path.join(cwd, '2026-06-06T20-00-00-000Z_fixture.jsonl');
     await writeFile(inputPath, fixtureJsonl);
 
     const result = await addLog({
@@ -52,6 +52,7 @@ test('imports a JSONL session into private work artifacts, public transcript JSO
     const publicTranscript = JSON.parse(await readFile(result.sessionOutputPath, 'utf8'));
     assert.equal(publicTranscript.title, 'Add Log Fixture');
     assert.equal(publicTranscript.source.sessionId, 'fixture-session-001');
+    assert.equal(publicTranscript.source.sessionStartedAt, '2026-06-06T20:00:00.000Z');
     assert.deepEqual(publicTranscript.highlights, []);
 
     const mdx = await readFile(result.logOutputPath, 'utf8');

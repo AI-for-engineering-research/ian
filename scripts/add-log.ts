@@ -49,6 +49,15 @@ interface ParsedCliOptions extends Omit<AddLogOptions, 'jsonlPath'> {
 
 const DEFAULT_WORK_ROOT = '.research-log-work';
 const SLUG_PATTERN = /^[a-z0-9][a-z0-9-]*$/;
+const PI_SESSION_FILENAME_DATE_PATTERN = /^(\d{4})-(\d{2})-(\d{2})T(\d{2})-(\d{2})-(\d{2})-(\d{3})Z(?:_|\.jsonl$)/;
+
+export function inferPiSessionStartedAtFromPath(jsonlPath: string): string | undefined {
+  const match = path.basename(jsonlPath).match(PI_SESSION_FILENAME_DATE_PATTERN);
+  if (!match) return undefined;
+  const [, year, month, day, hour, minute, second, millisecond] = match;
+  const iso = `${year}-${month}-${day}T${hour}:${minute}:${second}.${millisecond}Z`;
+  return Number.isNaN(Date.parse(iso)) ? undefined : iso;
+}
 
 export async function addLog(options: AddLogOptions): Promise<AddLogResult> {
   const cwd = options.cwd ?? process.cwd();
@@ -73,6 +82,7 @@ export async function addLog(options: AddLogOptions): Promise<AddLogResult> {
   const transcript = parsePiJsonlSession(jsonl, {
     title,
     importedAt: options.importedAt ?? new Date().toISOString(),
+    sessionStartedAt: inferPiSessionStartedAtFromPath(jsonlInputPath),
   });
 
   const runner = options.noAnalysis ? undefined : options.piJsonRunner ?? piJsonRunnerFromEnvironment();
@@ -225,6 +235,7 @@ function validatePublicTranscript(transcript: NormalizedSessionTranscript): void
   if (!transcript.title.trim()) throw new Error('Generated transcript requires a title.');
   if (transcript.source.kind !== 'pi') throw new Error('Generated transcript source.kind must be pi.');
   if (Number.isNaN(Date.parse(transcript.source.importedAt))) throw new Error('Generated transcript importedAt must be a valid date.');
+  if (transcript.source.sessionStartedAt && Number.isNaN(Date.parse(transcript.source.sessionStartedAt))) throw new Error('Generated transcript sessionStartedAt must be a valid date.');
   if (transcript.participants.length === 0) throw new Error('Generated transcript requires participants.');
   if (transcript.entries.length === 0) throw new Error('Generated transcript requires entries.');
   const entryIds = new Set<string>();
