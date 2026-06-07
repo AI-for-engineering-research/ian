@@ -2,8 +2,17 @@
 import { getCollection } from 'astro:content';
 import ContentLayout from '../../layouts/ContentLayout.astro';
 
-const entries = (await getCollection('log', ({ data }) => !data.draft))
-  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+const numericPrefix = (id: string) => {
+  const match = id.match(/^(\d+)/);
+  return match ? Number.parseInt(match[1], 10) : Number.NEGATIVE_INFINITY;
+};
+
+const entries = (await getCollection('log', ({ data }) => !data.draft)).sort((a, b) => {
+  const dateComparison = b.data.date.valueOf() - a.data.date.valueOf();
+  if (dateComparison !== 0) return dateComparison;
+
+  return numericPrefix(b.id) - numericPrefix(a.id);
+});
 ---
 
 <ContentLayout title="Research log" description="Session-by-session notes about interactions with coding agents and AI research tools.">
