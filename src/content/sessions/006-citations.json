@@ -1,0 +1,2082 @@
+{
+  "schemaVersion": 1,
+  "title": "Citation processing",
+  "source": {
+    "kind": "pi",
+    "importedAt": "2026-06-07T15:06:12.900Z",
+    "sessionStartedAt": "2026-06-07T13:57:00.846Z"
+  },
+  "participants": [
+    {
+      "id": "user",
+      "name": "User",
+      "role": "user"
+    },
+    {
+      "id": "assistant",
+      "name": "Pi",
+      "role": "assistant"
+    }
+  ],
+  "entries": [
+    {
+      "id": "entry-1",
+      "index": 0,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "4b713427",
+      "parentId": "7ed4d04d",
+      "content": [
+        {
+          "type": "text",
+          "text": "<skill name=\"grill-me\" location=\"[REDACTED_LOCAL_PATH]\">\nReferences are relative to [REDACTED_LOCAL_PATH]\n\nInterview me relentlessly about every aspect of this plan until we reach a shared understanding. Walk down each branch of the design tree, resolving dependencies between decisions one-by-one. For each question, provide your recommended answer.\n\nAsk the questions one at a time.\n\nIf a question can be answered by exploring the codebase, explore the codebase instead.\n</skill>\n\nI would like you to build some simple citation tools for me. I am going to collect references in a BibTeX file (src/data/references.bib) and I would like to be able to use MDX tags like <Cite ref=\"berton-2023\"/> and <Citep ref=\"kaercher-corcos-2025\"/>. The citations should be processed using BibTeX and whatever LaTeX to Markdown translator you like (pandoc is installed) and should then be included as sidenotes in the page where they appear. There is no need for a central references page.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [
+        {
+          "kind": "path",
+          "replacement": "[REDACTED_LOCAL_PATH]",
+          "count": 2
+        }
+      ],
+      "truncated": false
+    },
+    {
+      "id": "entry-2",
+      "index": 1,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "1cbbf074",
+      "parentId": "52a0ba80",
+      "content": [
+        {
+          "type": "text",
+          "text": "I inspected the codebase first. Relevant facts:\n\n- Astro + MDX site.\n- Global MDX components are injected in `astro.config.mjs`.\n- Existing `Sidenote.astro` already gives numbered margin/sidenote behavior.\n- `src/data/references.bib` already exists with keys like `berton-2023` and `kaercher-corcos-2025`.\n- No citation pipeline exists yet.\n\nFirst decision:\n\n**What should `<Cite>` and `<Citep>` render in the main prose?**\n\nOptions:\n\n1. **LaTeX-like author/year**\n   - `<Cite ref=\"berton-2023\" />` → `Berton (2023)` plus sidenote\n   - `<Citep ref=\"berton-2023\" />` → `(Berton, 2023)` plus sidenote\n\n2. **Numbered-marker only**\n   - `<Cite ref=\"berton-2023\" />` → just a sidenote marker\n   - sidenote contains full citation\n\n3. **Full inline citation**\n   - `<Cite ref=\"berton-2023\" />` → `Berton, Roland P. H. “Two-Dimensional…” …`\n   - probably too noisy for prose\n\n**My recommended answer:** option 1.\n\nUse:\n- `<Cite>` for narrative citations: `Berton (2023)`\n- `<Citep>` for parenthetical citations: `(Berton, 2023)`\n- both attach a numbered sidenote containing the full formatted reference.\n\nDo you agree with this author-year behavior?",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-3",
+      "index": 2,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "ee6f6e21",
+      "parentId": "1cbbf074",
+      "content": [
+        {
+          "type": "text",
+          "text": "Yes.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-4",
+      "index": 3,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "2f4a9062",
+      "parentId": "ee6f6e21",
+      "content": [
+        {
+          "type": "text",
+          "text": "Next question:\n\n**Should repeated citations to the same reference on the same page create repeated sidenotes, or should only the first citation create the full sidenote?**\n\nOptions:\n\n1. **Every citation gets its own sidenote**\n   - Simple and local.\n   - If the same article is cited three times, the full reference appears three times in the margin.\n\n2. **Only first citation gets full sidenote; later citations are inline only**\n   - Cleaner margins.\n   - But implementation needs per-page citation state.\n\n3. **Every citation gets a sidenote, but repeated ones use a short form**\n   - First: full reference.\n   - Later: `Berton, “Two-Dimensional Dynamics…”.`\n   - More scholarly, but more complexity.\n\n**My recommended answer:** option 2 for v1.\n\nFirst use of a reference on a page:\n```mdx\n<Cite ref=\"berton-2023\" />\n```\nrenders:\n```text\nBerton (2023)[sidenote marker]\n```\nwith the full citation in the sidenote.\n\nLater use on the same page renders only:\n```text\nBerton (2023)\n```\n\nThis keeps pages readable and avoids repeated full citations.\n\nDo you agree?",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-5",
+      "index": 4,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "01081236",
+      "parentId": "2f4a9062",
+      "content": [
+        {
+          "type": "text",
+          "text": "Yes.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-6",
+      "index": 5,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "772d6108",
+      "parentId": "01081236",
+      "content": [
+        {
+          "type": "text",
+          "text": "Next question:\n\n**Should citation components support multiple references in one tag?**\n\nExample:\n```mdx\n<Citep ref=\"berton-2023; kaercher-corcos-2025\" />\n```\n\nor:\n```mdx\n<Citep refs={[\"berton-2023\", \"kaercher-corcos-2025\"]} />\n```\n\nOptions:\n\n1. **Single reference only in v1**\n   - Simpler API and implementation.\n   - Multiple citations require writing two tags.\n\n2. **Support multiple references via a semicolon-separated `ref` string**\n   - Natural for Markdown-ish authoring:\n     ```mdx\n     <Citep ref=\"berton-2023; kaercher-corcos-2025\" />\n     ```\n   - Renders something like `(Berton, 2023; Kärcher and Corcos, 2025)`.\n   - First unseen reference(s) each get sidenotes.\n\n3. **Support both `ref` and `refs`**\n   - Flexible, but more API surface than probably needed.\n\n**My recommended answer:** option 2.\n\nUse semicolon-separated `ref` values for multiple parenthetical citations. Keep the component API lightweight:\n\n```mdx\n<Cite ref=\"berton-2023\" />\n<Citep ref=\"berton-2023; kaercher-corcos-2025\" />\n```\n\nDo you agree?",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-7",
+      "index": 6,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "e6b6f090",
+      "parentId": "772d6108",
+      "content": [
+        {
+          "type": "text",
+          "text": "Yes.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-8",
+      "index": 7,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "31dc743f",
+      "parentId": "e6b6f090",
+      "content": [
+        {
+          "type": "text",
+          "text": "Next question:\n\n**What citation style should the BibTeX → Markdown/full-reference formatter use?**\n\nOptions:\n\n1. **Chicago author-date**\n   - Good for scholarly prose.\n   - Full sidenote: `Berton, Roland P. H. 2023. “Two-Dimensional Dynamics of Ice Crystal Parcels in a Cirrus Uncinus.” Tellus B: Chemical and Physical Meteorology. https://doi.org/...`\n\n2. **APA-ish**\n   - Common, compact.\n   - Full sidenote: `Berton, R. P. H. (2023). Two-Dimensional dynamics... Tellus B...`\n\n3. **CSL-configurable**\n   - Use Pandoc with a CSL file and allow future swapping.\n   - More flexible, but one more file/config convention.\n\n**My recommended answer:** option 3, with **Chicago author-date as the default CSL style**.\n\nImplementation direction:\n- Use Pandoc’s citation processor against `src/data/references.bib`.\n- Add a project-local CSL file/config only if needed; otherwise use Pandoc’s built-in/default behavior or a bundled style.\n- Generate both:\n  - short author-year labels for inline text\n  - full bibliography entries for sidenotes\n\nDo you agree with Chicago author-date as the default style, implemented in a way that can be swapped later?",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-9",
+      "index": 8,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "d3ad39be",
+      "parentId": "31dc743f",
+      "content": [
+        {
+          "type": "text",
+          "text": "Yes, that sounds good.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-10",
+      "index": 9,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "c805f397",
+      "parentId": "54e48bfd",
+      "content": [
+        {
+          "type": "text",
+          "text": "Next question:\n\n**Where should citation processing happen: during Astro build via a generated data file, or inside each citation component at render time?**\n\nOptions:\n\n1. **Prebuild/generate citation data**\n   - Script reads `src/data/references.bib`.\n   - Calls Pandoc once.\n   - Writes something like `src/data/auto/citations.json`.\n   - Components import that JSON.\n   - Fast, deterministic components; easier tests.\n\n2. **Component render-time processing**\n   - `<Cite>` component directly invokes parsing/Pandoc during Astro render.\n   - Fewer generated files, but slower and messier.\n   - Harder to maintain per-page citation state.\n\n3. **Remark plugin transforms MDX citations before Astro**\n   - Elegant long-term.\n   - But more complex because your desired syntax is MDX components, not markdown cite syntax.\n\n**My recommended answer:** option 1.\n\nAdd a script, probably:\n```sh\nnpm run citations\n```\n\nand make build run it first:\n```json\n\"build\": \"npm run citations && astro check && astro build\"\n```\n\nGenerated data:\n```txt\nsrc/data/auto/citations.json\n```\n\nSource of truth remains:\n```txt\nsrc/data/references.bib\n```\n\nDo you agree with a prebuild generated citation data file?",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-11",
+      "index": 10,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "88a1cb85",
+      "parentId": "c805f397",
+      "content": [
+        {
+          "type": "text",
+          "text": "Option 1 is right.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-12",
+      "index": 11,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "0108c418",
+      "parentId": "88a1cb85",
+      "content": [
+        {
+          "type": "text",
+          "text": "Next question:\n\n**Should missing/invalid citation keys fail the build, or render a visible placeholder?**\n\nExample:\n```mdx\n<Cite ref=\"missing-key\" />\n```\n\nOptions:\n\n1. **Fail the build**\n   - Best for publication correctness.\n   - A typo in a citation key is caught immediately.\n   - Slightly stricter while drafting.\n\n2. **Render visible placeholder**\n   - Example: `[missing citation: missing-key]`\n   - Easier during rough drafting.\n   - But broken citations can accidentally ship.\n\n3. **Different behavior by environment**\n   - Dev: render placeholder.\n   - Build: fail.\n   - More nuanced, slightly more implementation.\n\n**My recommended answer:** option 1 for this site.\n\nBecause this is static publishing and citations are scholarly metadata, citation mistakes should be build errors. Drafts can still be rough, but if the page is part of the site build, bad refs should stop it.\n\nDo you agree that missing citation keys should fail `npm run build`?",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-13",
+      "index": 12,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "acf8156c",
+      "parentId": "0108c418",
+      "content": [
+        {
+          "type": "text",
+          "text": "Fail the build.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-14",
+      "index": 13,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "4b7b7a94",
+      "parentId": "acf8156c",
+      "content": [
+        {
+          "type": "text",
+          "text": "Next question:\n\n**Should citation sidenotes be open/visible by default on narrow/mobile screens?**\n\nExisting `Sidenote.astro` collapses sidenotes behind a clickable marker below the desktop breakpoint unless `open={true}` is passed.\n\nOptions:\n\n1. **Closed by default on mobile**\n   - Matches existing `Sidenote` behavior.\n   - Keeps mobile prose compact.\n\n2. **Open by default on mobile**\n   - Readers see references without tapping.\n   - Can clutter pages with citations.\n\n3. **Configurable prop**\n   - e.g. `<Citep ref=\"...\" open />`\n   - But default still needs choosing.\n\n**My recommended answer:** option 1, closed by default.\n\nUse the existing `Sidenote` default behavior. Citation markers already indicate extra information, and full references are secondary while reading.\n\nDo you agree?",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-15",
+      "index": 14,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "ea04620d",
+      "parentId": "4b7b7a94",
+      "content": [
+        {
+          "type": "text",
+          "text": "Yes, option 1.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-16",
+      "index": 15,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "22b1082b",
+      "parentId": "ea04620d",
+      "content": [
+        {
+          "type": "text",
+          "text": "Next question:\n\n**How much override/customization should `<Cite>` and `<Citep>` support in v1?**\n\nPossible props:\n```mdx\n<Cite ref=\"berton-2023\" />\n<Cite ref=\"berton-2023\" page=\"14\" />\n<Cite ref=\"berton-2023\" prefix=\"see\" />\n<Citep ref=\"berton-2023\" suffix=\"chapter 2\" />\n<Citep ref=\"berton-2023\" suppressAuthor />\n```\n\nOptions:\n\n1. **Minimal v1: only `ref`**\n   - Simple.\n   - Covers your examples.\n   - Add locators/pages later.\n\n2. **Add page/locator support now**\n   - Useful for books/chapters:\n     ```mdx\n     <Citep ref=\"smith-2020\" page=\"42\" />\n     ```\n     → `(Smith, 2020, 42)`\n   - Sidenote can include full reference plus page.\n\n3. **Full pandoc-like citation modifiers**\n   - Prefix, suffix, suppress author, locator labels.\n   - Too much for v1.\n\n**My recommended answer:** option 2.\n\nSupport:\n```mdx\n<Cite ref=\"berton-2023\" />\n<Citep ref=\"berton-2023\" />\n<Citep ref=\"berton-2023\" page=\"42\" />\n<Citep ref=\"berton-2023\" locator=\"pp. 42–43\" />\n```\n\nBut skip prefix/suffix/suppress-author for now.\n\nDo you agree with adding simple page/locator support in v1?",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-17",
+      "index": 16,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "9dbf9249",
+      "parentId": "22b1082b",
+      "content": [
+        {
+          "type": "text",
+          "text": "Yes.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-18",
+      "index": 17,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "6f88c5e3",
+      "parentId": "9dbf9249",
+      "content": [
+        {
+          "type": "text",
+          "text": "Next question:\n\n**How should locators work for multiple references?**\n\nExample:\n```mdx\n<Citep ref=\"berton-2023; kaercher-corcos-2025\" page=\"42\" />\n```\n\nThat is ambiguous: does page 42 apply to both references, only the first, or is it invalid?\n\nOptions:\n\n1. **Allow `page`/`locator` only with a single reference**\n   - Clear and simple.\n   - Multiple references with pages require separate tags:\n     ```mdx\n     <Citep ref=\"berton-2023\" page=\"42\" />; <Citep ref=\"kaercher-corcos-2025\" page=\"7\" />\n     ```\n\n2. **Apply the same locator to all references**\n   - Rarely what you want.\n\n3. **Support structured locator syntax**\n   - e.g. `refs={[{ ref: \"a\", page: \"42\" }, { ref: \"b\", page: \"7\" }]}`\n   - More complexity than v1 deserves.\n\n**My recommended answer:** option 1.\n\nIf `ref` contains multiple keys, `page` or `locator` should be rejected with a build error. That keeps the API honest.\n\nDo you agree?",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-19",
+      "index": 18,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "32c58b4a",
+      "parentId": "6f88c5e3",
+      "content": [
+        {
+          "type": "text",
+          "text": "Yes, 1.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-20",
+      "index": 19,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "705ba4c0",
+      "parentId": "32c58b4a",
+      "content": [
+        {
+          "type": "text",
+          "text": "Next question:\n\n**Should the generated full sidenote citation include DOI/URL links when available?**\n\nOptions:\n\n1. **Yes, link DOI/URL**\n   - Full sidenote includes a clickable DOI or URL.\n   - Useful for readers.\n   - Slightly more visual clutter.\n\n2. **No, text-only citation**\n   - Cleaner.\n   - Less useful.\n\n3. **Only DOI, not URL**\n   - Avoids long publisher URLs when DOI exists.\n   - Best balance.\n\n**My recommended answer:** option 3.\n\nIf a DOI exists, render a DOI link:\n```html\n<a href=\"https://doi.org/10....\">doi:10....</a>\n```\n\nIf no DOI exists but URL exists, render the URL link.\n\nDo you agree?",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-21",
+      "index": 20,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "012ffd2e",
+      "parentId": "705ba4c0",
+      "content": [
+        {
+          "type": "text",
+          "text": "Yes.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-22",
+      "index": 21,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "94d22e6f",
+      "parentId": "012ffd2e",
+      "content": [
+        {
+          "type": "text",
+          "text": "Next question:\n\n**Should the sidenote citation preserve abstracts/keywords/notes from BibTeX, or only render bibliographic fields?**\n\nYour current `references.bib` entries include large `abstract`, `keyword(s)`, `eprint`, and `note` fields.\n\nOptions:\n\n1. **Bibliographic fields only**\n   - Author, year, title, journal/publisher, volume/issue/pages, DOI/URL.\n   - Ignore abstract, keywords, eprint, note unless citation style includes them.\n\n2. **Include abstract in sidenote**\n   - Richer, but sidenotes become enormous and distract from prose.\n\n3. **Configurable per citation**\n   - e.g. `<Citep ref=\"...\" abstract />`\n   - Too much for v1.\n\n**My recommended answer:** option 1.\n\nCitation sidenotes should be compact references, not mini literature-review cards. Ignore abstracts/keywords/notes unless Pandoc/CSL naturally includes some note field.\n\nDo you agree?",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-23",
+      "index": 22,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "c4a8d3a8",
+      "parentId": "94d22e6f",
+      "content": [
+        {
+          "type": "text",
+          "text": "Bibliographic fields only. The BibTeX file will contain all sorts of things, because the entries are pasted direct from the journal websites, but the sidenotes should just be short bibliographic entries. There will almost always be a DOI link there anyway.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-24",
+      "index": 23,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "e4f846e3",
+      "parentId": "c69dcba3",
+      "content": [
+        {
+          "type": "text",
+          "text": "Important codebase/pandoc finding: with the current `references.bib`, Pandoc already produces sensible Chicago-author-date output, but the second entry has:\n\n```bibtex\ndoi = {https://doi.org/10.1029/2025JD044488}\n```\n\nPandoc renders that as:\n\n```text\nhttps://doi.org/https://doi.org/10.1029/2025JD044488\n```\n\nbecause BibTeX DOI fields are expected to contain the DOI value, not the full URL.\n\nNext question:\n\n**Should the citation generator normalize messy DOI fields from pasted journal BibTeX?**\n\nOptions:\n\n1. **Yes, normalize DOI fields**\n   - If DOI is `https://doi.org/10.xxxx`, store/render it as `10.xxxx`.\n   - If DOI is `doi:10.xxxx`, store/render it as `10.xxxx`.\n   - Output link becomes `https://doi.org/10.xxxx`.\n   - More robust for pasted publisher entries.\n\n2. **No, require clean BibTeX**\n   - Simpler.\n   - But pasted journal BibTeX will often be messy.\n\n3. **Warn but don’t normalize**\n   - Helps notice problems, but still makes output ugly unless manually fixed.\n\n**My recommended answer:** option 1.\n\nThe generator should sanitize DOI fields before calling Pandoc or before writing generated citation data, so pasted publisher BibTeX works without manual cleanup.\n\nDo you agree?",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-25",
+      "index": 24,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "1ce3eaf8",
+      "parentId": "e4f846e3",
+      "content": [
+        {
+          "type": "text",
+          "text": "Yes.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-26",
+      "index": 25,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "c55af27b",
+      "parentId": "1ce3eaf8",
+      "content": [
+        {
+          "type": "text",
+          "text": "Next question:\n\n**Should citation inline text follow Pandoc’s exact Chicago output, including “Berton 2023” without a comma, or should `<Citep>` use the more common prose form with a comma: `(Berton, 2023)`?**\n\nPandoc Chicago author-date currently outputs:\n```text\n(Berton 2023; Kärcher and Corcos 2025)\n```\n\nYour original example expectation sounded more like:\n```text\n(Berton, 2023)\n```\n\nOptions:\n\n1. **Use Pandoc/Chicago exactly**\n   - `<Citep ref=\"berton-2023\" />` → `(Berton 2023)`\n   - Most style-consistent with the full bibliography.\n\n2. **Use comma form**\n   - `<Citep ref=\"berton-2023\" />` → `(Berton, 2023)`\n   - More visually familiar to many readers.\n   - Slight divergence from strict Chicago author-date.\n\n3. **Make it style-configurable**\n   - Too much for v1.\n\n**My recommended answer:** option 1.\n\nSince we’re choosing Chicago author-date, let Pandoc/CSL define the exact punctuation. That avoids inventing a partial citation formatter ourselves.\n\nDo you agree that parenthetical citations should render as `(Author Year)`, not `(Author, Year)`?",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-27",
+      "index": 26,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "cf30d90e",
+      "parentId": "c55af27b",
+      "content": [
+        {
+          "type": "text",
+          "text": "Yes, option 1.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-28",
+      "index": 27,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "9c4836ad",
+      "parentId": "cf30d90e",
+      "content": [
+        {
+          "type": "text",
+          "text": "Next question:\n\n**Should the citation sidenote attach to every unseen reference in a multi-citation, or should one sidenote contain all newly cited references?**\n\nExample first citation:\n```mdx\n<Citep ref=\"berton-2023; kaercher-corcos-2025\" />\n```\n\nOptions:\n\n1. **One combined sidenote**\n   - Inline: `(Berton 2023; Kärcher and Corcos 2025)[1]`\n   - Sidenote contains both full references, likely as a short list.\n   - Cleanest for multi-citations.\n\n2. **Separate sidenote markers for each reference**\n   - Inline: `(Berton 2023[1]; Kärcher and Corcos 2025[2])`\n   - More precise, but ugly.\n\n3. **Only first unseen reference gets sidenote**\n   - Bad; hides references.\n\n**My recommended answer:** option 1.\n\nA multi-citation should produce one combined sidenote containing all references in that tag that have not already appeared on the page.\n\nIf one ref has already appeared and one is new:\n```mdx\n<Citep ref=\"berton-2023; kaercher-corcos-2025\" />\n```\nthen the sidenote contains only `kaercher-corcos-2025`, while the inline citation still shows both.\n\nDo you agree?",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-29",
+      "index": 28,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "b692eb32",
+      "parentId": "9c4836ad",
+      "content": [
+        {
+          "type": "text",
+          "text": "Yes.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-30",
+      "index": 29,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "52c35cc2",
+      "parentId": "b692eb32",
+      "content": [
+        {
+          "type": "text",
+          "text": "Next question:\n\n**How should “already cited on this page” state be tracked/reset?**\n\nThe existing `Sidenote.astro` uses a `globalThis` counter keyed by `Astro.url.pathname`. Citation components could do the same.\n\nOptions:\n\n1. **Use `globalThis`, keyed by page pathname**\n   - Matches current sidenote implementation.\n   - Simple inside Astro components.\n   - Fine for static build.\n\n2. **Require each page/layout to wrap content in a `CitationContext` component**\n   - More explicit.\n   - More boilerplate and not natural in Astro-only components.\n\n3. **Remark plugin prepass per MDX file**\n   - Robust but bigger architecture.\n\n**My recommended answer:** option 1 for v1.\n\nUse a global set keyed by:\n```ts\n__aiResearchCitations:${Astro.url.pathname}\n```\n\nThat means first citation per static route gets sidenote; repeated ones don’t.\n\nDo you agree?",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-31",
+      "index": 30,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "eaf5e74f",
+      "parentId": "52c35cc2",
+      "content": [
+        {
+          "type": "text",
+          "text": "Yes.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-32",
+      "index": 31,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "3ca3f7f4",
+      "parentId": "eaf5e74f",
+      "content": [
+        {
+          "type": "text",
+          "text": "Next question:\n\n**Should generated full citation entries be stored as Markdown strings or HTML strings?**\n\nOptions:\n\n1. **Markdown strings**\n   - Example generated data:\n     ```json\n     {\n       \"berton-2023\": {\n         \"fullMarkdown\": \"Berton, Roland P. H. 2023. ...\"\n       }\n     }\n     ```\n   - But Astro components would then need to render Markdown inside a component slot, which is awkward without adding another renderer.\n\n2. **HTML strings**\n   - Example:\n     ```json\n     {\n       \"berton-2023\": {\n         \"fullHtml\": \"Berton, Roland P. H. 2023. “... ” <em>Tellus B</em>. <a href=\\\"...\\\">...</a>.\"\n       }\n     }\n     ```\n   - Easy for `Cite`/`Citep` to inject inside `<Sidenote set:html={...}>`.\n   - Need generator to sanitize/trust Pandoc output.\n\n3. **Structured citation objects**\n   - Store author/title/year/journal/doi fields and format ourselves.\n   - More control, but then we are not really using Pandoc/CSL for formatting.\n\n**My recommended answer:** option 2.\n\nUse Pandoc to produce sanitized HTML snippets for full references. Since the input is your own BibTeX file and build-time generated, this is acceptable and makes the Astro components simple.\n\nDo you agree that generated citation entries should store full citation HTML?",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-33",
+      "index": 32,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "f6781555",
+      "parentId": "3ca3f7f4",
+      "content": [
+        {
+          "type": "text",
+          "text": "Yes.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-34",
+      "index": 33,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "181ead25",
+      "parentId": "f6781555",
+      "content": [
+        {
+          "type": "text",
+          "text": "Next question:\n\n**Should `src/data/auto/citations.json` be committed to git, or treated as generated/untracked build output?**\n\nOptions:\n\n1. **Commit it**\n   - Site can build without rerunning citation generation in some contexts.\n   - Diff shows citation output changes when `references.bib` changes.\n   - But generated files add noise.\n\n2. **Do not commit it**\n   - Cleaner source tree.\n   - Build always regenerates it.\n   - But imports from `src/data/auto/citations.json` require the file to exist before `astro check`, so local/editor workflows may break unless generation is always run first.\n\n3. **Commit a generated file but make regeneration automatic**\n   - Source of truth is still `references.bib`.\n   - `npm run citations` updates `citations.json`.\n   - `npm run build` regenerates before checking/building.\n   - Best balance for static sites.\n\n**My recommended answer:** option 3.\n\nCommit `src/data/auto/citations.json`, but treat it as generated. That keeps Astro/TypeScript imports stable while preserving `references.bib` as the real source.\n\nDo you agree?",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-35",
+      "index": 34,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "f01b0189",
+      "parentId": "181ead25",
+      "content": [
+        {
+          "type": "text",
+          "text": "I'm wondering about building the site in CI. If we commit that JSON file, would I be right in thinking that we would not need to run BibTeX and Pandoc in CI, since the JSON already has the HTML renders for the required citations?",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-36",
+      "index": 35,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "1cc2dbe2",
+      "parentId": "f01b0189",
+      "content": [
+        {
+          "type": "text",
+          "text": "Yes, mostly right.\n\nIf `src/data/auto/citations.json` is committed and the components only import that JSON, then CI **does not need BibTeX/Pandoc to render the site**. Astro can build from the already-generated citation HTML.\n\nBut there’s a tradeoff:\n\n- If CI does **not** run the citation generator, it cannot detect that `references.bib` and `citations.json` are out of sync.\n- You could accidentally update `references.bib`, forget to regenerate `citations.json`, and CI would still pass while the site uses stale citation output.\n\nSo the next decision is:\n\n**Should CI require Pandoc in order to verify citation data freshness, or should citation regeneration be a local/manual responsibility?**\n\nOptions:\n\n1. **CI does not run Pandoc**\n   - Commit `citations.json`.\n   - Build works without Pandoc.\n   - Fast and portable.\n   - Risk: stale generated citation data.\n\n2. **CI runs citation generation and fails if `citations.json` changes**\n   - Requires Pandoc in CI.\n   - Guarantees generated citation data is fresh.\n   - More robust scholarly publishing workflow.\n\n3. **Two-tier workflow**\n   - Normal CI build uses committed `citations.json` and does not require Pandoc.\n   - Optional/manual/periodic check runs Pandoc freshness verification.\n   - Balanced, but slightly more workflow complexity.\n\n**My recommended answer:** option 1 for now, with a separate local command like:\n\n```sh\nnpm run citations\n```\n\nand maybe later add:\n\n```sh\nnpm run citations:check\n```\n\nif stale data becomes a problem.\n\nFor your site, avoiding a CI Pandoc dependency is probably worth it.\n\nDo you agree that CI should be able to build without Pandoc, using committed generated citation JSON?",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-37",
+      "index": 36,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "965971de",
+      "parentId": "1cc2dbe2",
+      "content": [
+        {
+          "type": "text",
+          "text": "Yes, let's do option 1.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-38",
+      "index": 37,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "37f4f578",
+      "parentId": "965971de",
+      "content": [
+        {
+          "type": "text",
+          "text": "Next question:\n\n**Given CI should build without Pandoc, should `npm run build` regenerate citations automatically, or should citation generation be a separate manual command?**\n\nOptions:\n\n1. **`npm run build` does not run citation generation**\n   - Build only uses committed `src/data/auto/citations.json`.\n   - CI does not need Pandoc.\n   - You manually run `npm run citations` after editing `references.bib`.\n\n2. **`npm run build` runs citation generation**\n   - Safer locally.\n   - But CI needs Pandoc unless you add environment conditionals.\n\n3. **`npm run build` optionally skips generation in CI**\n   - More magic:\n     ```sh\n     if [ \"$CI\" != \"true\" ]; then npm run citations; fi\n     ```\n   - Can surprise you because local and CI builds differ.\n\n**My recommended answer:** option 1.\n\nKeep:\n```json\n\"build\": \"astro check && astro build\"\n```\n\nAdd:\n```json\n\"citations\": \"node scripts/generate-citations.ts\"\n```\n\nWorkflow:\n```sh\nnpm run citations\nnpm run build\n```\n\nDo you agree that citation generation should be manual/separate, not part of `npm run build`?",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-39",
+      "index": 38,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "7a801b2b",
+      "parentId": "37f4f578",
+      "content": [
+        {
+          "type": "text",
+          "text": "Yes, 1.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-40",
+      "index": 39,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "97749680",
+      "parentId": "7a801b2b",
+      "content": [
+        {
+          "type": "text",
+          "text": "Next question:\n\n**What should happen when `src/data/auto/citations.json` is missing?**\n\nThis matters because if the generated file is committed, normal checkouts are fine — but first implementation and accidental deletion need handling.\n\nOptions:\n\n1. **Build fails with a clear error**\n   - Components import JSON.\n   - If missing, Astro/TypeScript fails.\n   - Add README/docs saying run `npm run citations`.\n\n2. **Fallback to an empty citation map**\n   - Build proceeds until a citation is used, then fails.\n   - Harder to reason about.\n\n3. **Auto-generate only if Pandoc exists**\n   - Reintroduces build-time Pandoc complexity.\n\n**My recommended answer:** option 1.\n\nKeep failure simple and clear:\n- `citations.json` is a committed generated artifact.\n- If missing, run `npm run citations`.\n- CI should never miss it unless someone deletes it.\n\nDo you agree?",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-41",
+      "index": 40,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "86149de6",
+      "parentId": "97749680",
+      "content": [
+        {
+          "type": "text",
+          "text": "Yes.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-42",
+      "index": 41,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "c85c1516",
+      "parentId": "86149de6",
+      "content": [
+        {
+          "type": "text",
+          "text": "Next question:\n\n**Should `Cite` and `Citep` be added to the global MDX components registry?**\n\nCurrently `astro.config.mjs` injects global imports for:\n- `Figure`\n- `MarginNote`\n- `MediaGrid`\n- `Sidenote`\n- `Wikipedia`\n\nOptions:\n\n1. **Yes, global**\n   - You can write `<Cite ref=\"...\" />` anywhere in MDX without imports.\n   - Matches your desired ergonomics.\n\n2. **No, explicit imports**\n   - More obvious dependencies per page.\n   - Annoying for citations.\n\n**My recommended answer:** option 1.\n\nAdd:\n- `Cite`\n- `Citep`\n\nto `globalMdxComponents` in `astro.config.mjs`.\n\nDo you agree?",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-43",
+      "index": 42,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "fda93b81",
+      "parentId": "c85c1516",
+      "content": [
+        {
+          "type": "text",
+          "text": "Yes.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-44",
+      "index": 43,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "408db17b",
+      "parentId": "fda93b81",
+      "content": [
+        {
+          "type": "text",
+          "text": "Next question:\n\n**Should we create one component with a `mode` prop internally, or two separate public component files?**\n\nOptions:\n\n1. **Two public components, shared internal helper**\n   - `src/components/Cite.astro`\n   - `src/components/Citep.astro`\n   - both use shared logic from `src/lib/citations.ts`\n   - Clean MDX API.\n\n2. **One component only**\n   - `<Citation ref=\"...\" mode=\"narrative\" />`\n   - Less aligned with your desired `<Cite>` / `<Citep>` syntax.\n\n3. **One implementation component plus tiny wrappers**\n   - `Citation.astro` does rendering.\n   - `Cite.astro` and `Citep.astro` wrap it.\n   - Good if Astro supports passing props cleanly enough, but may be unnecessary.\n\n**My recommended answer:** option 1.\n\nTwo public `.astro` components plus a TypeScript helper module:\n```txt\nsrc/components/Cite.astro\nsrc/components/Citep.astro\nsrc/lib/citations.ts\nscripts/generate-citations.ts\nsrc/data/auto/citations.json\n```\n\nDo you agree?",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-45",
+      "index": 44,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "b1ffcc6a",
+      "parentId": "408db17b",
+      "content": [
+        {
+          "type": "text",
+          "text": "Yes.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-46",
+      "index": 45,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "6433c11d",
+      "parentId": "b1ffcc6a",
+      "content": [
+        {
+          "type": "text",
+          "text": "Next question:\n\n**How should we handle possessive or grammatical variants of narrative citations?**\n\nExample prose:\n```mdx\n<Cite ref=\"berton-2023\" /> model predicts...\n```\nrenders:\n```text\nBerton (2023) model predicts...\n```\n\nBut sometimes you want:\n```text\nBerton’s (2023) model predicts...\n```\n\nOptions:\n\n1. **Ignore in v1**\n   - Author can write around it:\n     ```mdx\n     The model in <Cite ref=\"berton-2023\" /> predicts...\n     ```\n\n2. **Add `possessive` prop**\n   - `<Cite ref=\"berton-2023\" possessive />`\n   - → `Berton’s (2023)`\n   - More polish, but slightly expands API.\n\n3. **Add arbitrary `text` override**\n   - `<Cite ref=\"berton-2023\" text=\"Berton’s (2023)\" />`\n   - Too much; risks mismatches.\n\n**My recommended answer:** option 1.\n\nKeep v1 simple and add grammar variants only when actual writing needs them.\n\nDo you agree?",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-47",
+      "index": 46,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "fd0c56ec",
+      "parentId": "6433c11d",
+      "content": [
+        {
+          "type": "text",
+          "text": "Yes.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-48",
+      "index": 47,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "0245b76d",
+      "parentId": "fd0c56ec",
+      "content": [
+        {
+          "type": "text",
+          "text": "Next question:\n\n**Should `Cite` be allowed to contain multiple refs, or should multiple refs only be allowed in `Citep`?**\n\nExample:\n```mdx\n<Cite ref=\"berton-2023; kaercher-corcos-2025\" />\n```\n\nPossible narrative rendering:\n```text\nBerton (2023); Kärcher and Corcos (2025)\n```\n\nOptions:\n\n1. **Allow multiple refs in both `Cite` and `Citep`**\n   - Symmetric API.\n   - Pandoc can render narrative multi-citations.\n\n2. **Allow multiple refs only in `Citep`**\n   - More natural: parenthetical grouped citations are common.\n   - Narrative multi-citations can get grammatically awkward.\n   - If needed, write two narrative citations manually:\n     ```mdx\n     <Cite ref=\"berton-2023\" /> and <Cite ref=\"kaercher-corcos-2025\" />\n     ```\n\n**My recommended answer:** option 2.\n\n`Citep` should support semicolon-separated multiple refs. `Cite` should accept exactly one ref in v1. This avoids awkward narrative grammar and keeps locators simpler.\n\nDo you agree?",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-49",
+      "index": 48,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "6d59ae87",
+      "parentId": "0245b76d",
+      "content": [
+        {
+          "type": "text",
+          "text": "Yes.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-50",
+      "index": 49,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "44b2ddc6",
+      "parentId": "6d59ae87",
+      "content": [
+        {
+          "type": "text",
+          "text": "Next question:\n\n**What exact inline rendering should `page`/`locator` produce?**\n\nGiven Chicago/Pandoc style, examples:\n\nFor parenthetical:\n```mdx\n<Citep ref=\"smith-2020\" page=\"42\" />\n```\n\nOptions:\n1. `(Smith 2020, 42)`\n2. `(Smith 2020, p. 42)`\n3. `(Smith 2020: 42)`\n\nFor narrative:\n```mdx\n<Cite ref=\"smith-2020\" page=\"42\" />\n```\n\nOptions:\n1. `Smith (2020, 42)`\n2. `Smith (2020, p. 42)`\n3. `Smith (2020), 42`\n\n**My recommended answer:** use Pandoc/CSL locator behavior, which for Chicago author-date is typically:\n\n```text\n(Smith 2020, 42)\nSmith (2020, 42)\n```\n\nSo:\n- `page=\"42\"` passes locator `42`.\n- `locator=\"chap. 2\"` passes exact locator-ish suffix if we can support it cleanly.\n- Output follows Pandoc.\n\nDo you agree with Pandoc/CSL locator punctuation?",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-51",
+      "index": 50,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "5279960a",
+      "parentId": "44b2ddc6",
+      "content": [
+        {
+          "type": "text",
+          "text": "Yes.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-52",
+      "index": 51,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "2d582957",
+      "parentId": "6810c9d9",
+      "content": [
+        {
+          "type": "text",
+          "text": "Next question:\n\n**Should `locator` be free text, or should we only support `page`?**\n\nPandoc can handle simple locators cleanly:\n```mdx\n<Citep ref=\"berton-2023\" page=\"42\" />\n```\n→ `(Berton 2023, 42)`\n\nBut arbitrary locator text is less predictable:\n```mdx\n<Citep ref=\"berton-2023\" locator=\"chap. 2\" />\n```\n\nOptions:\n\n1. **Support only `page` in v1**\n   - Simple and predictable.\n   - Most common need.\n   - Avoids weird citation text.\n\n2. **Support both `page` and `locator`**\n   - More flexible.\n   - Need rules: cannot pass both; locator is inserted after year using Pandoc syntax.\n\n3. **Support `locator` only**\n   - General, but less self-documenting.\n\n**My recommended answer:** option 1.\n\nUse:\n```mdx\n<Citep ref=\"berton-2023\" page=\"42\" />\n<Cite ref=\"berton-2023\" page=\"42\" />\n```\n\nSkip generic `locator` until you actually need chapters/sections.\n\nDo you agree?",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-53",
+      "index": 52,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "5657bc6d",
+      "parentId": "2d582957",
+      "content": [
+        {
+          "type": "text",
+          "text": "Yes.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-54",
+      "index": 53,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "88363396",
+      "parentId": "5657bc6d",
+      "content": [
+        {
+          "type": "text",
+          "text": "Next question:\n\n**Should a `page` citation count as the same already-cited reference for sidenote suppression?**\n\nExample:\n```mdx\n<Cite ref=\"berton-2023\" />\n...\n<Citep ref=\"berton-2023\" page=\"42\" />\n```\n\nOptions:\n\n1. **Same reference key suppresses sidenote regardless of page**\n   - First citation gets full reference sidenote.\n   - Later page-specific citation is inline only: `(Berton 2023, 42)`.\n   - Simple and avoids repeated full bibliography entries.\n\n2. **Different page locator creates a new sidenote**\n   - Could mention page-specific context.\n   - But your sidenote is just bibliographic, not quote annotation, so repetition is unnecessary.\n\n**My recommended answer:** option 1.\n\nTrack cited-ness by BibTeX key only, not page.\n\nDo you agree?",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-55",
+      "index": 54,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "d8614044",
+      "parentId": "88363396",
+      "content": [
+        {
+          "type": "text",
+          "text": "Yes.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-56",
+      "index": 55,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "205f7bdb",
+      "parentId": "d8614044",
+      "content": [
+        {
+          "type": "text",
+          "text": "Next question:\n\n**Should we support citation children/content, or should citations be self-closing only?**\n\nExamples:\n```mdx\n<Cite ref=\"berton-2023\" />\n```\n\nvs.\n\n```mdx\n<Cite ref=\"berton-2023\">Berton’s model</Cite>\n```\nwhich might render:\n```text\nBerton’s model [sidenote marker]\n```\n\nOptions:\n\n1. **Self-closing only**\n   - Clear semantics.\n   - `<Cite>` controls citation text.\n\n2. **Allow children as override text**\n   - More flexible.\n   - But makes author-year behavior less consistent.\n\n**My recommended answer:** option 1.\n\nFor v1, citation components should be self-closing and produce their own inline text from BibTeX/Pandoc.\n\nDo you agree?",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-57",
+      "index": 56,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "9f38ad2e",
+      "parentId": "205f7bdb",
+      "content": [
+        {
+          "type": "text",
+          "text": "Yes.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-58",
+      "index": 57,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "e4f30de2",
+      "parentId": "9f38ad2e",
+      "content": [
+        {
+          "type": "text",
+          "text": "Next question:\n\n**Should the generated citation data include all BibTeX entries, or only entries actually cited in current MDX content?**\n\nOptions:\n\n1. **All BibTeX entries**\n   - Simple generator.\n   - Any valid key in `references.bib` is available.\n   - `citations.json` may include unused references, but likely small.\n\n2. **Only cited entries**\n   - Smaller generated file.\n   - But generator must scan MDX for `<Cite>` / `<Citep>` usage.\n   - Adding a citation requires regeneration after content edit, not just BibTeX edit.\n\n**My recommended answer:** option 1.\n\nGenerate citation data for every BibTeX key in `src/data/references.bib`. The file can grow, but citation libraries are usually manageable, and this avoids MDX scanning complexity.\n\nDo you agree?",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-59",
+      "index": 58,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "e5eaf678",
+      "parentId": "e4f30de2",
+      "content": [
+        {
+          "type": "text",
+          "text": "Yes.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-60",
+      "index": 59,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "4d101a00",
+      "parentId": "e5eaf678",
+      "content": [
+        {
+          "type": "text",
+          "text": "Next question:\n\n**Should the generator depend on a JavaScript BibTeX parser, or should it use Pandoc itself to discover/render entries?**\n\nOptions:\n\n1. **Use Pandoc as the only citation processor**\n   - Generator shells out to Pandoc.\n   - Avoids adding a BibTeX parser dependency.\n   - But extracting keys and short labels may need a small BibTeX key regex.\n\n2. **Add a JS BibTeX parser**\n   - Easier to inspect entries, normalize DOI fields, extract keys/authors/years.\n   - Then still use Pandoc for formatted output.\n   - More dependency surface.\n\n3. **Fully custom JS formatting**\n   - Avoids Pandoc at generation time.\n   - But contradicts the “use BibTeX/Pandoc/CSL” goal.\n\n**My recommended answer:** option 1.\n\nUse Pandoc for formatting and a small conservative parser/regex only to:\n- find entry keys like `@article{berton-2023, ...}`\n- normalize obvious bad DOI forms before passing a temporary BibTeX file to Pandoc\n\nNo extra dependency unless this proves brittle.\n\nDo you agree?",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-61",
+      "index": 60,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "7fb3a4e9",
+      "parentId": "4d101a00",
+      "content": [
+        {
+          "type": "text",
+          "text": "Yes.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-62",
+      "index": 61,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "4796dc4d",
+      "parentId": "7fb3a4e9",
+      "content": [
+        {
+          "type": "text",
+          "text": "Next question:\n\n**Should generated citation data include precomputed inline strings for both narrative and parenthetical citations, or should components assemble inline text from structured fields?**\n\nOptions:\n\n1. **Precompute inline strings with Pandoc**\n   - Generator asks Pandoc for:\n     - narrative: `@berton-2023` → `Berton (2023)`\n     - parenthetical: `[@berton-2023]` → `(Berton 2023)`\n     - page variants generated at component time? Harder, because page values are dynamic props.\n   - Most style-faithful, but less flexible for arbitrary `page`.\n\n2. **Store enough structured data for components to assemble inline text**\n   - Store something like:\n     ```json\n     {\n       \"authorLabel\": \"[REDACTED_ENV:authorLabel]\",\n       \"year\": \"2023\",\n       \"fullHtml\": \"...\"\n     }\n     ```\n   - Components render:\n     - `Cite`: `authorLabel (year)`\n     - `Citep`: `(authorLabel year)`\n     - with page: `(authorLabel year, page)`\n   - Slightly less pure Pandoc, but matches Chicago author-date enough for v1 and handles `page` easily.\n\n3. **Hybrid**\n   - Store Pandoc-rendered inline strings for no-page citations.\n   - Store structured `authorLabel`/`year` for page variants.\n   - More data, more complexity.\n\n**My recommended answer:** option 2.\n\nUse Pandoc for full reference HTML, but use a small structured inline formatter for author-year strings. Reason: `page` is a runtime prop in MDX, so precomputing every locator is impossible. For Chicago author-date, `Author (Year)` and `(Author Year, page)` are straightforward.\n\nDo you agree?",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [
+        {
+          "kind": "environment-value",
+          "replacement": "\"authorLabel\": \"[REDACTED_ENV:authorLabel]\"",
+          "count": 1
+        }
+      ],
+      "truncated": false
+    },
+    {
+      "id": "entry-63",
+      "index": 62,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "d3d116e3",
+      "parentId": "4796dc4d",
+      "content": [
+        {
+          "type": "text",
+          "text": "Yes.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-64",
+      "index": 63,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "bb8974df",
+      "parentId": "d3d116e3",
+      "content": [
+        {
+          "type": "text",
+          "text": "Next question:\n\n**How should `authorLabel` be generated for inline citations?**\n\nExamples:\n- one author: `Berton`\n- two authors: `Kärcher and Corcos`\n- three authors: maybe `Smith, Jones, and Lee` or `Smith et al.`\n\nOptions:\n\n1. **Use Pandoc-rendered inline citations to derive labels**\n   - Generator asks Pandoc for `@key` and `[@key]`.\n   - Extracts/stores the no-page rendered strings or parses out author/year.\n   - Most style-faithful, but string extraction is a little fiddly.\n\n2. **Parse BibTeX `author` field manually**\n   - One author → last name.\n   - Two authors → `A and B`.\n   - Three or more → `A et al.`\n   - Simple enough for v1, but may mishandle institutions, editors, suffixes, particles, nonstandard names.\n\n3. **Store Pandoc-rendered no-page strings and structured fallback**\n   - `narrativeText`: `Kärcher and Corcos (2025)`\n   - `parentheticalText`: `(Kärcher and Corcos 2025)`\n   - plus `authorLabel` and `year` for page variants.\n   - More robust, slightly more complex.\n\n**My recommended answer:** option 2 for v1, with conservative behavior:\n- split BibTeX authors on ` and `\n- use the surname part for each author\n- 1 author: `Surname`\n- 2 authors: `Surname and Surname`\n- 3+ authors: `Surname et al.`\n- use `year`\n- fail generation if an entry lacks usable `author` or `year`\n\nThis is good enough for article citations and keeps runtime simple.\n\nDo you agree?",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-65",
+      "index": 64,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "6a1f5508",
+      "parentId": "bb8974df",
+      "content": [
+        {
+          "type": "text",
+          "text": "Yes.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-66",
+      "index": 65,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "ad777ff9",
+      "parentId": "6a1f5508",
+      "content": [
+        {
+          "type": "text",
+          "text": "Next question:\n\n**How should entries without an `author` field be handled?**\n\nSome BibTeX entries may eventually be reports, standards, software, websites, or institutional publications with fields like:\n```bibtex\norganization = {World Meteorological Organization}\n```\nor:\n```bibtex\neditor = {Smith, Jane}\n```\ninstead of `author`.\n\nOptions:\n\n1. **Require `author` and `year` for v1**\n   - Generator fails if a cited/generated entry lacks them.\n   - Simple and strict.\n   - Fine if your references are mostly journal articles.\n\n2. **Fallback to `editor`, then `organization`, then `title`**\n   - More robust for reports/web resources.\n   - More parsing rules.\n\n3. **Generate full sidenote for all entries, but only allow inline `<Cite>`/`<Citep>` for author-year-compatible entries**\n   - Complicated distinction.\n\n**My recommended answer:** option 2.\n\nFor inline label:\n1. `author` if present\n2. else `editor` if present, with maybe `ed.` ignored in inline v1\n3. else `organization` / `institution` / `publisher`\n4. else fail with a clear generator error\n\nStill require `year` for v1.\n\nDo you agree with those fallbacks?",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-67",
+      "index": 66,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "9cedc850",
+      "parentId": "ad777ff9",
+      "content": [
+        {
+          "type": "text",
+          "text": "Yes.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-68",
+      "index": 67,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "6ba2e0f3",
+      "parentId": "9cedc850",
+      "content": [
+        {
+          "type": "text",
+          "text": "Next question:\n\n**Should `date` be accepted as a fallback to `year`?**\n\nSome BibTeX/web entries may have:\n```bibtex\ndate = {2025-10-01}\n```\ninstead of:\n```bibtex\nyear = {2025}\n```\n\nOptions:\n\n1. **Require `year` only**\n   - Simple.\n   - Many BibTeX entries have `year`.\n\n2. **Fallback from `date` to first 4-digit year**\n   - More robust for CSL-ish entries.\n   - Easy enough.\n\n3. **Allow `month` + `year`, but not `date`**\n   - Less useful.\n\n**My recommended answer:** option 2.\n\nFor inline citation year:\n- use `year` if present\n- else parse first four-digit year from `date`\n- else fail generation\n\nDo you agree?",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-69",
+      "index": 68,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "fab38161",
+      "parentId": "6ba2e0f3",
+      "content": [
+        {
+          "type": "text",
+          "text": "Yes.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-70",
+      "index": 69,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "75979c03",
+      "parentId": "fab38161",
+      "content": [
+        {
+          "type": "text",
+          "text": "Next question:\n\n**Should the generator fail on every BibTeX entry that lacks author/year, or only on entries that are actually cited?**\n\nEarlier we chose generating data for all BibTeX entries. That implies strict validation on all entries unless we decide otherwise.\n\nOptions:\n\n1. **Fail on all invalid entries**\n   - Keeps `references.bib` clean.\n   - But pasted/staged entries you are not using yet can break generation.\n\n2. **Generate full entries for all possible entries, but mark incomplete ones unusable**\n   - Components fail only if you cite an incomplete entry.\n   - More tolerant.\n   - But since generator does not scan MDX, it won’t know cited vs unused.\n\n3. **Require valid author/year-ish metadata for all entries included in `references.bib`**\n   - Same as option 1, but framed as a convention.\n\n**My recommended answer:** option 1/3 for now.\n\nIf `references.bib` is the site bibliography, entries should be citation-ready. Since you’re pasting journal BibTeX, most will have author/year. If later you want a messy “reference inbox,” we can add `src/data/reference-inbox.bib` or skip invalid entries.\n\nDo you agree that `npm run citations` should fail if any BibTeX entry cannot produce an author/year label?",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-71",
+      "index": 70,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "61263acd",
+      "parentId": "75979c03",
+      "content": [
+        {
+          "type": "text",
+          "text": "Yes.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-72",
+      "index": 71,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "7d7a3215",
+      "parentId": "61263acd",
+      "content": [
+        {
+          "type": "text",
+          "text": "Next question:\n\n**Should the generator write TypeScript instead of JSON to improve type safety?**\n\nOptions:\n\n1. **JSON**\n   - `src/data/auto/citations.json`\n   - Simple, matches our earlier discussion.\n   - Importable in Astro/TS with existing config likely.\n\n2. **TypeScript**\n   - `src/data/auto/citations.ts`\n   - Can export `as const`.\n   - Easier type inference.\n   - But generated code is a little less neutral.\n\n**My recommended answer:** option 1.\n\nUse JSON and define TypeScript types in `src/lib/citations.ts`.\n\nDo you agree?",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-73",
+      "index": 72,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "fd0ff210",
+      "parentId": "7d7a3215",
+      "content": [
+        {
+          "type": "text",
+          "text": "Generate TypeScript. I think we should make that a general policy. Like for the biographical data, which is also TypeScript.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-74",
+      "index": 73,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "8441e9ee",
+      "parentId": "fd0ff210",
+      "content": [
+        {
+          "type": "text",
+          "text": "Good correction. That changes the generated artifact shape.\n\nNext question:\n\n**What should the generated TypeScript module export?**\n\nOptions:\n\n1. **Single default/const citation map**\n   ```ts\n   export const citations = {\n     \"berton-2023\": {\n       authorLabel: \"[REDACTED_ENV:authorLabel]\",\n       year: \"2023\",\n       fullHtml: \"...\"\n     }\n   } as const;\n   ```\n\n2. **Citation map plus exported key type**\n   ```ts\n   export const citations = { ... } as const;\n   export type CitationKey = keyof typeof citations;\n   ```\n\n3. **Citation map, key type, and source metadata**\n   ```ts\n   export const citationSource = {\n     bibliography: \"src/data/references.bib\",\n     generatedAt: \"...\"\n   } as const;\n\n   export const citations = { ... } as const;\n   export type CitationKey = keyof typeof citations;\n   ```\n\n**My recommended answer:** option 2.\n\nAvoid `generatedAt` because it creates noisy diffs every time generation runs. Keep the generated module stable:\n\n```ts\n// Generated by scripts/generate-citations.ts from src/data/references.bib.\n// Do not edit directly.\n\nexport const citations = { ... } as const;\nexport type CitationKey = keyof typeof citations;\n```\n\nDo you agree?",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [
+        {
+          "kind": "environment-value",
+          "replacement": "authorLabel: \"[REDACTED_ENV:authorLabel]\"",
+          "count": 1
+        }
+      ],
+      "truncated": false
+    },
+    {
+      "id": "entry-75",
+      "index": 74,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "d93a33ef",
+      "parentId": "8441e9ee",
+      "content": [
+        {
+          "type": "text",
+          "text": "Yes.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-76",
+      "index": 75,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "8779e8cf",
+      "parentId": "d93a33ef",
+      "content": [
+        {
+          "type": "text",
+          "text": "Next question:\n\n**Should citation component props type `ref` as `CitationKey`, or keep it as `string`?**\n\nIn `.astro` components, props can be typed, but MDX string literals may or may not give useful compile-time checking depending on Astro/MDX behavior.\n\nOptions:\n\n1. **Type as `string` and validate at runtime/build render**\n   - Reliable clear build errors.\n   - Handles semicolon-separated refs naturally.\n\n2. **Type as `CitationKey` where possible**\n   - Better editor/TS checks for `<Cite ref=\"...\" />` maybe.\n   - Awkward for multi-ref `Citep`, because `ref` can be `\"a; b\"`.\n\n3. **Use `string`, export `CitationKey` for helper code only**\n   - Good balance.\n\n**My recommended answer:** option 3.\n\nProps:\n```ts\nref: string;\npage?: string | number;\n```\n\nHelper functions validate keys against generated `citations`.\n\nDo you agree?",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-77",
+      "index": 76,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "f9eca878",
+      "parentId": "8779e8cf",
+      "content": [
+        {
+          "type": "text",
+          "text": "Yes.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-78",
+      "index": 77,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "149c5bce",
+      "parentId": "f9eca878",
+      "content": [
+        {
+          "type": "text",
+          "text": "Next question:\n\n**Should page numbers accept numbers as well as strings?**\n\nExamples:\n```mdx\n<Citep ref=\"smith-2020\" page=\"42\" />\n<Citep ref=\"smith-2020\" page={42} />\n<Citep ref=\"smith-2020\" page=\"42–43\" />\n```\n\nOptions:\n\n1. **Accept string only**\n   - Simpler type.\n   - Ranges work naturally.\n\n2. **Accept string or number**\n   - More ergonomic in MDX.\n   - Convert to string internally.\n\n**My recommended answer:** option 2.\n\nUse:\n```ts\npage?: string | number;\n```\n\nDo you agree?",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-79",
+      "index": 78,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "89e8f342",
+      "parentId": "149c5bce",
+      "content": [
+        {
+          "type": "text",
+          "text": "Yes.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-80",
+      "index": 79,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "1335ae12",
+      "parentId": "89e8f342",
+      "content": [
+        {
+          "type": "text",
+          "text": "Next question:\n\n**Should citation components expose `id` or `open` props for the underlying `Sidenote`?**\n\nExisting `Sidenote` supports:\n```ts\nid?: string;\nlabel?: string;\nopen?: boolean;\n```\n\nOptions:\n\n1. **No passthrough props**\n   - Keep citations simple.\n   - Use default sidenote behavior.\n\n2. **Expose `open` only**\n   - Allows a citation sidenote to be expanded by default if needed.\n\n3. **Expose `id`, `label`, and `open`**\n   - Full control, but more API.\n\n**My recommended answer:** option 1.\n\nCitation sidenotes are not hand-authored annotations; they should behave consistently. If future needs arise, we can add `open`.\n\nDo you agree?",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-81",
+      "index": 80,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "395be9a0",
+      "parentId": "1335ae12",
+      "content": [
+        {
+          "type": "text",
+          "text": "Yes.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-82",
+      "index": 81,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "142c5428",
+      "parentId": "395be9a0",
+      "content": [
+        {
+          "type": "text",
+          "text": "Next question:\n\n**Should full citation HTML in sidenotes be wrapped as a list when multiple new refs appear?**\n\nExample:\n```mdx\n<Citep ref=\"berton-2023; kaercher-corcos-2025\" />\n```\n\nOptions:\n\n1. **Single ref: bare paragraph; multiple refs: ordered/unordered list**\n   - Single note stays compact.\n   - Multi-note is readable:\n     ```html\n     <ol>\n       <li>...</li>\n       <li>...</li>\n     </ol>\n     ```\n\n2. **Always list**\n   - Consistent, but single citation has unnecessary list styling.\n\n3. **Join with line breaks**\n   - Compact but less semantic.\n\n**My recommended answer:** option 1.\n\nSingle unseen ref: sidenote body contains its full HTML directly.\nMultiple unseen refs: wrap each citation in an ordered list.\n\nDo you agree?",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-83",
+      "index": 82,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "df79c5d0",
+      "parentId": "142c5428",
+      "content": [
+        {
+          "type": "text",
+          "text": "Yes, although the list needs to be styled so that there are no extraneous bullets or other decorations, just some space between the citations.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-84",
+      "index": 83,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "594e71b5",
+      "parentId": "df79c5d0",
+      "content": [
+        {
+          "type": "text",
+          "text": "Next question:\n\n**Should multi-citation sidenote lists be semantic lists with CSS removing markers, or plain block wrappers?**\n\nOptions:\n\n1. **Semantic list, visually unmarked**\n   ```html\n   <ol class=\"citation-list\">\n     <li>...</li>\n     <li>...</li>\n   </ol>\n   ```\n   CSS:\n   ```css\n   .citation-list {\n     list-style: none;\n     padding-left: 0;\n   }\n   ```\n   Screen readers still understand it as a list.\n\n2. **Plain wrappers**\n   ```html\n   <div class=\"citation-list\">\n     <div>...</div>\n     <div>...</div>\n   </div>\n   ```\n   No list semantics, simpler visual behavior.\n\n**My recommended answer:** option 1.\n\nUse semantic `<ol>` but style away numbering/bullets and add spacing between entries.\n\nDo you agree?",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-85",
+      "index": 84,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "a1b5c888",
+      "parentId": "594e71b5",
+      "content": [
+        {
+          "type": "text",
+          "text": "Yes.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-86",
+      "index": 85,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "5eb093fa",
+      "parentId": "a1b5c888",
+      "content": [
+        {
+          "type": "text",
+          "text": "Next question:\n\n**Should we keep the prop name `ref`, even though `ref` can be a special/reserved-ish JSX concept in some frameworks?**\n\nYour desired syntax is:\n\n```mdx\n<Cite ref=\"berton-2023\" />\n<Citep ref=\"kaercher-corcos-2025\" />\n```\n\nOptions:\n\n1. **Keep `ref`**\n   - Matches your requested API.\n   - Short and natural for BibTeX references.\n   - Astro components should receive it as a normal prop in this context.\n\n2. **Use `key`**\n   - Bad idea because `key` is also special in JSX-like systems.\n\n3. **Use `cite` or `citation`**\n   - Avoids any `ref` ambiguity:\n     ```mdx\n     <Cite cite=\"berton-2023\" />\n     ```\n   - But less natural than your requested syntax.\n\n4. **Support both `ref` and `cite`**\n   - Flexible but unnecessary API clutter.\n\n**My recommended answer:** option 1.\n\nKeep `ref`. It is exactly the authoring syntax you want, and if Astro/MDX treats it normally for `.astro` components, it keeps the API clean.\n\nDo you agree?",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-87",
+      "index": 86,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "99623076",
+      "parentId": "5eb093fa",
+      "content": [
+        {
+          "type": "text",
+          "text": "I don't actually care what it's called. I actually think the ideal syntax might be <Cite>berton-2023</Cite> and <Citep>berton-2023; kaercher-corcos-2025</Citep> rather than putting the key in a prop.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-88",
+      "index": 87,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "522b4a2f",
+      "parentId": "99623076",
+      "content": [
+        {
+          "type": "text",
+          "text": "That is probably better authoring syntax.\n\nNext question:\n\n**Should citation keys be passed as component children instead of a prop?**\n\nProposed API:\n```mdx\n<Cite>berton-2023</Cite>\n<Citep>berton-2023; kaercher-corcos-2025</Citep>\n<Citep page=\"42\">berton-2023</Citep>\n```\n\nOptions:\n\n1. **Children-only**\n   - Cleanest MDX prose syntax.\n   - Citation key visually reads like content.\n   - But component must parse slot text and reject non-plain children.\n\n2. **Prop-only**\n   - Easier implementation:\n     ```mdx\n     <Cite ref=\"berton-2023\" />\n     ```\n   - Slightly uglier.\n\n3. **Support both children and prop**\n   - Flexible, but creates two conventions.\n   - Need precedence/error rules.\n\n**My recommended answer:** option 1.\n\nUse children-only in v1:\n```mdx\n<Cite>berton-2023</Cite>\n<Citep>berton-2023; kaercher-corcos-2025</Citep>\n```\n\nRules:\n- slot content must be plain text after trimming\n- semicolon-separated keys allowed only in `Citep`\n- no nested markup/expressions inside citation components\n- `page` remains a prop because it is metadata, not the citation key\n\nDo you agree with children-only citation keys?",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-89",
+      "index": 88,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "e888a2db",
+      "parentId": "522b4a2f",
+      "content": [
+        {
+          "type": "text",
+          "text": "Yes. That looks better.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-90",
+      "index": 89,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "d124e118",
+      "parentId": "e888a2db",
+      "content": [
+        {
+          "type": "text",
+          "text": "Next question:\n\n**How strict should the child content parser be?**\n\nBecause Astro slots render as HTML, these:\n\n```mdx\n<Cite>berton-2023</Cite>\n```\n\nand maybe line-wrapped:\n\n```mdx\n<Citep>\n  berton-2023; kaercher-corcos-2025\n</Citep>\n```\n\nwill need to be reduced to plain text.\n\nOptions:\n\n1. **Allow whitespace/newlines only around plain text keys**\n   - Trim outer whitespace.\n   - Collapse internal whitespace around semicolons.\n   - Reject rendered HTML tags.\n   - Good examples:\n     ```mdx\n     <Cite>berton-2023</Cite>\n     <Citep>\n       berton-2023; kaercher-corcos-2025\n     </Citep>\n     ```\n   - Bad:\n     ```mdx\n     <Cite><em>berton-2023</em></Cite>\n     ```\n\n2. **Allow arbitrary rendered text by stripping HTML tags**\n   - More forgiving.\n   - But accidental markup could silently become a citation key.\n\n3. **Single-line only**\n   - Simplest.\n   - Annoying for multi-citations.\n\n**My recommended answer:** option 1.\n\nAllow plain text with harmless whitespace/newlines, but fail the build if the slot contains markup or anything that does not parse cleanly as citation keys.\n\nDo you agree?",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-91",
+      "index": 90,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "3ce144fe",
+      "parentId": "d124e118",
+      "content": [
+        {
+          "type": "text",
+          "text": "Yes, option 1.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-92",
+      "index": 91,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "3d972c88",
+      "parentId": "3ce144fe",
+      "content": [
+        {
+          "type": "text",
+          "text": "Next question:\n\n**Should `<Cite>` allow a `page` prop with child-key syntax?**\n\nExample:\n```mdx\n<Cite page=\"42\">berton-2023</Cite>\n```\n\nrenders:\n```text\nBerton (2023, 42)\n```\n\nOptions:\n\n1. **Yes, both `Cite` and `Citep` support `page`**\n   - Symmetric.\n   - Useful for narrative citations.\n\n2. **Only `Citep` supports `page`**\n   - Slightly simpler.\n   - But unnecessarily restrictive.\n\n**My recommended answer:** option 1.\n\nSupport:\n```mdx\n<Cite page=\"42\">berton-2023</Cite>\n<Citep page=\"42\">berton-2023</Citep>\n```\n\nStill reject `page` when `Citep` contains multiple refs.\n\nDo you agree?",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-93",
+      "index": 92,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "6dd7b1a8",
+      "parentId": "3d972c88",
+      "content": [
+        {
+          "type": "text",
+          "text": "Yes.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-94",
+      "index": 93,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "b8a3fba8",
+      "parentId": "6dd7b1a8",
+      "content": [
+        {
+          "type": "text",
+          "text": "Next question:\n\n**Should we still support the original prop syntax as a compatibility alias?**\n\nExamples:\n```mdx\n<Cite ref=\"berton-2023\" />\n<Cite>berton-2023</Cite>\n```\n\nOptions:\n\n1. **No, children-only**\n   - One canonical syntax.\n   - Avoids ambiguity.\n   - Matches the revised preferred API.\n\n2. **Yes, support both**\n   - Easier if you later forget the syntax.\n   - But two conventions.\n\n**My recommended answer:** option 1.\n\nUse children-only:\n```mdx\n<Cite>berton-2023</Cite>\n<Citep>berton-2023; kaercher-corcos-2025</Citep>\n```\n\nDo you agree to drop `ref` entirely?",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-95",
+      "index": 94,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "4e9dc3f6",
+      "parentId": "b8a3fba8",
+      "content": [
+        {
+          "type": "text",
+          "text": "Yes. Children only.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-96",
+      "index": 95,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "ae2add5d",
+      "parentId": "4e9dc3f6",
+      "content": [
+        {
+          "type": "text",
+          "text": "Next question:\n\n**How should the component extract child citation keys in Astro?**\n\nAstro slots are rendered asynchronously via `Astro.slots.render('default')`, which returns an HTML string. For plain text children, that should be easy to trim.\n\nOptions:\n\n1. **Parse rendered slot HTML as plain text only**\n   - Render slot to string.\n   - Reject if it contains `<` / `>` tags after trimming.\n   - Decode basic HTML entities if needed.\n   - Parse semicolon-separated keys.\n   - Simple and sufficient.\n\n2. **Use a remark/MDX transform instead**\n   - More structurally correct.\n   - But much larger implementation.\n\n3. **Avoid children syntax because slot parsing is awkward**\n   - We already decided children syntax is nicer.\n\n**My recommended answer:** option 1.\n\nImplement a helper like:\n```ts\nparseCitationSlot(await Astro.slots.render('default'))\n```\n\nIt should accept:\n```html\nberton-2023\n```\n\nand reject:\n```html\n<em>berton-2023</em>\n```\n\nDo you agree?",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-97",
+      "index": 96,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "bb760bb0",
+      "parentId": "ae2add5d",
+      "content": [
+        {
+          "type": "text",
+          "text": "Yes.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-98",
+      "index": 97,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "5a28ea51",
+      "parentId": "bb760bb0",
+      "content": [
+        {
+          "type": "text",
+          "text": "Next question:\n\n**Should HTML entity decoding be supported for citation keys?**\n\nProbably not needed for BibTeX keys like:\n```text\nberton-2023\nkaercher-corcos-2025\n```\n\nOptions:\n\n1. **No entity decoding**\n   - Citation keys should be ASCII-ish.\n   - Simpler.\n   - If rendered slot contains `&amp;`, it will fail validation.\n\n2. **Decode basic entities**\n   - More robust for weird keys.\n   - But encourages complicated keys.\n\n**My recommended answer:** option 1.\n\nRequire simple BibTeX keys that do not need HTML entity decoding. Your existing keys fit this.\n\nDo you agree?",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-99",
+      "index": 98,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "cbf87ca8",
+      "parentId": "5a28ea51",
+      "content": [
+        {
+          "type": "text",
+          "text": "Yes.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-100",
+      "index": 99,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "ff6a82e2",
+      "parentId": "cbf87ca8",
+      "content": [
+        {
+          "type": "text",
+          "text": "Next question:\n\n**What characters should citation keys allow?**\n\nExisting keys:\n```text\nberton-2023\nkaercher-corcos-2025\n```\n\nOptions:\n\n1. **Conservative**\n   ```regex\n   /^[A-Za-z0-9:_-]+$/\n   ```\n   Allows common BibTeX keys.\n   Rejects spaces, slashes, periods.\n\n2. **BibTeX-ish broader**\n   Allow most non-whitespace/non-semicolon characters.\n   More flexible, but less clean.\n\n3. **No regex, just lookup in generated citation map**\n   Missing lookup catches invalid keys.\n   But error messages less precise for malformed multi-ref strings.\n\n**My recommended answer:** option 1.\n\nUse simple citation keys:\n```text\nletters, numbers, colon, underscore, hyphen\n```\n\nDo you agree? \n",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-101",
+      "index": 100,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "21794f12",
+      "parentId": "ff6a82e2",
+      "content": [
+        {
+          "type": "text",
+          "text": "Yes.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-102",
+      "index": 101,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "fd12f895",
+      "parentId": "21794f12",
+      "content": [
+        {
+          "type": "text",
+          "text": "Next question:\n\n**Should the generator also enforce the same key regex for BibTeX entry keys?**\n\nOptions:\n\n1. **Yes**\n   - Prevents generating keys that components cannot cite.\n   - Clear convention for this site.\n\n2. **No**\n   - Let BibTeX contain broader keys, but components may not handle them.\n   - Inconsistent.\n\n**My recommended answer:** option 1.\n\nIf a BibTeX key does not match:\n```regex\n/^[A-Za-z0-9:_-]+$/\n```\n`npm run citations` should fail with a clear error.\n\nDo you agree? \n",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-103",
+      "index": 102,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "25014a7f",
+      "parentId": "fd12f895",
+      "content": [
+        {
+          "type": "text",
+          "text": "Yes.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-104",
+      "index": 103,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "b89ed351",
+      "parentId": "25014a7f",
+      "content": [
+        {
+          "type": "text",
+          "text": "Next question:\n\n**Should we create a Backlog task now before implementation?**\n\nProject instructions say if we proceed to implementation, use Backlog CLI:\n- create task\n- set In Progress\n- assign to self\n- add implementation plan\n- share plan and wait for approval before coding\n\nOptions:\n\n1. **Yes, create one task for citation tooling**\n   - Title: `Add BibTeX-backed MDX citation sidenotes`\n   - ACs reflect our decisions.\n   - Then I add implementation plan and pause for your approval.\n\n2. **Split into several tasks**\n   - generator, components, styling, docs/tests\n   - More traceable, but probably overkill for this feature.\n\n3. **Skip Backlog**\n   - Faster, but conflicts with project instructions.\n\n**My recommended answer:** option 1.\n\nOne task is enough for this coherent feature.\n\nDo you want me to create the Backlog task and implementation plan now?",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-105",
+      "index": 104,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "07620e97",
+      "parentId": "b89ed351",
+      "content": [
+        {
+          "type": "text",
+          "text": "Yes, go ahead. One task is enough.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-106",
+      "index": 105,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "bdf19bc2",
+      "parentId": "34215f2e",
+      "content": [
+        {
+          "type": "text",
+          "text": "Created and started Backlog task:\n\n- `TASK-13` — Add BibTeX-backed MDX citation sidenotes\n\nImplementation plan:\n\n1. Inspect current MDX/global-component and sidenote patterns.\n2. Add `scripts/generate-citations.ts` to read `src/data/references.bib`, validate keys/metadata, normalize DOI URL forms, call Pandoc, and write `src/data/auto/citations.ts`.\n3. Add `src/lib/citations.ts` for parsing, validation, inline formatting, per-page cited state, and errors.\n4. Add `src/components/Cite.astro` and `src/components/Citep.astro`.\n5. Register `Cite`/`Citep` globally in `astro.config.mjs`.\n6. Add CSS for unmarked spaced multi-citation sidenote lists.\n7. Add `npm run citations`; leave `npm run build` unchanged.\n8. Add/adjust tests and run `npm test`, `npm run citations`, `npm run build`.\n9. Complete Backlog ACs and final summary after verification.\n\nPlease confirm if you want me to proceed with implementation.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-107",
+      "index": 106,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "30bb5b1f",
+      "parentId": "bdf19bc2",
+      "content": [
+        {
+          "type": "text",
+          "text": "Please go ahead.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-108",
+      "index": 107,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "46faa3cd",
+      "parentId": "0e179520",
+      "content": [
+        {
+          "type": "text",
+          "text": "Implemented `TASK-13`.\n\nAdded:\n- `scripts/generate-citations.ts`\n- `src/data/auto/citations.ts`\n- `src/lib/citations.ts`\n- `src/components/Cite.astro`\n- `src/components/Citep.astro`\n- `test/citations.test.ts`\n\nUpdated:\n- `astro.config.mjs` — global MDX `Cite` / `Citep`\n- `package.json` — `npm run citations`\n- `src/styles/global.css` — unmarked citation sidenote list styling\n\nUsage:\n\n```mdx\n<Cite>berton-2023</Cite>\n<Citep>berton-2023; kaercher-corcos-2025</Citep>\n<Citep page=\"42\">berton-2023</Citep>\n```\n\nValidation:\n- `npm run citations` passes\n- `npm run build` passes\n- Citation tests pass\n- Full `npm test` still has one unrelated existing failure expecting `dist/sessions/001-first-session/index.html`\n\nBacklog task `TASK-13` is marked Done.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-109",
+      "index": 108,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "8801a383",
+      "parentId": "46faa3cd",
+      "content": [
+        {
+          "type": "text",
+          "text": "That works pretty well, but when the dev server rerenders a page containing a citation, the citation sidenote disappears.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-110",
+      "index": 109,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "d668c63b",
+      "parentId": "40eedff4",
+      "content": [
+        {
+          "type": "text",
+          "text": "Fixed.\n\nRoot cause: citation “already seen” state was stored on `globalThis` keyed by pathname. In the dev server, rerendering the same page reused that state, so citations were treated as repeats and their sidenotes disappeared.\n\nChange:\n- Moved citation seen-state to per-render `Astro.locals`.\n- Repeated citations still suppress duplicate sidenotes within one render.\n- A fresh dev-server rerender gets fresh citation state.\n\nUpdated:\n- `src/lib/citations.ts`\n- `src/components/Cite.astro`\n- `src/components/Citep.astro`\n- `test/citations.test.ts`\n\nValidation:\n- `node --test test/citations.test.ts` passes\n- `npm run build` passes\n\nBacklog `TASK-14` marked Done.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-111",
+      "index": 110,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "ec168c2f",
+      "parentId": "d668c63b",
+      "content": [
+        {
+          "type": "text",
+          "text": "Please commit the relevant changes. I have been editing some content pages by hand in the meantime: don't commit those.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-112",
+      "index": 111,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "a3dc84c0",
+      "parentId": "7711ca1b",
+      "content": [
+        {
+          "type": "text",
+          "text": "Committed relevant citation changes only.\n\nCommit:\n- `1c78049 Add BibTeX citation sidenotes`\n\nLeft uncommitted:\n- `public/figures/placeholder.svg`\n- `src/components/BaseHead.astro`\n- `src/components/Header.astro`\n- `src/content/project/overview.mdx`\n- `src/pages/index.mdx`\n- `src/pages/project/index.astro`\n- `src/data/auto/references.el`",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    }
+  ],
+  "highlights": [],
+  "redactionSummary": [
+    {
+      "kind": "path",
+      "replacement": "[REDACTED_LOCAL_PATH]",
+      "count": 2
+    },
+    {
+      "kind": "environment-value",
+      "replacement": "\"authorLabel\": \"[REDACTED_ENV:authorLabel]\"",
+      "count": 1
+    },
+    {
+      "kind": "environment-value",
+      "replacement": "authorLabel: \"[REDACTED_ENV:authorLabel]\"",
+      "count": 1
+    }
+  ],
+  "redaction": {
+    "status": "processed",
+    "reviewNotes": [
+      "Automated public-safety pass completed. Review generated transcript before publishing.",
+      "One or more sensitive-looking values were replaced with explicit redaction markers."
+    ]
+  }
+}
