@@ -1,0 +1,21 @@
+---
+import { wikipediaSearchHref, wikipediaSearchTermFromSlotHtml } from '../lib/wikipedia.ts';
+
+export interface Props {
+  /** Search terms, as entered through a browser's Wikipedia search shortcut. */
+  search?: string;
+  /** Alias for search, useful when the term is a page title. */
+  title?: string;
+  /** Wikipedia language subdomain. Defaults to English. */
+  lang?: string;
+  /** Link text when no child content is supplied. Defaults to the search term. */
+  label?: string;
+}
+
+const { search, title, lang = 'en', label } = Astro.props;
+const slotHtml = Astro.slots.has('default') ? await Astro.slots.render('default') : '';
+const term = search ?? title ?? wikipediaSearchTermFromSlotHtml(slotHtml);
+const href = wikipediaSearchHref(term, { lang });
+---
+
+<a href={href} class="wikipedia-link" rel="noopener noreferrer"><slot>{label ?? term}</slot></a>
