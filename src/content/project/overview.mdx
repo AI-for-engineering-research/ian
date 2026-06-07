@@ -1,6 +1,6 @@
 ---
 title: Project overview
-summary: A starting point for the research project's questions, methods, and expected outputs.
+summary: What I'm planning to do.
 order: 1
 ---
 
@@ -8,7 +8,30 @@ import LorenzAttractor from '../../components/visualizations/LorenzAttractor.ast
 import HopfBifurcation from '../../components/visualizations/HopfBifurcation.astro';
 import ReactionDiffusion from '../../components/visualizations/ReactionDiffusion.astro';
 
-This page should describe the research question, the pilot-class context, and the kinds of evidence you expect to collect.
+## Schematic models in the environmental sciences
+
+In many areas of atmospheric and environmental physics, it's common to use
+simplified ODE or PDE models to represent "schematic" views of physical
+phenomena. Perhaps the best known example of this is the <Wikipedia>Lorenz
+system</Wikipedia> (first animation below), which started out as a model of
+atmospheric convection, but has become *the* paradigmatic example of a
+low-dimensional ODE system exhibiting chaos.
+
+Even in the absence of chaos, the methods of dynamical systems theory can be
+useful for understanding the stability of states of physical systems as
+parameters and conditions change. The second animation below shows the normal
+form of a <Wikipedia>Hopf bifurcation</Wikipedia> as the bifurcation parameter
+varies. For negative μ, there is a single stable equilibrium point at the
+origin, while for positive μ, the equilibrium point becomes unstable and a
+stable periodic limit cycle exists instead. Many physical systems acquire
+oscillatory behavior through these kinds of bifurcations.
+
+These kinds of low-dimensional ODE systems can be used to build PDE models of
+extended media, like the example shown in the third animation. This is a
+<Wikipedia>reaction-diffusion</Wikipedia> equation based on the
+<Wikipedia>FitzHugh-Nagumo model</Wikipedia>. For different model parameter
+values, it displays widely varying pattern formation and wave propagation
+phenomena.
 
 <MediaGrid layout="wide" aria-label="Animated model visualizations">
   <figure class="media-card">
@@ -31,14 +54,42 @@ This page should describe the research question, the pilot-class context, and th
   </figure>
 </MediaGrid>
 
-## Working question
+## Cloud and contrail physics
 
-How do AI tools alter the practice of research, especially when the work includes programming, mathematical exposition, data analysis, and iterative writing?<Sidenote>This is deliberately broad. Later pages can split this into operational questions about speed, correctness, pedagogy, trust, and reproducibility.</Sidenote>
+This approach seem to be less commonly used by researchers in cloud physics
+and contrail modeling. The reasons are pretty clear: if you are looking for
+maximum physical fidelity, a low-dimensional ODE model is not appropriate.
+However, what these models can give you is some understanding of the competing
+influences on physical phenomena, and they can give you an idea of the sources
+of instability in systems.
 
-## Method sketch
+I have found a few papers that build these kinds of very simplified models of
+some cloud and contrail systems, and I think it would be an interesting avenue
+to explore. First there is <Cite>berton-2023</Cite>, which has a
+low-dimensional model of the formation of <Wikipedia>cirrus
+uncinus</Wikipedia> ("mares' tails") clouds. They find that their model has
+what looks like a stable equilibrium for some parameter values, and
+oscillatory behavior for other conditions. Sounds like a Hopf bifurcation?
+Maybe? Worth a look anyway.
 
-- Maintain a session-level research log.
-- Preserve prompts, agent outputs, code diffs, and reflections where appropriate.
-- Compare outcomes across tools and task types.
-- Separate subjective experience from externally checkable artifacts.
+Second, there is <Cite>kaercher-corcos-2025</Cite>, which has a different
+low-dimensional model for different conditions, including some additional
+physical processes and a different set of "important" couplings. I'm not 100%
+sure what to do with this one yet, but it would be quite interesting to
+compare it directly to Berton's model.
 
+## Research plan
+
+1. Duplicate the numerical results of <Cite>berton-2023</Cite>.
+2. Perform a symbolic analysis of Berton's model to work out where the
+   oscillations come from.
+3. Duplicate the numerical results from <Cite>kaercher-corcos-2025</Cite>.
+4. Perform some symbolic analysis of Kärcher & Corcos's model.
+5. Maybe build a spatially extended version of Berton's model including
+   something like the entrainment mechanism in Kärcher's model to see if it
+   can replicate the "puffiness" of cirrus unicus, which looks like some sort
+   of lateral inhibition effect.
+
+Alongside actually doing some of this research, we'll try to explore how AI
+tools alter the practice of research, especially when the work includes
+programming, mathematical exposition, data analysis, and iterative writing.

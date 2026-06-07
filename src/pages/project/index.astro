@@ -6,7 +6,7 @@ const pages = (await getCollection('project', ({ data }) => !data.draft))
   .sort((a, b) => a.data.order - b.data.order || a.data.title.localeCompare(b.data.title));
 ---
 
-<ContentLayout title="Project" description="Background, methods, artifacts, and findings for the pilot-class research project.">
+<ContentLayout title="Project materials">
   <ul class="card-list">
     {pages.map((page) => (
       <li class="card">
