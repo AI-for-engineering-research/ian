@@ -1,0 +1,69 @@
+---
+import PointerIcon from '../icons/PointerIcon.astro';
+import {
+  DEFAULT_REACTION_DIFFUSION_CONFIG,
+  type ColorStop,
+  type ReactionDiffusionConfig,
+  type ReactionDiffusionModel,
+} from '../../lib/visualizations/reactionDiffusion.ts';
+
+export interface Props {
+  title?: string;
+  ariaLabel?: string;
+  model?: Partial<ReactionDiffusionModel>;
+  timestep?: number;
+  dt?: number;
+  stepsPerFrame?: number;
+  simulationResolution?: { width?: number; height?: number };
+  simWidth?: number;
+  simHeight?: number;
+  colorStops?: ColorStop[];
+  class?: string;
+}
+
+const {
+  title = 'FitzHugh-Nagumo reaction-diffusion',
+  ariaLabel = DEFAULT_REACTION_DIFFUSION_CONFIG.ariaLabel,
+  model = {},
+  timestep,
+  dt = timestep ?? DEFAULT_REACTION_DIFFUSION_CONFIG.dt,
+  stepsPerFrame = DEFAULT_REACTION_DIFFUSION_CONFIG.stepsPerFrame,
+  simulationResolution,
+  simWidth = simulationResolution?.width ?? DEFAULT_REACTION_DIFFUSION_CONFIG.simWidth,
+  simHeight = simulationResolution?.height ?? DEFAULT_REACTION_DIFFUSION_CONFIG.simHeight,
+  colorStops = DEFAULT_REACTION_DIFFUSION_CONFIG.colorStops,
+  class: extraClass,
+} = Astro.props;
+
+const config: ReactionDiffusionConfig = {
+  ariaLabel,
+  a: model.a ?? DEFAULT_REACTION_DIFFUSION_CONFIG.a,
+  b: model.b ?? DEFAULT_REACTION_DIFFUSION_CONFIG.b,
+  I: model.I ?? DEFAULT_REACTION_DIFFUSION_CONFIG.I,
+  Du: model.Du ?? DEFAULT_REACTION_DIFFUSION_CONFIG.Du,
+  Dv: model.Dv ?? DEFAULT_REACTION_DIFFUSION_CONFIG.Dv,
+  simWidth,
+  simHeight,
+  dt,
+  stepsPerFrame,
+  colorStops,
+};
+
+const className = ['reaction-diffusion', extraClass].filter(Boolean).join(' ');
+const configJson = JSON.stringify(config).replaceAll('</', '<\\/');
+---
+
+<div class={className} data-reaction-diffusion>
+  <canvas aria-label={ariaLabel} role="img" title={title} tabindex="0">
+    {ariaLabel}
+  </canvas>
+  <PointerIcon />
+  <script is:inline type="application/json" data-reaction-diffusion-config set:html={configJson} />
+</div>
+
+<script>
+  import { initializeReactionDiffusions } from '../../lib/visualizations/reactionDiffusion.ts';
+
+  initializeReactionDiffusions();
+  document.addEventListener('astro:page-load', () => initializeReactionDiffusions());
+</script>

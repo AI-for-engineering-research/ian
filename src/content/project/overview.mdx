@@ -5,9 +5,33 @@ order: 1
 ---
 
 import Sidenote from '../../components/Sidenote.astro';
-import Figure from '../../components/Figure.astro';
+import MediaGrid from '../../components/MediaGrid.astro';
+import LorenzAttractor from '../../components/visualizations/LorenzAttractor.astro';
+import HopfBifurcation from '../../components/visualizations/HopfBifurcation.astro';
+import ReactionDiffusion from '../../components/visualizations/ReactionDiffusion.astro';
 
 This page should describe the research question, the pilot-class context, and the kinds of evidence you expect to collect.
+
+<MediaGrid layout="wide" aria-label="Animated model visualizations">
+  <figure class="media-card">
+    <span class="media-grid__frame">
+      <LorenzAttractor viewpoint={{x: 0, y: 1, z: 0}} ariaLabel="Animated Lorenz attractor on a white drawing surface with a dark red point tracing a fading grey-red trail; click to restart from a new initial condition." />
+    </span>
+    <figcaption>Lorenz attractor.</figcaption>
+  </figure>
+  <figure class="media-card">
+    <span class="media-grid__frame">
+      <HopfBifurcation ariaLabel="Animated supercritical Hopf bifurcation on a white drawing surface with restrained grey vector-field arrows, moving sample points, a black origin stability marker, and a black limit cycle after mu crosses zero." />
+    </span>
+    <figcaption>Supercritical Hopf bifurcation.</figcaption>
+  </figure>
+  <figure class="media-card">
+    <span class="media-grid__frame">
+      <ReactionDiffusion ariaLabel="Animated FitzHugh-Nagumo reaction-diffusion simulation using a Belousov-Zhabotinsky-style navy, cyan, cream, orange, and dark-red colormap; click to randomize the chemical field." />
+    </span>
+    <figcaption>FitzHugh-Nagumo reaction-diffusion.</figcaption>
+  </figure>
+</MediaGrid>
 
 ## Working question
 
@@ -20,4 +44,3 @@ How do AI tools alter the practice of research, especially when the work include
 - Compare outcomes across tools and task types.
 - Separate subjective experience from externally checkable artifacts.
 
-<Figure src="/figures/placeholder.svg" alt="Placeholder geometric figure" layout="wide" caption="A wide figure spanning the text column and margin rail." />
