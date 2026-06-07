@@ -7,35 +7,23 @@ export interface Props {
 }
 
 const { entry } = Astro.props;
-const timestamp = entry.createdAt ? new Date(entry.createdAt) : undefined;
-const formattedTime = timestamp?.toLocaleString('en', { dateStyle: 'medium', timeStyle: 'short' });
+const roleLabel = entry.role[0].toUpperCase() + entry.role.slice(1);
+const collapseLongText = entry.role === 'assistant' ? 10 : undefined;
 ---
 
-<article id={entry.id} class={`session-entry session-entry--${entry.role}`}>
+<article id={entry.id} class={`session-entry session-entry--${entry.role}`} aria-labelledby={`${entry.id}-label`}>
   <header class="session-entry__header">
-    <div>
-      <a class="session-entry__anchor" href={`#${entry.id}`}>#{entry.id}</a>
-      <span class="session-entry__role">{entry.role}</span>
+    <div class="session-entry__identity">
+      <span id={`${entry.id}-label`} class="session-entry__role">{roleLabel}</span>
       {entry.title && <span class="session-entry__title">{entry.title}</span>}
     </div>
-    <div class="session-entry__meta">
-      <span>Entry {entry.index + 1}</span>
-      {formattedTime && <time datetime={entry.createdAt}>{formattedTime}</time>}
+    <div class="session-entry__meta" aria-label={`Transcript entry ${entry.index + 1}`}>
+      Entry {entry.index + 1}
     </div>
   </header>
 
   {entry.branch && (
     <p class="session-entry__annotation"><strong>Branch:</strong> {entry.branch}</p>
-  )}
-
-  {entry.parentId && (
-    <p class="session-entry__annotation"><strong>Parent source ID:</strong> <code>{entry.parentId}</code></p>
-  )}
-
-  {entry.omissions && entry.omissions.length > 0 && (
-    <aside class="session-entry__notice" aria-label="Omitted content">
-      {entry.omissions.map((omission) => <p>{omission.count} {omission.kind} block(s) omitted: {omission.reason}</p>)}
-    </aside>
   )}
 
   {entry.redactions && entry.redactions.length > 0 && (
@@ -48,6 +36,6 @@ const formattedTime = timestamp?.toLocaleString('en', { dateStyle: 'medium', tim
   )}
 
   <div class="session-entry__content">
-    {entry.content.map((block) => <SessionContentBlock block={block} />)}
+    {entry.content.map((block) => <SessionContentBlock block={block} collapseAfterLines={collapseLongText} />)}
   </div>
 </article>

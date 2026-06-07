@@ -52,10 +52,12 @@ test('imports a JSONL session into private work artifacts, public transcript JSO
     const publicTranscript = JSON.parse(await readFile(result.sessionOutputPath, 'utf8'));
     assert.equal(publicTranscript.title, 'Add Log Fixture');
     assert.equal(publicTranscript.source.sessionId, 'fixture-session-001');
-    assert.ok(publicTranscript.highlights.some((highlight: { entries: string[] }) => highlight.entries.includes('entry-2')));
+    assert.deepEqual(publicTranscript.highlights, []);
 
     const mdx = await readFile(result.logOutputPath, 'utf8');
     assert.match(mdx, /^draft: true$/m);
+    assert.doesNotMatch(mdx, /^summary:/m);
+    assert.doesNotMatch(mdx, /^# Add Log Fixture$/m);
     assert.match(mdx, /^transcript:$/m);
     assert.match(mdx, /Imported at: 2026-06-06T20:10:00.000Z/);
     assert.match(mdx, /\/sessions\/002-add-log-fixture\/#entry-2/);

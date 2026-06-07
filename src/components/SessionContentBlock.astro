@@ -4,19 +4,41 @@ import type { TranscriptContentBlock } from '../lib/piSessionParser.ts';
 
 export interface Props {
   block: TranscriptContentBlock;
+  collapseAfterLines?: number;
 }
 
-const { block } = Astro.props;
+const { block, collapseAfterLines } = Astro.props;
 
 function formatJson(value: unknown): string {
   if (value === undefined) return '';
   if (typeof value === 'string') return value;
   return JSON.stringify(value, null, 2);
 }
+
+function splitTextForCollapse(text: string, lineLimit: number | undefined): { preview: string; rest?: string; hiddenLineCount?: number } {
+  if (!lineLimit || lineLimit <= 0) return { preview: text };
+  const lines = text.replace(/\r\n?/g, '\n').split('\n');
+  if (lines.length <= lineLimit) return { preview: text };
+  const preview = lines.slice(0, lineLimit).join('\n');
+  const rest = lines.slice(lineLimit).join('\n');
+  return { preview, rest, hiddenLineCount: lines.length - lineLimit };
+}
+
+const textParts = block.type === 'text' ? splitTextForCollapse(block.text, collapseAfterLines) : undefined;
 ---
 
-{block.type === 'text' && (
-  <div class={`session-block session-block--text session-block--${block.format ?? 'markdown'}`} set:html={renderSafeMarkdown(block.text)} />
+{block.type === 'text' && textParts && !textParts.rest && (
+  <div class={`session-block session-block--text session-block--${block.format ?? 'markdown'}`} set:html={renderSafeMarkdown(textParts.preview)} />
+)}
+
+{block.type === 'text' && textParts?.rest && (
+  <div class={`session-block session-block--text session-block--collapsed-text session-block--${block.format ?? 'markdown'}`}>
+    <div set:html={renderSafeMarkdown(textParts.preview)} />
+    <details class="session-block__continuation">
+      <summary>Show remaining {textParts.hiddenLineCount} line{textParts.hiddenLineCount === 1 ? '' : 's'}</summary>
+      <div set:html={renderSafeMarkdown(textParts.rest)} />
+    </details>
+  </div>
 )}
 
 {block.type === 'tool_call' && (

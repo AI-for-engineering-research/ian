@@ -4,13 +4,12 @@ import type { NormalizedSessionTranscript } from '../lib/piSessionParser.ts';
 
 export interface Props {
   transcript: NormalizedSessionTranscript;
-  slug: string;
 }
 
-const { transcript, slug } = Astro.props;
+const { transcript } = Astro.props;
 ---
 
-<section class="session-transcript" aria-labelledby="session-transcript-heading">
+<section class="session-transcript">
   {transcript.redaction.status === 'needs_review' && (
     <aside class="session-redaction-banner" role="note" aria-label="Redaction review required">
       <strong>Redaction review required.</strong>
@@ -21,31 +20,6 @@ const { transcript, slug } = Astro.props;
         </ul>
       )}
     </aside>
-  )}
-
-  <div class="session-transcript__metadata">
-    <h2 id="session-transcript-heading">Transcript</h2>
-    <dl>
-      <div><dt>Source</dt><dd>{transcript.source.kind}</dd></div>
-      {transcript.source.sessionId && <div><dt>Session ID</dt><dd><code>{transcript.source.sessionId}</code></dd></div>}
-      <div><dt>Imported</dt><dd><time datetime={transcript.source.importedAt}>{new Date(transcript.source.importedAt).toLocaleString('en', { dateStyle: 'medium', timeStyle: 'short' })}</time></dd></div>
-      <div><dt>Entries</dt><dd>{transcript.entries.length}</dd></div>
-    </dl>
-  </div>
-
-  {transcript.highlights.length > 0 && (
-    <nav class="session-highlights" aria-label="Transcript highlights">
-      <h2>Highlights</h2>
-      <ul>
-        {transcript.highlights.map((highlight: any) => (
-          <li>
-            <strong>{highlight.title}</strong>
-            <p>{highlight.summary}</p>
-            <p>{highlight.entries.map((entryId: string) => <a href={`/sessions/${slug}/#${entryId}`}>{entryId}</a>)}</p>
-          </li>
-        ))}
-      </ul>
-    </nav>
   )}
 
   <div class="session-transcript__entries">

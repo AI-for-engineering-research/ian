@@ -12,7 +12,7 @@ const entries = (await getCollection('log', ({ data }) => !data.draft))
       <li class="card">
         <h2><a href={`/log/${entry.id}/`}>{entry.data.title}</a></h2>
         <p class="content-meta"><time datetime={entry.data.date.toISOString()}>{entry.data.date.toLocaleDateString('en', { year: 'numeric', month: 'long', day: 'numeric' })}</time></p>
-        <p>{entry.data.summary}</p>
+        {entry.data.summary && <p>{entry.data.summary}</p>}
         {(entry.data.tags.length > 0 || entry.data.agents.length > 0) && (
           <ul class="tag-list">
             {entry.data.agents.map((agent) => <li>agent: {agent}</li>)}

@@ -12,5 +12,5 @@ const { session } = Astro.props;
 ---
 
 <ContentLayout title={session.data.title} description={session.data.summary} eyebrow="Session transcript">
-  <SessionTranscript transcript={session.data} slug={session.id} />
+  <SessionTranscript transcript={session.data} />
 </ContentLayout>

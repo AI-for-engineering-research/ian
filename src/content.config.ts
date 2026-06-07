@@ -29,7 +29,7 @@ const log = defineCollection({
   schema: z.object({
     title: z.string(),
     date: z.date(),
-    summary: z.string(),
+    summary: z.string().optional(),
     tags: z.array(z.string()).default([]),
     agents: z.array(z.string()).default([]),
     draft: z.boolean().default(false),

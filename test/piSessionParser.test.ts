@@ -50,13 +50,12 @@ test('converts representative Pi JSONL fixture into the normalized transcript sc
   assert.match(transcript.entries[8].content[0].type === 'text' ? transcript.entries[8].content[0].text : '', /branch notes were compacted/);
 });
 
-test('representative fixture omits thinking and redacts synthetic sensitive-looking values', () => {
+test('representative fixture omits thinking without generating public omission notices', () => {
   const transcript = parsePiJsonlSession(representativePiJsonlFixture, { importedAt: '2026-06-06T20:10:00.000Z' });
 
-  assert.deepEqual(transcript.entries[1].omissions, [
-    { kind: 'thinking', count: 1, reason: 'Thinking content is omitted from public transcripts.' },
-  ]);
+  assert.deepEqual(transcript.entries[1].omissions, []);
   assert.equal(JSON.stringify(transcript).includes('Synthetic private reasoning'), false);
+  assert.equal(JSON.stringify(transcript).includes('Thinking omitted'), false);
 
   const redactedEntry = transcript.entries[9];
   const textBlock = redactedEntry.content[0];
@@ -88,7 +87,7 @@ test('assigns stable display IDs in render order while preserving source IDs and
   );
 });
 
-test('omits thinking blocks from public content and records omission metadata', () => {
+test('omits thinking blocks from public content without recording omission metadata', () => {
   const jsonl = JSON.stringify({
     id: 'assistant-thinking',
     role: 'assistant',
@@ -102,10 +101,25 @@ test('omits thinking blocks from public content and records omission metadata', 
   const [entry] = transcript.entries;
 
   assert.deepEqual(entry.content, [{ type: 'text', text: 'Public answer.', format: 'plain' }]);
-  assert.deepEqual(entry.omissions, [
-    { kind: 'thinking', count: 1, reason: 'Thinking content is omitted from public transcripts.' },
-  ]);
+  assert.deepEqual(entry.omissions, []);
   assert.equal(JSON.stringify(entry).includes('private chain of thought'), false);
+  assert.equal(JSON.stringify(entry).includes('Thinking omitted'), false);
+});
+
+test('drops entries that contain only thinking blocks', () => {
+  const jsonl = [
+    JSON.stringify({ id: 'assistant-thinking-only', role: 'assistant', content: [{ type: 'thinking', text: 'private chain of thought' }] }),
+    JSON.stringify({ id: 'assistant-public', role: 'assistant', content: 'Public answer.' }),
+  ].join('\n');
+
+  const transcript = parsePiJsonlSession(jsonl, { importedAt: '2026-06-06T20:10:00.000Z' });
+
+  assert.deepEqual(
+    transcript.entries.map((entry) => entry.sourceId),
+    ['assistant-public'],
+  );
+  assert.equal(transcript.entries[0].id, 'entry-1');
+  assert.equal(JSON.stringify(transcript).includes('private chain of thought'), false);
 });
 
 test('redacts sensitive paths, secrets, environment values, and long blobs while preserving email addresses', () => {

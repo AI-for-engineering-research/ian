@@ -100,17 +100,25 @@ export function renderSafeMarkdown(markdown: string): string {
       continue;
     }
 
-    const heading = line.match(/^(#{1,3})\s+(.+)$/);
+    const heading = line.match(/^\s{0,3}(#{1,6})\s+(.+)$/);
     if (heading) {
       flushParagraph();
       flushLists();
       flushBlockquote();
-      const level = heading[1].length + 2;
+      const level = Math.min(6, heading[1].length + 2);
       html.push(`<h${level}>${renderInline(heading[2])}</h${level}>`);
       continue;
     }
 
-    const unorderedItem = line.match(/^[-*]\s+(.+)$/);
+    if (/^\s{0,3}(?:-{3,}|\*{3,}|_{3,})\s*$/.test(line)) {
+      flushParagraph();
+      flushLists();
+      flushBlockquote();
+      html.push('<hr>');
+      continue;
+    }
+
+    const unorderedItem = line.match(/^\s{0,3}[-*+]\s+(.+)$/);
     if (unorderedItem) {
       flushParagraph();
       flushOrderedList();
@@ -119,7 +127,7 @@ export function renderSafeMarkdown(markdown: string): string {
       continue;
     }
 
-    const orderedItem = line.match(/^\d+[.)]\s+(.+)$/);
+    const orderedItem = line.match(/^\s{0,3}\d+[.)]\s+(.+)$/);
     if (orderedItem) {
       flushParagraph();
       flushUnorderedList();

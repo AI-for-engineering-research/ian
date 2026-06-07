@@ -44,7 +44,7 @@
       "content": [
         {
           "type": "text",
-          "text": "Created a starter structure and noted future transcript-linking needs."
+          "text": "Created a starter structure.\nLine 2 of the assistant explanation.\nLine 3 of the assistant explanation.\nLine 4 of the assistant explanation.\nLine 5 of the assistant explanation.\nLine 6 of the assistant explanation.\nLine 7 of the assistant explanation.\nLine 8 of the assistant explanation.\nLine 9 of the assistant explanation.\nLine 10 of the assistant explanation.\nLine 11 of the assistant explanation.\nLine 12 of the assistant explanation."
         },
         {
           "type": "tool_call",
@@ -62,13 +62,7 @@
           "collapsed": true
         }
       ],
-      "omissions": [
-        {
-          "kind": "thinking",
-          "count": 1,
-          "reason": "Thinking content is omitted from public transcripts."
-        }
-      ]
+      "omissions": []
     },
     {
       "id": "entry-3",
@@ -99,14 +93,7 @@
       "truncated": true
     }
   ],
-  "highlights": [
-    {
-      "id": "setup",
-      "title": "Initial setup",
-      "summary": "The session established the shape of future research-log entries.",
-      "entries": ["entry-1", "entry-2"]
-    }
-  ],
+  "highlights": [],
   "redactionSummary": [
     {
       "kind": "path",
@@ -116,6 +103,8 @@
   ],
   "redaction": {
     "status": "needs_review",
-    "reviewNotes": ["Fixture exercises the public review banner."]
+    "reviewNotes": [
+      "Fixture exercises the public review banner."
+    ]
   }
 }

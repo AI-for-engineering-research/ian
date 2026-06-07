@@ -126,12 +126,9 @@ function normalizeRecord(record: ParsedRecord): NormalizedTranscriptEntry[] {
   if (!role) return [];
 
   const content: TranscriptContentBlock[] = [];
-  let omittedThinkingCount = 0;
 
   const rawContent = message.content ?? message.parts ?? message.blocks ?? message.text ?? message.markdown;
-  collectContentBlocks(rawContent, content, (count) => {
-    omittedThinkingCount += count;
-  });
+  collectContentBlocks(rawContent, content);
 
   collectToolCalls(message.tool_calls ?? message.toolCalls ?? record.raw.tool_calls ?? record.raw.toolCalls, content);
   collectToolResults(message.tool_results ?? message.toolResults ?? record.raw.tool_results ?? record.raw.toolResults, content);
@@ -141,10 +138,6 @@ function normalizeRecord(record: ParsedRecord): NormalizedTranscriptEntry[] {
   const compactionNote = firstString(message.compactionNote, record.raw.compactionNote, message.summary, record.raw.summary);
   if (compactionNote && isCompactionRecord(message, record.raw)) {
     content.push({ type: 'text', text: compactionNote, format: 'plain' });
-  }
-
-  if (content.length === 0 && omittedThinkingCount > 0) {
-    content.push({ type: 'text', text: '[Thinking omitted from public transcript.]', format: 'plain' });
   }
 
   if (content.length === 0) return [];
@@ -160,9 +153,7 @@ function normalizeRecord(record: ParsedRecord): NormalizedTranscriptEntry[] {
     ...(branch ? { branch } : {}),
     ...titleField(message, record.raw),
     content,
-    ...(omittedThinkingCount > 0
-      ? { omissions: [{ kind: 'thinking', count: omittedThinkingCount, reason: 'Thinking content is omitted from public transcripts.' }] }
-      : {}),
+    omissions: [],
     redactions: [],
     truncated: false,
   };
@@ -170,7 +161,7 @@ function normalizeRecord(record: ParsedRecord): NormalizedTranscriptEntry[] {
   return [entry];
 }
 
-function collectContentBlocks(rawContent: unknown, content: TranscriptContentBlock[], omitThinking: (count: number) => void): void {
+function collectContentBlocks(rawContent: unknown, content: TranscriptContentBlock[]): void {
   if (typeof rawContent === 'string') {
     if (rawContent.length > 0) content.push({ type: 'text', text: rawContent, format: 'markdown' });
     return;
@@ -189,7 +180,6 @@ function collectContentBlocks(rawContent: unknown, content: TranscriptContentBlo
 
     const type = firstString(obj.type, obj.kind, obj.name)?.toLowerCase();
     if (type && ['thinking', 'reasoning', 'thought', 'chain_of_thought'].includes(type)) {
-      omitThinking(1);
       continue;
     }
 

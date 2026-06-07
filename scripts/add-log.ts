@@ -88,7 +88,7 @@ export async function addLog(options: AddLogOptions): Promise<AddLogResult> {
     requireAnalysis: options.requireAnalysis,
   });
 
-  const publicTranscript = attachHighlights(transcript, analysis.highlights);
+  const publicTranscript = transcript;
   const mdx = generateDraftMdx({ slug: options.slug, title, date: options.date ?? todayIsoDate(), transcript: publicTranscript, analysis });
 
   validatePublicTranscript(publicTranscript);
@@ -180,7 +180,7 @@ export function generateDraftMdx({
   const transcriptHref = `/sessions/${slug}/`;
   const highlightSection = analysis.highlights.length > 0 ? renderHighlightSection(slug, analysis.highlights) : renderTodoSection(slug, transcript);
 
-  return `---\ntitle: ${yamlString(title)}\ndate: ${date}\nsummary: ${yamlString(`Draft research log generated from ${transcript.title}.`)}\ntags:\n  - agent-logs\nagents:\n  - Pi\ndraft: true\ntranscript:\n  session: ${yamlString(slug)}\n  title: ${yamlString(transcript.title)}\n  href: ${yamlString(transcriptHref)}\n  spans:\n${renderFrontmatterSpans(uniqueSpans)}---\n\n# ${title}\n\n> TODO: Review the generated transcript, redactions, and highlights before publishing.\n\n## Transcript metadata\n\n- Transcript: [${slug}](${transcriptHref})\n- Imported at: ${transcript.source.importedAt}\n- Entries: ${transcript.entries.length}\n- Participants: ${transcript.participants.map((participant) => participant.name).join(', ')}\n- Redaction status: ${transcript.redaction.status}\n- Analysis status: ${analysis.status}\n\n${highlightSection}\n\n## Notes\n\nTODO: Add interpretation, methodological context, and takeaways.\n`;
+  return `---\ntitle: ${yamlString(title)}\ndate: ${date}\ntags:\n  - agent-logs\nagents:\n  - Pi\ndraft: true\ntranscript:\n  session: ${yamlString(slug)}\n  title: ${yamlString(transcript.title)}\n  href: ${yamlString(transcriptHref)}\n  spans:\n${renderFrontmatterSpans(uniqueSpans)}---\n\n> TODO: Review the generated transcript, redactions, and highlights before publishing.\n\n## Transcript metadata\n\n- Transcript: [${slug}](${transcriptHref})\n- Imported at: ${transcript.source.importedAt}\n- Entries: ${transcript.entries.length}\n- Participants: ${transcript.participants.map((participant) => participant.name).join(', ')}\n- Redaction status: ${transcript.redaction.status}\n- Analysis status: ${analysis.status}\n\n${highlightSection}\n\n## Notes\n\nTODO: Add interpretation, methodological context, and takeaways.\n`;
 }
 
 function renderFrontmatterSpans(spans: Array<{ entryId: string; label: string }>): string {
@@ -200,18 +200,6 @@ function renderHighlightSection(slug: string, highlights: SessionHighlightCandid
 function renderTodoSection(slug: string, transcript: NormalizedSessionTranscript): string {
   const firstEntry = transcript.entries[0]?.id ?? 'entry-1';
   return `## Highlight TODOs\n\n- TODO: Select noteworthy transcript spans, starting with [${firstEntry}](/sessions/${slug}/#${firstEntry}).\n`;
-}
-
-function attachHighlights(transcript: NormalizedSessionTranscript, highlights: SessionHighlightCandidate[]): NormalizedSessionTranscript {
-  return {
-    ...transcript,
-    highlights: highlights.map((highlight) => ({
-      id: sanitizeId(highlight.id),
-      title: highlight.title,
-      summary: highlight.summary,
-      entries: highlight.entries,
-    })),
-  };
 }
 
 function validateImportOptions(options: AddLogOptions): void {
@@ -248,12 +236,6 @@ function validatePublicTranscript(transcript: NormalizedSessionTranscript): void
     if (entry.content.length === 0) throw new Error(`Transcript entry ${entry.id} has no content.`);
     entryIds.add(entry.id);
     entryIndexes.add(entry.index);
-  }
-  for (const highlight of transcript.highlights as Array<{ id?: unknown; entries?: unknown }>) {
-    if (typeof highlight.id !== 'string' || !/^[a-z0-9][a-z0-9_-]*$/.test(highlight.id)) throw new Error('Transcript highlight has an invalid id.');
-    if (!Array.isArray(highlight.entries) || !highlight.entries.every((entryId) => typeof entryId === 'string' && entryIds.has(entryId))) {
-      throw new Error(`Transcript highlight ${highlight.id} references an unknown entry.`);
-    }
   }
 }
 
@@ -305,11 +287,6 @@ function todayIsoDate(): string {
 
 function yamlString(value: string): string {
   return JSON.stringify(value);
-}
-
-function sanitizeId(value: string): string {
-  const sanitized = value.toLowerCase().replace(/[^a-z0-9_-]+/g, '-').replace(/^-+/, '').replace(/-+$/, '');
-  return sanitized || 'highlight-1';
 }
 
 async function main(): Promise<void> {
