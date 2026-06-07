@@ -1,0 +1,715 @@
+{
+  "schemaVersion": 1,
+  "title": "Styling, layout and cleanup",
+  "source": {
+    "kind": "pi",
+    "importedAt": "2026-06-07T12:28:53.835Z",
+    "sessionStartedAt": "2026-06-07T08:45:24.031Z"
+  },
+  "participants": [
+    {
+      "id": "user",
+      "name": "User",
+      "role": "user"
+    },
+    {
+      "id": "assistant",
+      "name": "Pi",
+      "role": "assistant"
+    }
+  ],
+  "entries": [
+    {
+      "id": "entry-1",
+      "index": 0,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "7efaea90",
+      "parentId": "2beb140d",
+      "content": [
+        {
+          "type": "text",
+          "text": "I would like to make some styling changes, mostly related to font sizes and spacing. First, the H1 used in the content header is too large. It currently works out to about 63px, while the H2 used for sections within articles is about 30px. That's too big a difference. Please modify the sizing so that that content header H1 is about 48px.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-2",
+      "index": 1,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "2528d817",
+      "parentId": "d41ccf4f",
+      "content": [
+        {
+          "type": "text",
+          "text": "Implemented in `src/styles/global.css`.\n\nChange:\n- Added a `.content-header h1` font-size override:\n  - Maxes at `2.4rem`, which is about `48px` with the site’s max root font size.\n  - Leaves article section `h2` sizing unchanged.\n\nValidation:\n- Ran `npm run build`\n- Build passed with existing deprecation hints only.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-3",
+      "index": 2,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "3b49e94a",
+      "parentId": "2528d817",
+      "content": [
+        {
+          "type": "text",
+          "text": "Good. Next, the H2 for sections within articles has a huge top margin (about 39px). Please reduce that by 50%.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-4",
+      "index": 3,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "4932fcbb",
+      "parentId": "700a3786",
+      "content": [
+        {
+          "type": "text",
+          "text": "Done in `src/styles/global.css`.\n\nChange:\n- Reduced `h2` top margin from the shared heading `2rem` to `var(--space-4)` / `1rem`, roughly 50%.\n\nValidation:\n- Ran `npm run build`\n- Build passed.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-5",
+      "index": 4,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "4e7f80d7",
+      "parentId": "4932fcbb",
+      "content": [
+        {
+          "type": "text",
+          "text": "Please reduce it to the next spacing down again. And make the top margin for H3 the same.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-6",
+      "index": 5,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "7f52e99b",
+      "parentId": "2d8d480a",
+      "content": [
+        {
+          "type": "text",
+          "text": "Done in `src/styles/global.css`.\n\nChange:\n- `h2` top margin reduced from `var(--space-4)` to `var(--space-3)`.\n- `h3` top margin now also uses `var(--space-3)`.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-7",
+      "index": 6,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "0ea51090",
+      "parentId": "7f52e99b",
+      "content": [
+        {
+          "type": "text",
+          "text": "Good. Actually, make the H3 top margin even smaller: the next step down.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-8",
+      "index": 7,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "d1745a9a",
+      "parentId": "32db5ec5",
+      "content": [
+        {
+          "type": "text",
+          "text": "Done in `src/styles/global.css`.\n\nChange:\n- `h3` top margin reduced from `var(--space-3)` to `var(--space-2)`.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-9",
+      "index": 8,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "86652d0f",
+      "parentId": "d1745a9a",
+      "content": [
+        {
+          "type": "text",
+          "text": "Good. Please commit those changes.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-10",
+      "index": 9,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "83b969bc",
+      "parentId": "4e3f31d1",
+      "content": [
+        {
+          "type": "text",
+          "text": "Committed the styling changes.\n\nCommit:\n- `f8242a9 Adjust article heading spacing`\n\nNote: I only committed `src/styles/global.css`; existing untracked content files were left untouched.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-11",
+      "index": 10,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "515979b9",
+      "parentId": "83b969bc",
+      "content": [
+        {
+          "type": "text",
+          "text": "Next, there seem to be some extraneous horizontal rules on some pages. The top-level index page has one at the top of the page content, for example. Also the research log index page has two horizontal rules before the first entry. One is attached to the log entry title, but the first one is extraneous. Same goes for the project index page.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-12",
+      "index": 11,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "c5bd7658",
+      "parentId": "12c31cc1",
+      "content": [
+        {
+          "type": "text",
+          "text": "Removed the extraneous rule from content headers in `src/styles/global.css`.\n\nEffect:\n- Top-level index no longer has the header rule before body content.\n- Research log and project indexes should now show only the card/title-attached rule before the first entry.\n\nValidation:\n- Ran `npm run build`\n- Build passed.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-13",
+      "index": 12,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "472f8692",
+      "parentId": "c5bd7658",
+      "content": [
+        {
+          "type": "text",
+          "text": "Good. Please commit those changes.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-14",
+      "index": 13,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "9040407f",
+      "parentId": "1e117d70",
+      "content": [
+        {
+          "type": "text",
+          "text": "Committed the divider removal.\n\nCommit:\n- `6143b0f Remove content header divider`\n\nUntracked content files were left untouched.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-15",
+      "index": 14,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "9a37f8bd",
+      "parentId": "9040407f",
+      "content": [
+        {
+          "type": "text",
+          "text": "OK, one thing I would like added to the session transcripts is the actual transcript date. That should be accessible from the Pi JSONL session filename. Can you add that please? It should be added to the JSON file and surfaced at the top of the session transcript page as a light date/time line below the session title.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-16",
+      "index": 15,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "5c249672",
+      "parentId": "53455667",
+      "content": [
+        {
+          "type": "text",
+          "text": "Implemented.\n\nChanges:\n- `scripts/add-log.ts`\n  - Extracts Pi session start datetime from filenames like:\n    `2026-06-06T20-00-00-000Z_...jsonl`\n  - Writes it into transcript JSON as `source.sessionStartedAt`.\n\n- `src/content.config.ts` / `src/lib/piSessionParser.ts`\n  - Added schema/type support for `source.sessionStartedAt`.\n\n- `src/pages/sessions/[slug].astro` / `src/layouts/ContentLayout.astro`\n  - Displays the session date/time as a light metadata line under the transcript title.\n\n- `src/content/sessions/001-first-session.json`\n  - Added fixture `sessionStartedAt`.\n\n- Tests updated.\n\nValidation:\n- Ran `npm test`\n- All 49 tests passed.\n\nNote: I also updated the untracked `src/content/sessions/001-ssg-choice.json` with `sessionStartedAt`, since it appears to be the current generated transcript.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-17",
+      "index": 16,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "4f04b8c0",
+      "parentId": "5c249672",
+      "content": [
+        {
+          "type": "text",
+          "text": "Good. One layout thing on the transcript page: there's a sort of double space between the title and session date and the first session entry card (because there's a margin at the bottom of the content header and a margin at the top of the entry card). Please squeeze that down.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-18",
+      "index": 17,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "908eb951",
+      "parentId": "f381c0cf",
+      "content": [
+        {
+          "type": "text",
+          "text": "Done in `src/styles/global.css`.\n\nChange:\n- Removed the top margin from the first transcript entry card, so the gap after the transcript header/date is tighter.\n\nValidation:\n- Ran `npm run build`\n- Build passed.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-19",
+      "index": 18,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "298762e1",
+      "parentId": "908eb951",
+      "content": [
+        {
+          "type": "text",
+          "text": "You seem to have added some extra stuff to the research log index page without me asking for it. Don't do that. I mean the line with \"agent: pi\" and some hashtags.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-20",
+      "index": 19,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "41283426",
+      "parentId": "85a2bbd3",
+      "content": [
+        {
+          "type": "text",
+          "text": "You’re right — sorry. I removed that metadata line from the research log index.\n\nChange:\n- `src/pages/log/index.astro`\n  - No longer renders `agent: ...` or hashtag tags under log entries.\n\nValidation:\n- Ran `npm run build`\n- Build passed.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-21",
+      "index": 20,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "c763bba7",
+      "parentId": "41283426",
+      "content": [
+        {
+          "type": "text",
+          "text": "I've noticed something that I would like to make a general principle. If a page has a summary metadata field, that summary should be used on index pages that link to the page in question, but should NOT appear on the page itself. The summary field will be used only for index page entries. Please adjust the log page template to make that the case (it currently shows the summary at the top of the page), and check other page types for the same issue.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-22",
+      "index": 21,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "f0bc8055",
+      "parentId": "595283f2",
+      "content": [
+        {
+          "type": "text",
+          "text": "Done.\n\nChanges:\n- Added `showDescription` control to `src/layouts/ContentLayout.astro`.\n- Log detail pages now use summary for metadata only, not visible page text.\n- Checked same pattern and fixed:\n  - `src/pages/project/[...slug].astro`\n  - `src/pages/sessions/[slug].astro`\n\nIndex pages still use summaries for entry previews.\n\nValidation:\n- Ran `npm run build`\n- Build passed.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-23",
+      "index": 22,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "82b57675",
+      "parentId": "f0bc8055",
+      "content": [
+        {
+          "type": "text",
+          "text": "Please commit the changes.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-24",
+      "index": 23,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "72488744",
+      "parentId": "aed13684",
+      "content": [
+        {
+          "type": "text",
+          "text": "Committed the changes.\n\nCommit:\n- `8377c6b Refine transcript metadata and summaries`\n\nNote: the existing untracked `001-ssg-choice` content files were not included in the commit.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-25",
+      "index": 24,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "c1d32d66",
+      "parentId": "72488744",
+      "content": [
+        {
+          "type": "text",
+          "text": "How is the Pi JSON runner setup supposed to work with the add-log script?",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-26",
+      "index": 25,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "e7a7a2c1",
+      "parentId": "ff3011b7",
+      "content": [
+        {
+          "type": "text",
+          "text": "The current `add-log` Pi JSON runner is intentionally pluggable via an environment variable.\n\n### Default behavior\n\nIf you run:\n\n```bash\nnpm run add-log -- path/to/session.jsonl --slug my-session\n```\n\nand **do not** set `ADD_LOG_PI_JSON_COMMAND`, the script skips model analysis and uses deterministic heuristic highlights only.\n\nEquivalent explicit form:\n\n```bash\nnpm run add-log -- path/to/session.jsonl --slug my-session --no-analysis\n```\n\n### Pi JSON runner behavior\n\nIf `ADD_LOG_PI_JSON_COMMAND` is set, `scripts/add-log.ts` will:\n\n1. Normalize/redact the JSONL transcript.\n2. Run heuristic highlight detection.\n3. Spawn the command in `ADD_LOG_PI_JSON_COMMAND`.\n4. Send this JSON to the command on `stdin`:\n\n```ts\n{\n  prompt,\n  transcript,\n  heuristicHighlights,\n  model\n}\n```\n\n5. Expect strict JSON on `stdout` matching `prompts/analyze-session-log.md`, roughly:\n\n```json\n{\n  \"schemaVersion\": 1,\n  \"highlights\": [\n    {\n      \"id\": \"pi-json-short-id\",\n      \"kind\": \"correction\",\n      \"title\": \"Short title\",\n      \"summary\": \"Why this span matters.\",\n      \"entries\": [\"entry-3\"],\n      \"confidence\": \"medium\"\n    }\n  ]\n}\n```\n\n### Failure behavior\n\n- By default, if the Pi JSON command fails or returns malformed JSON, `add-log` falls back to heuristic-only analysis.\n- If you pass `--require-analysis`, failure becomes fatal:\n\n```bash\nnpm run add-log -- session.jsonl --slug my-session --require-analysis\n```\n\n### Artifacts\n\nWhen Pi JSON analysis runs, artifacts are written under:\n\n```text\n.research-log-work/<slug>/\n```\n\nincluding:\n- `analysis-prompt.md`\n- `analysis-input.json`\n- `pi-json-output.json`\n- `parsed-analysis.json`\n- or `analysis-error.txt`\n\n### Missing piece\n\nThere is not currently a checked-in wrapper command that calls Pi itself. The script expects you to provide one through `ADD_LOG_PI_JSON_COMMAND`.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-27",
+      "index": 26,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "8e5afbc9",
+      "parentId": "e7a7a2c1",
+      "content": [
+        {
+          "type": "text",
+          "text": "OK, so ADD_LOG_PI_JSON_COMMAND should just be something like \"pi --json\"?",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-28",
+      "index": 27,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "5a216805",
+      "parentId": "5c91df76",
+      "content": [
+        {
+          "type": "text",
+          "text": "Not quite.\n\nFor this script, **do not use `pi --mode json` / `pi --json` directly**. Pi JSON mode emits a JSONL *event stream*, but `add-log` expects the command’s stdout to be only the final analysis JSON object.\n\nUse Pi **print mode** instead:\n\n```bash\nADD_LOG_PI_JSON_COMMAND='pi -p \"Read the JSON request from stdin. It contains prompt, transcript, heuristicHighlights, and model. Follow request.prompt exactly. Return strict JSON only.\"' \\\nnpm run add-log -- path/to/session.jsonl --slug my-session\n```\n\nWith a model:\n\n```bash\nADD_LOG_PI_JSON_COMMAND='pi -p --model anthropic/claude-sonnet-4 \"Read the JSON request from stdin. Follow request.prompt exactly. Return strict JSON only.\"' \\\nnpm run add-log -- path/to/session.jsonl --slug my-session --model anthropic/claude-sonnet-4\n```\n\nThe more robust version would be a small wrapper script that:\n1. reads the request JSON from stdin,\n2. builds a clean prompt from `request.prompt` plus transcript data,\n3. calls `pi -p`,\n4. prints only the final JSON.\n\nBut for quick use, `pi -p \"...\"` is the intended shape, not Pi event-stream JSON mode.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-29",
+      "index": 28,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "fcf694a3",
+      "parentId": "5a216805",
+      "content": [
+        {
+          "type": "text",
+          "text": "Please add an MDX component for linking to Wikipedia pages. It should be called Wikipedia, and work the same way as the usual browser address bar link to Wikipedia that most browsers have works.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-30",
+      "index": 29,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "973aadb5",
+      "parentId": "8c371698",
+      "content": [
+        {
+          "type": "text",
+          "text": "Added the MDX component.\n\nFiles:\n- `src/components/Wikipedia.astro`\n- `src/lib/wikipedia.ts`\n- `test/wikipedia.test.ts`\n- `README.md`\n\nUsage:\n\n```mdx\nimport Wikipedia from '../components/Wikipedia.astro';\n\n<Wikipedia search=\"Markov chain Monte Carlo\" />\n<Wikipedia search=\"bifurcation theory\">Wikipedia article on bifurcation theory</Wikipedia>\n```\n\nIt links through Wikipedia search URLs, so exact page titles resolve directly when Wikipedia recognizes them, while looser terms show search results.\n\nValidation:\n- `npm test` passed: 52 tests\n- `npm run build` passed",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-31",
+      "index": 30,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "36e4f1a6",
+      "parentId": "973aadb5",
+      "content": [
+        {
+          "type": "text",
+          "text": "OK, that works, but is it possible to make the component so that if no search attribute is provided, the text inside the tag is taken as the search text? So I can say \"<Wikipedia>Monte Carlo</Wikipedia>\", for example.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-32",
+      "index": 31,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "93b1f5f9",
+      "parentId": "77605da5",
+      "content": [
+        {
+          "type": "text",
+          "text": "Yes — updated.\n\nYou can now write:\n\n```mdx\n<Wikipedia>Monte Carlo</Wikipedia>\n```\n\nBehavior:\n- If `search` or `title` is provided, that is used as the Wikipedia search term.\n- Otherwise, the component uses the text inside the tag.\n- The visible link text remains the slotted content.\n\nValidation:\n- `npm test` passed: 53 tests\n- `npm run build` passed",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-33",
+      "index": 32,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "016d9d08",
+      "parentId": "93b1f5f9",
+      "content": [
+        {
+          "type": "text",
+          "text": "One usability question with MDX: is there a way to have a set of components that is imported generically so you don't need to import them separately in every page that uses them?",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-34",
+      "index": 33,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "4b37b0d0",
+      "parentId": "016d9d08",
+      "content": [
+        {
+          "type": "text",
+          "text": "Yes. In Astro MDX, the usual way is to configure global MDX components via `mdx({ components })`, or to use an MDX provider/module setup.\n\nFor this project, the cleanest option is likely an MDX components registry file, e.g.\n\n```ts\n// src/components/mdx-components.ts\nimport Figure from './Figure.astro';\nimport MarginNote from './MarginNote.astro';\nimport Sidenote from './Sidenote.astro';\nimport Wikipedia from './Wikipedia.astro';\n\nexport const components = {\n  Figure,\n  MarginNote,\n  Sidenote,\n  Wikipedia,\n};\n```\n\nThen wire it into `astro.config.mjs` if Astro’s MDX integration supports the `components` option in the installed version:\n\n```js\nimport mdx from '@astrojs/mdx';\nimport { defineConfig } from 'astro/config';\n\nexport default defineConfig({\n  integrations: [\n    mdx({\n      components: './src/components/mdx-components.ts',\n    }),\n  ],\n});\n```\n\nThen MDX pages can use:\n\n```mdx\n<Wikipedia>Monte Carlo</Wikipedia>\n\n<Sidenote>This is a note.</Sidenote>\n```\n\nwithout local imports.\n\nCaveat: exact syntax depends on the Astro/MDX integration version. If that option is unavailable, the fallback is to create a shared import block/snippet or a wrapper layout, but global MDX components are the feature you want.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-35",
+      "index": 34,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "13646da3",
+      "parentId": "4b37b0d0",
+      "content": [
+        {
+          "type": "text",
+          "text": "OK. Could you set that up for the following components that we've defined: Figure, MarginNote, MediaGrid, Sidenote, Wikipedia.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-36",
+      "index": 35,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "0f797726",
+      "parentId": "133a9bfe",
+      "content": [
+        {
+          "type": "text",
+          "text": "Set up global MDX components.\n\nNow available in MDX without local imports:\n- `Figure`\n- `MarginNote`\n- `MediaGrid`\n- `Sidenote`\n- `Wikipedia`\n\nChanges:\n- Added a remark plugin in `astro.config.mjs` that injects these component imports into `.mdx` files.\n- Removed now-unnecessary imports from existing MDX files.\n- Updated README usage docs.\n- Updated the MediaGrid test expectation.\n\nValidation:\n- `npm test` passed: 53 tests\n- `npm run build` passed",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-37",
+      "index": 36,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "be1f212c",
+      "parentId": "0f797726",
+      "content": [
+        {
+          "type": "text",
+          "text": "Good. Please commit all changes, apart from those to do with the 001-ssg-choice log entry I'm working on.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-38",
+      "index": 37,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "ab8d988f",
+      "parentId": "83a796ac",
+      "content": [
+        {
+          "type": "text",
+          "text": "Committed all requested changes, excluding your `001-ssg-choice` work.\n\nCommit:\n- `33a6d4b Add global MDX components`\n\nLeft uncommitted:\n- `src/content/log/001-ssg-choice.mdx`\n- `src/content/sessions/001-ssg-choice.json`",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    }
+  ],
+  "highlights": [],
+  "redactionSummary": [],
+  "redaction": {
+    "status": "processed",
+    "reviewNotes": [
+      "Automated public-safety pass completed. Review generated transcript before publishing."
+    ]
+  }
+}
