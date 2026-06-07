@@ -1,0 +1,13 @@
+---
+import Sidenote from './Sidenote.astro';
+import { formatCitation, parseCitationSlot } from '../lib/citations.ts';
+
+export interface Props {
+  page?: string | number;
+}
+
+const { page } = Astro.props;
+const keys = parseCitationSlot(await Astro.slots.render('default'));
+const citation = formatCitation('narrative', keys, Astro.locals, page);
+---
+<span class="citation citation--narrative">{citation.inlineText}{citation.newCitationHtml.length > 0 && <Sidenote label={`Show reference for ${citation.inlineText}`}><Fragment set:html={citation.newCitationHtml[0]} /></Sidenote>}</span>

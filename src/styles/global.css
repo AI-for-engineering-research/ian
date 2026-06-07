@@ -253,6 +253,8 @@ th, td { border-bottom: var(--rule); padding: 0.35rem 0.55rem; text-align: left;
 .content-margin-note__body { font-size: 0.84rem; }
 .content-sidenote__body :first-child, .content-margin-note__body :first-child { margin-top: 0; }
 .content-sidenote__body :last-child, .content-margin-note__body :last-child { margin-bottom: 0; }
+.citation-list { display: grid; gap: var(--space-2); margin: 0; padding: 0; list-style: none; }
+.citation-list li { margin: 0; }
 
 .card-list { display: grid; gap: var(--space-4); max-width: var(--measure); padding: 0; list-style: none; }
 .card { border-top: var(--rule); padding-top: var(--space-3); }

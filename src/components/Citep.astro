@@ -1,0 +1,14 @@
+---
+import Sidenote from './Sidenote.astro';
+import { formatCitation, parseCitationSlot } from '../lib/citations.ts';
+
+export interface Props {
+  page?: string | number;
+}
+
+const { page } = Astro.props;
+const keys = parseCitationSlot(await Astro.slots.render('default'));
+const citation = formatCitation('parenthetical', keys, Astro.locals, page);
+const hasMultipleNewReferences = citation.newCitationHtml.length > 1;
+---
+<span class="citation citation--parenthetical">{citation.inlineText}{citation.newCitationHtml.length > 0 && <Sidenote label={`Show reference for ${citation.inlineText}`}>{hasMultipleNewReferences ? <ol class="citation-list">{citation.newCitationHtml.map((html) => <li set:html={html} />)}</ol> : <Fragment set:html={citation.newCitationHtml[0]} />}</Sidenote>}</span>
