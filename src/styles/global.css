@@ -120,7 +120,7 @@ a:hover { color: var(--color-link-hover); }
 }
 .article-layout > * { grid-column: 1; min-width: 0; }
 .content-header { max-width: var(--measure); margin-bottom: var(--space-5); border-bottom: var(--rule); padding-bottom: var(--space-4); }
-.content-header h1 { margin-top: 0; }
+.content-header h1 { margin-top: 0; font-size: clamp(2.1rem, 1.45rem + 1.6vw, 2.4rem); }
 .content-meta { color: var(--color-muted); font-size: 0.9rem; }
 
 h1, h2, h3, h4, h5, h6 {
@@ -130,8 +130,8 @@ h1, h2, h3, h4, h5, h6 {
   margin: var(--space-6) 0 var(--space-3);
 }
 h1 { font-size: clamp(2.1rem, 1.55rem + 2vw, 3.25rem); letter-spacing: -0.025em; }
-h2 { font-size: 1.55rem; }
-h3 { font-size: 1.2rem; font-style: italic; }
+h2 { font-size: 1.55rem; margin-top: var(--space-3); }
+h3 { font-size: 1.2rem; font-style: italic; margin-top: var(--space-2); }
 p, dl, ol, ul, table, blockquote, pre, figure { margin-top: 0; margin-bottom: var(--space-4); }
 p, li, dd, dt { max-width: var(--measure); }
 ol, ul { padding-left: 1.35em; }
