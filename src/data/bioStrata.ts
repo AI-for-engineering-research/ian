@@ -205,7 +205,7 @@ export const bioLayers: BioLayer[] = [
     vignette: 'Distributed systems, cloud infrastructure, web and mobile applications, embedded networking, product engineering, energy efficiency, CFD visualisation, and short independent contracts.',
     remains: [
       "It's good to learn new things. It's good to jump into the deep end of the pool.",
-        "Living with imposter syndrome. It's the default state for sane people",
+        "Living with imposter syndrome. It's the default state for sane people.",
       'Dogs ground you. There are no excuses. You have to be there for them.',
     ],
     fossils: [
