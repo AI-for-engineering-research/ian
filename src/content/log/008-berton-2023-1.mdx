@@ -1,0 +1,31 @@
+---
+title: "Extract Berton 2023 model"
+date: 2026-06-10
+tags:
+  - agent-logs
+agents:
+  - Pi
+draft: false
+---
+
+[Transcript](../../sessions/008-berton-2023-1/)
+
+- This was the first session doing some actual work on the project.
+- I wanted to extract the model from the paper I'm going to start looking at
+  <Citep>berton-2023</Citep> and replicate the numerical results from a few of
+  the test cases.
+- I used the `extract-model` skill I made in [another
+  session](../011-extract-model-skill/).
+- I had made a mistake making the skill to do with tools for PDF text
+  extraction, but the agent figured out what to do, which was interesting to
+  see.
+- As instructed in the skill, the agent surface some ambiguous points in the
+  model extraction process rather than guessing, which was nice to see. Some
+  of these were to do with PDF OCR problems with mathematical notation, and
+  some were misinterpretations of things in the paper. Overall, there were
+  very few problems.
+- I did a few turns of code cleanup based on looking at what the agent
+  produced. It mostly followed the instructions I had given it in the skill
+  and the code was (apart from a couple of weird things) not too bad.
+- I finally asked the agent to produce a notebook to start on replicating the
+  figures from the paper. It did that, again, without any real problems.

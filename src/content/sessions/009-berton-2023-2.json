@@ -1,0 +1,211 @@
+{
+  "schemaVersion": 1,
+  "title": "Check Berton 2023 atmospheric profiles",
+  "source": {
+    "kind": "pi",
+    "importedAt": "2026-06-10T06:43:28.108Z",
+    "sessionStartedAt": "2026-06-10T06:26:27.496Z"
+  },
+  "participants": [
+    {
+      "id": "user",
+      "name": "User",
+      "role": "user"
+    },
+    {
+      "id": "assistant",
+      "name": "Pi",
+      "role": "assistant"
+    }
+  ],
+  "entries": [
+    {
+      "id": "entry-1",
+      "index": 0,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "cad374aa",
+      "parentId": "bfa24035",
+      "content": [
+        {
+          "type": "text",
+          "text": "I'm looking at the plots in the atmospheric profiles notebook, and the relative humidity plot (which should match Figure 4 in the paper) looks a little odd. In the paper, the relative humidity relative to ice is always greater than the relative humidity relative to liquid water. In Section A.3 of the paper, it is stated that H_i > H_l because p_vsl > p_vsi. That implies that there is an error somewhere in the calculation of the relative humidity or vapor pressure in our code or in the calculation in the notebook. Can you work out what's wrong here, please?",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-2",
+      "index": 1,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "07f80ac7",
+      "parentId": "644272fc",
+      "content": [
+        {
+          "type": "text",
+          "text": "Now let me read the key functions in `berton2023.py`:",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-3",
+      "index": 2,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "ec311ed3",
+      "parentId": "2a83c32a",
+      "content": [
+        {
+          "type": "text",
+          "text": "Now let me check the paper for the relevant equations:",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-4",
+      "index": 3,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "66a758fc",
+      "parentId": "04b87edd",
+      "content": [
+        {
+          "type": "text",
+          "text": "Let me look at the notebook imports and also verify the saturation pressures numerically:",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-5",
+      "index": 4,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "d9378a7f",
+      "parentId": "0b91efd3",
+      "content": [
+        {
+          "type": "text",
+          "text": "The underlying code is correct — let me look at the notebook's stored output to see what the actual plot shows:",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-6",
+      "index": 5,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "2e5247f3",
+      "parentId": "06bc184e",
+      "content": [
+        {
+          "type": "text",
+          "text": "I'm looking at the plots in the atmospheric profiles notebook, and the relative humidity plot (which should match Figure 4 in the paper) looks a little odd. In the paper, the relative humidity relative to ice is always greater than the relative humidity relative to liquid water. In Section A.3 of the paper, it is stated that H_i > H_l because p_vsl > p_vsi. That implies that there is an error somewhere in the calculation of the relative humidity or vapor pressure in our code or in the calculation in the notebook. Can you work out what's wrong here, please? (Note that the problem occurs at lower levels in the atmosphere, below about 2 km: the H_i and H_l curves appear to cross at about 2 km, with H_i < H_l for altitudes less than 2 km. That isn't right.)",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-7",
+      "index": 6,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "741b096a",
+      "parentId": "2e5247f3",
+      "content": [
+        {
+          "type": "text",
+          "text": "I'll inspect the temperature profile and saturation pressure behavior below 2 km, since that's where the crossing occurs.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-8",
+      "index": 7,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "17b8389f",
+      "parentId": "797f1453",
+      "content": [
+        {
+          "type": "text",
+          "text": "The crossing is below the freezing level. I'll update the notebook so the ice-relative quantities are only plotted where the paper plots them: from the 0 °C level upward.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-9",
+      "index": 8,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "911146a1",
+      "parentId": "2158fe1f",
+      "content": [
+        {
+          "type": "text",
+          "text": "Let me quickly verify numerically that the only apparent violation was below the freezing level, and that the masked plotted domain satisfies `H_i >= H_l`.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-10",
+      "index": 9,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "e0ee0d7a",
+      "parentId": "1fd3658d",
+      "content": [
+        {
+          "type": "text",
+          "text": "Found it: the relative humidity/vapor-pressure formulas in `src/cloud_rom/berton2023.py` are OK. The problem is the notebook was plotting the ice-relative quantities below their intended/physical domain.\n\nIn the model temperature profile, `T_a = 273.15 K` at about `z = 2 km`. Below that, the notebook was still evaluating/plotting:\n\n- `p_vsi = saturation_pressure_ice(T)`\n- `H_i`\n- `S_i`\n\nBut the paper explicitly says the `H_i`/`S_i` profiles are plotted only down to 2 km, where the temperature reaches the freezing point. Below freezing level? No issue: `p_vsl > p_vsi`, so `H_i > H_l`. Above freezing, the Sonntag ice formula is being extrapolated outside the intended domain and gives `p_vsi > p_vsl`, which flips the inequality and makes `H_i < H_l`.\n\nExample at sea level from our code:\n\n```text\nT = 20 °C\np_vsl = 2339 Pa\np_vsi = 2830 Pa\n```\n\nso the notebook’s low-level crossing is just an invalid ice-saturation extrapolation.\n\nI updated:\n\n```text\nnotebooks/atmospheric-profiles.ipynb\n```\n\nso `H_i` and `S_i` are set to `np.nan` wherever `T > 273.15 K`, matching the paper’s Figure 4 domain. Numerically verified: for all `T <= 273.15 K`, `H_i >= H_l`.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    }
+  ],
+  "highlights": [],
+  "redactionSummary": [],
+  "redaction": {
+    "status": "processed",
+    "reviewNotes": [
+      "Automated public-safety pass completed. Review generated transcript before publishing."
+    ]
+  }
+}

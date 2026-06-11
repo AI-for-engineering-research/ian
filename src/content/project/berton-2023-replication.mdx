@@ -1,0 +1,28 @@
+---
+title: Replicating Berton 2023
+summary: Initial replication work for the Berton 2023 cirrus uncinus model.
+order: 2
+---
+
+As a first step, I wanted to replicate the initial test cases from
+<Cite>berton-2023</Cite>. The code for this is on GitHub in my [`cloud-rom`
+repository](https://github.com/ian-ross/cloud-rom). Interesting things to see
+are:
+
+- [The model
+  code](https://github.com/ian-ross/cloud-rom/blob/main/src/cloud_rom/berton2023.py):
+  this was extracted from the paper by the agent (using ChatGPT 5.5), with
+  only a little extra massaging by me after the fact. It's not too bad.
+- An [atmospheric
+  profiles notebook](https://github.com/ian-ross/cloud-rom/blob/main/notebooks/atmospheric-profiles.ipynb)
+  to check some of the initial and boundary conditions for the model.
+- A notebook replicating the first [steady
+  state](https://github.com/ian-ross/cloud-rom/blob/main/notebooks/replicate-steady-state.ipynb)
+  solution.
+- A notebook replicating the [oscillatory
+  solution](https://github.com/ian-ross/cloud-rom/blob/main/notebooks/replicate-oscillatory-state.ipynb):
+  this is one of the main results of the paper, so I wanted to make sure I
+  could replicated it right away before trying anything else.
+
+More or less everything here was done using Pi and ChatGPT 5.5, starting in
+[this session](../../log/008-berton-2023-1/).

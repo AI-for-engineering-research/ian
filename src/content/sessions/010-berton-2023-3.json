@@ -1,0 +1,301 @@
+{
+  "schemaVersion": 1,
+  "title": "More on Berton 2023 replication",
+  "source": {
+    "kind": "pi",
+    "importedAt": "2026-06-11T15:32:43.058Z",
+    "sessionStartedAt": "2026-06-10T06:44:14.259Z"
+  },
+  "participants": [
+    {
+      "id": "user",
+      "name": "User",
+      "role": "user"
+    },
+    {
+      "id": "assistant",
+      "name": "Pi",
+      "role": "assistant"
+    }
+  ],
+  "entries": [
+    {
+      "id": "entry-1",
+      "index": 0,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "c2ac1200",
+      "parentId": "a4df5841",
+      "content": [
+        {
+          "type": "text",
+          "text": "Please create a notebook (notebooks/replicate-basic-solutions.ipynb) to replicate the plots in Section 3 of the paper. Please also add some logging (using tqdm: you can add it as a dependency) in the simulation function in the main code, so that I can see progress as the simulations run.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-2",
+      "index": 1,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "8bf534e7",
+      "parentId": "cd9ed84d",
+      "content": [
+        {
+          "type": "text",
+          "text": "Implemented.\n\nChanges:\n- Added `tqdm` dependency in `pyproject.toml` and updated `uv.lock`.\n- Added `tqdm.auto.tqdm` progress reporting to `cloud_rom.berton2023.simulate(...)`.\n  - New args: `progress=True`, `progress_desc=\"simulate\"`.\n- Created notebook:\n  - `notebooks/replicate-basic-solutions.ipynb`\n  - Reproduces Section 3 Case 0 basic solution plots:\n    - non-oscillatory mode: Figures 7–15 analogues\n    - oscillatory mode: Figures 16–24 analogues\n\nValidation:\n- `uv run pytest -q` → `6 passed`\n- Notebook JSON/code cells parse successfully.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-3",
+      "index": 2,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "ef73fcda",
+      "parentId": "8bf534e7",
+      "content": [
+        {
+          "type": "text",
+          "text": "Let's concentrate on the steady-state solution in the notebook. I've run the simulation, but it stopped before the full time and the results look a little odd. I've saved the results into notebooks/df_steady.csv. It appears that the initial part of the trajectory has been dropped somehow: most of the plots look reasonable but seem to show only the later part of the trajectory (after maybe 3-3.5 hours?).",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-4",
+      "index": 3,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "fb25d6ea",
+      "parentId": "9d925b40",
+      "content": [
+        {
+          "type": "text",
+          "text": "I inspected `notebooks/df_steady.csv`. Two things are happening:\n\n1. **The initial part is not actually missing**  \n   The CSV starts at `t = 0 second`, `x = 2 kilometer`, `z = 10 kilometer`.\n\n2. **The raw CSV has mixed unit strings**  \n   The first row has `x = 2 kilometer`, but later rows have `x = ... meter`; same for `z`. If reloaded/parsed naively, that can make the early trajectory look wrong or effectively disappear.\n\n3. **The run stopped early because mass is approaching zero**  \n   Your saved steady run ends at about `7836 s ≈ 2.18 h`, not 5 h. The last sampled mass is still positive, but the simulator likely stops shortly after because `stop_on_nonpositive_mass=True`.\n\nI made these changes:\n\n- Updated `initial_state_for_case()` and `case0_initial_state()` so initial `x, z` are stored internally as meters, avoiding mixed-unit CSV output.\n- Reworked `notebooks/replicate-basic-solutions.ipynb` to focus only on the **steady Case 0** solution.\n- Added notebook diagnostics showing:\n  - requested duration vs actual last sampled time\n  - early-stop warning\n  - first rows, to confirm the beginning is present\n- Added zoomed trajectory plots for the first 1.5 h so the early hook/head isn’t visually compressed by the later trail.\n- Added export of a clean numeric CSV:\n  - `notebooks/df_steady_magnitudes.csv`\n\nValidation:\n- `uv run pytest -q` → `6 passed`\n\nOne remaining issue: the model currently sublimates the steady crystal too fast compared with the paper’s stated 5 h lifetime. That looks like a model/parameter discrepancy, not a notebook plotting/drop issue.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-5",
+      "index": 4,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "11fcd6a4",
+      "parentId": "fb25d6ea",
+      "content": [
+        {
+          "type": "text",
+          "text": "Something is definitely not right: based on Figure 11a in the paper, the particle mass should increase for about 3.5 hours, reaching a maximum of more than 1.2 μg. It's also very clear that the first part of the trajectory is not simulated correctly: there is no \"hook\", and the abscissa increases monotically, while according to Figure 8a in the paper, it should *decrease* for the first 3.5 hours (during the \"hook\" phase). My guess would be that there is a sign error somewhere causing the initial forcing to be in the wrong direction. I'll see if I can find anything, but could you also investigate and see if you can find any other potential causes for this problem?",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-6",
+      "index": 5,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "8fe8d04a",
+      "parentId": "b867c6cd",
+      "content": [
+        {
+          "type": "text",
+          "text": "I just noticed something: the Coriolis term is not being set to zero. I included the Coriolis force in the model for later investigation, but in the paper it's always neglected, so we should do the same for the verification exercise. I also noticed that the timestep used in the notebook is 0.04 seconds, while in the paper, Δt = 0.02s. However, some experimentation indicates that neither of those things is the cause of this problem. I've updated the notebook to disable the Coriolis effect and reduce the timestep to 0.02 s, but the simulation is still incorrect and the hook part of the trajectory doesn't happen.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-7",
+      "index": 6,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "ef8bef0f",
+      "parentId": "0082ae24",
+      "content": [
+        {
+          "type": "text",
+          "text": "You are trying to do some very long simulations. I don't think that's the way to go here. Something is going wrong right at the beginning of the simulations: the mass growth rate quickly falls to zero, there is no hook, etc. Concentrate on the beginning of the simulation.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-8",
+      "index": 7,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "f7fb0643",
+      "parentId": "01e59e83",
+      "content": [
+        {
+          "type": "text",
+          "text": "I think it's the definition of the Reynolds number and the drag coefficient that are the problem. Take a look at their values at the first timestep and the second timestep. First, the drag coefficient has a value of O(10^13) at t=0 when it should be between 11 and 12, and Re is approximately 1, when it should be about 2.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-9",
+      "index": 8,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "8388cc50",
+      "parentId": "589a7199",
+      "content": [
+        {
+          "type": "text",
+          "text": "You were right to focus on `Re`/`C_D`.\n\nI found two related issues:\n\n1. **Wrong default Reynolds length convention**\n   - The code defaulted to `reynolds_length=\"radius\"`.\n   - But the paper text before Sect. 3 says it uses `r_i = D_i` in Eq. (4) for the retained numerical convention.\n   - Using radius halves `Re`, raises `C_D`, increases damping, and kills the early lift/hook behavior.\n\n2. **Singular initial zero-slip state**\n   - Table 2 has `w0 = W_a = 0.6 m/s`, so the literal relative speed in Eq. (4) is exactly zero at `t=0`.\n   - That made `Re≈1e-12` and `C_D≈2e13`.\n   - The paper’s plotted branch is clearly the physical terminal/low-Re branch, with `Re≈2`, `C_D≈11`.\n\nI changed `src/cloud_rom/berton2023.py` to:\n\n- Default `SimulationConfig.reynolds_length = \"diameter\"`.\n- Add a `terminal_reynolds_number(...)` fallback for the zero-slip initial state, solving Eqs. (3), (5), and (9) self-consistently.\n- Use that fallback only when instantaneous slip is effectively zero.\n\nNow Case 0 initial diagnostics are:\n\n```text\nRe  = 2.0788\nC_D = 11.3261\nk   = 17.54 1/s\n```\n\nAnd after 20 min with `dt=0.02`, no Coriolis:\n\n```text\nt=0 min    x=2.000 km  z=10.000 km  m=0.936 µg\nt=10 min   x=1.965 km  z=10.023 km  m=0.955 µg\nt=20 min   x=1.868 km  z=10.041 km  m=0.972 µg\n```\n\nSo the early trajectory now moves left and upward, and mass grows.\n\nValidation:\n- `uv run pytest -q` → `7 passed`\n\nIf your notebook explicitly sets `reynolds_length=\"radius\"`, remove that override or set it to `\"diameter\"`.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-10",
+      "index": 9,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "5f6d9073",
+      "parentId": "8388cc50",
+      "content": [
+        {
+          "type": "text",
+          "text": "OK, that works perfectly now. The initial condition was tricky, but everything looks good now.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-11",
+      "index": 10,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "bf1c4da0",
+      "parentId": "5f6d9073",
+      "content": [
+        {
+          "type": "text",
+          "text": "Great — glad that fixed it.\n\nThe key fixes were:\n- using the paper’s retained `Re` convention (`D_i`, not `D_i/2`);\n- handling the zero-slip initial condition via the terminal low-Re branch instead of letting `C_D` blow up.\n\nThat explains why the early hook and mass-growth phase were missing before.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-12",
+      "index": 11,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "21f44637",
+      "parentId": "bf1c4da0",
+      "content": [
+        {
+          "type": "text",
+          "text": "Now, please rename the notebook for the steady state to reflect that it's for the steady state and make an equivalent notebook for replicating the oscillatory state. Factor out any common setup and plotting code into a separate module.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-13",
+      "index": 12,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "5a2a5c78",
+      "parentId": "9b438e23",
+      "content": [
+        {
+          "type": "text",
+          "text": "Done.\n\nChanges:\n- Renamed/replaced notebook:\n  - `notebooks/replicate-steady-state.ipynb`\n- Added oscillatory notebook:\n  - `notebooks/replicate-oscillatory-state.ipynb`\n- Removed old:\n  - `notebooks/replicate-basic-solutions.ipynb`\n- Factored shared notebook utilities into:\n  - `src/cloud_rom/berton2023_plots.py`\n\nThe new helper module includes:\n- Case 0 runner\n- Pint-to-magnitude conversion\n- numeric CSV export\n- run summaries\n- shared plotting functions for trajectory/hodograph, x/z, microphysics drivers, size state, and drag/damping diagnostics\n\nValidation:\n- Notebook code cells parse successfully.\n- `uv run python -m py_compile src/cloud_rom/berton2023_plots.py`\n- `uv run pytest -q` → `7 passed`",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-14",
+      "index": 13,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "9a25065a",
+      "parentId": "5a2a5c78",
+      "content": [
+        {
+          "type": "text",
+          "text": "OK, that all looks good. Can you please commit the changes so far.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-15",
+      "index": 14,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "f959f91b",
+      "parentId": "a0ba27a1",
+      "content": [
+        {
+          "type": "text",
+          "text": "Committed changes.\n\nCommit:\n- `6b6b39e Implement Berton 2023 parcel model notebooks`\n\nWorking tree is clean.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    }
+  ],
+  "highlights": [],
+  "redactionSummary": [],
+  "redaction": {
+    "status": "processed",
+    "reviewNotes": [
+      "Automated public-safety pass completed. Review generated transcript before publishing."
+    ]
+  }
+}

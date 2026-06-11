@@ -1,0 +1,22 @@
+---
+title: "Check Berton 2023 atmospheric profiles"
+date: 2026-06-10
+tags:
+  - agent-logs
+agents:
+  - Pi
+draft: false
+---
+
+[Transcript](../../sessions/009-berton-2023-2/)
+
+- In this session, I worked through the atmospheric profile plots the agent
+  produced. These are things that the model in the paper uses as boundary and
+  initial conditions, so I wanted to make sure they were OK before moving on
+  to the main model equations and simulations.
+- There was only one problem here, which was to do with the agent missing a
+  statement about the conditions of validity for one of the moisture profiles.
+  When I told it about this, the agent looked like it was going off in a weird
+  direction, so I interrupted it and gave it a [better description of the
+  problem](../../sessions/009-berton-2023-2/#entry-6). With that, it found and
+  fixed the problem right away.

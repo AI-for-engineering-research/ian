@@ -1,0 +1,34 @@
+---
+title: "Pi system prompt and extract-model skill"
+date: 2026-06-11
+tags:
+  - agent-logs
+agents:
+  - Pi
+draft: false
+---
+
+[Transcript](../../sessions/011-extract-model-skill/)
+
+- In this session, I did two things: asked the agent about its system prompt
+  and got it to make a new skill.
+- The system prompt conversation was interesting. I was using the ChatGPT 5.5
+  model and it was [very coy
+  indeed](../../sessions/011-extract-model-skill/#entry-2) about revealing its
+  system prompt. It thought I was trying to get at some *secret training
+  instructions* from the goblins at OpenAI. I had to push it quite hard to
+  show me the [Pi system
+  prompt](../../sessions/011-extract-model-skill/#entry-6). I also got it to
+  explain a little about how the full prompt that goes to the model is built:
+  there are no "extras" mandated by the model providers, and the tiny system
+  prompt that Pi uses is exactly what the model sees first.
+- The [skill I got the agent to
+  build](../../sessions/011-extract-model-skill/#entry-11) was to extract
+  mathematical models from papers and turn them into code, since I wanted to
+  do this with a paper I'm looking at. I do have a `create-a-skill` I
+  sometimes use, but I just realised I didn't have it set up for this session,
+  so the "build a skill" process was driven purely by what the model
+  intrinsically knows about agent skills, plus the result of a short grilling
+  session.
+- Given the slapdash to setting it up, the [`extract-model`
+  skill](/ian/skills/extract-model/SKILL.md) doesn't do a terrible job!

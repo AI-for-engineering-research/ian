@@ -1,0 +1,38 @@
+---
+title: "More on Berton 2023 replication"
+date: 2026-06-11
+tags:
+  - agent-logs
+agents:
+  - Pi
+draft: false
+---
+
+[Transcript](../../sessions/010-berton-2023-3/)
+
+- This session concentrated on the first couple of real simulations in the
+  paper. The paper models a cirrus uncinus cloud ("mare's tail") which has a
+  distinct spatial structure and, according to the paper, displays oscillatory
+  behavior under some boundary conditions. The first thing I wanted to do,
+  before messing with the numerics or anything else, was to replicate the
+  steady state and oscillatory solutions.
+- The session transcript here is interesting mostly for what you can't see.
+  There was a problem with the steady state profile that the simulations
+  produced, and I tried to get the agent to diagnose what was going wrong.
+  This led to a lot of false starts where I kept suggesting something, watched
+  to see what the agent did, and then interrupted it when it looked like it
+  was taking a false track. It was trying some dumb stuff without really
+  investigating what was going on (running very long simulations, setting up
+  parameter sensitivity studies, etc.), when it was clear that there was a
+  problem with the simulations right from the start.
+- I eventually [narrowed the problem
+  down](../../sessions/010-berton-2023-3/#entry-8) to either an expression for
+  a Reynolds number or another for a drag coefficient. They both had anomalous
+  values at the beginning of the simulation, and additionally, the description
+  of the Reynolds number calculation in the paper was ambiguous<Sidenote>And
+  getting the Reynolds number off by a factor of two was enough to break the
+  simulation, which isn't great!</Sidenote>.
+- With that bit of guidance, the agent could fix the problem and the plots
+  looked more or less identical to the paper. I then got it to make a notebook
+  for the oscillatory case as well. That turned out to match the paper as
+  well, so it seems all is well!
