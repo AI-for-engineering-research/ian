@@ -1,6 +1,11 @@
 ---
 import SiteLayout from './SiteLayout.astro';
 
+export interface ContentNavLink {
+  href: string;
+  label: string;
+}
+
 export interface Props {
   title: string;
   description?: string;
@@ -8,9 +13,11 @@ export interface Props {
   date?: Date;
   dateFormat?: Intl.DateTimeFormatOptions;
   showDescription?: boolean;
+  previous?: ContentNavLink;
+  next?: ContentNavLink;
 }
 
-const { title, description, eyebrow, date, dateFormat, showDescription = true } = Astro.props;
+const { title, description, eyebrow, date, dateFormat, showDescription = true, previous, next } = Astro.props;
 const formattedDate = date?.toLocaleString('en', dateFormat ?? { year: 'numeric', month: 'long', day: 'numeric' });
 ---
 
@@ -23,5 +30,21 @@ const formattedDate = date?.toLocaleString('en', dateFormat ?? { year: 'numeric'
       {showDescription && description && <p>{description}</p>}
     </header>
     <slot />
+    {(previous || next) && (
+      <nav class="content-pagination" aria-label="Adjacent pages">
+        {previous ? (
+          <a class="content-pagination__link content-pagination__link--previous" href={previous.href} rel="prev">
+            <span class="content-pagination__direction">Previous</span>
+            <span class="content-pagination__title">{previous.label}</span>
+          </a>
+        ) : <span></span>}
+        {next ? (
+          <a class="content-pagination__link content-pagination__link--next" href={next.href} rel="next">
+            <span class="content-pagination__direction">Next</span>
+            <span class="content-pagination__title">{next.label}</span>
+          </a>
+        ) : <span></span>}
+      </nav>
+    )}
   </article>
 </SiteLayout>
