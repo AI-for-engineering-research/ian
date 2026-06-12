@@ -1,0 +1,308 @@
+---
+title: Integration methods for the Berton 2023 model
+summary: Improving integration efficiency.
+order: 3
+---
+
+import { withBase } from '../../lib/sitePaths.ts';
+
+export const trajectoryUrl = withBase('/data/berton-integration-methods/trajectories.json');
+export const timingsUrl = withBase('/data/berton-integration-methods/timings.json');
+export const timingRunsUrl = withBase('/data/berton-integration-methods/timing-runs.json');
+export const metadataUrl = withBase('/data/berton-integration-methods/metadata.json');
+
+export const plotFont = 'STIX Two Text, Georgia, Times New Roman, serif';
+
+export const vegaTextConfig = {
+  config: {
+    font: plotFont,
+    axis: {
+      labelFont: plotFont,
+      titleFont: plotFont,
+      labelFontSize: 18,
+      titleFontSize: 20,
+    },
+    legend: {
+      labelFont: plotFont,
+      titleFont: plotFont,
+      labelFontSize: 18,
+      titleFontSize: 20,
+    },
+    header: {
+      labelFont: plotFont,
+      titleFont: plotFont,
+      labelFontSize: 20,
+      titleFontSize: 20,
+    },
+    text: { font: plotFont, fontSize: 18 },
+  },
+};
+
+export const methodScale = {
+  domain: ['Euler', 'Radau', 'BDF', 'LSODA'],
+  range: ['#222222', '#a6611a', '#018571', '#5e3c99'],
+};
+
+export const nativeMethodScale = {
+  domain: ['Radau', 'BDF', 'LSODA'],
+  range: ['#a6611a', '#018571', '#5e3c99'],
+};
+
+export const variableParam = {
+  name: 'variable',
+  value: 'z_minus_z0_km',
+  bind: {
+    input: 'select',
+    name: 'Quantity ',
+    options: ['z_minus_z0_km', 'm_ug', 'w_m_s'],
+    labels: ['altitude offset', 'crystal mass', 'vertical velocity'],
+  },
+};
+
+export const fixedMethodSelection = {
+  name: 'methodSelection',
+  value: [{ method: 'Euler' }],
+  select: { type: 'point', fields: ['method'], toggle: 'true', clear: false },
+  bind: 'legend',
+};
+
+export const nativeMethodSelection = {
+  name: 'methodSelection',
+  value: [{ method: 'Radau' }],
+  select: { type: 'point', fields: ['method'], toggle: false, clear: false },
+  bind: 'legend',
+};
+
+export const methodLegend = {
+  title: 'Method',
+  orient: 'bottom',
+  symbolType: 'stroke',
+  symbolSize: 400,
+  symbolStrokeWidth: 3,
+};
+
+export const timeSeriesEncoding = (scale) => ({
+  x: { field: 't_h', type: 'quantitative', title: 'Time (h)' },
+  y: { field: 'value', type: 'quantitative', title: null },
+  color: { field: 'method', type: 'nominal', scale, legend: methodLegend },
+  opacity: { condition: { param: 'methodSelection', value: 1 }, value: 0 },
+  tooltip: [
+    { field: 'scenario', type: 'nominal' },
+    { field: 'method', type: 'nominal', title: 'Method' },
+    { field: 'variable_label', type: 'nominal', title: 'Quantity' },
+    { field: 't_h', type: 'quantitative', title: 'Time (h)', format: '.3f' },
+    { field: 'value', type: 'quantitative', format: '.5g' },
+  ],
+});
+
+export const fixedOutputSpec = (scenario) => ({
+  $schema: 'https://vega.github.io/schema/vega-lite/v6.json',
+  ...vegaTextConfig,
+  width: 'container',
+  height: 300,
+  autosize: { type: 'fit', contains: 'padding' },
+  data: { url: trajectoryUrl },
+  params: [variableParam, fixedMethodSelection],
+  transform: [
+    { filter: `datum.scenario == '${scenario}'` },
+    { filter: "datum.output_mode == 'fixed output' || datum.output_mode == 'saved fixed output'" },
+    { filter: 'datum.variable == variable' },
+  ],
+  mark: { type: 'line', clip: true },
+  encoding: {
+    ...timeSeriesEncoding(methodScale),
+    strokeDash: { field: 'output_mode', type: 'nominal', legend: null },
+  },
+});
+
+export const nativeOutputSpec = (scenario) => ({
+  $schema: 'https://vega.github.io/schema/vega-lite/v6.json',
+  ...vegaTextConfig,
+  width: 'container',
+  height: 300,
+  autosize: { type: 'fit', contains: 'padding' },
+  data: { url: trajectoryUrl },
+  params: [variableParam, nativeMethodSelection],
+  transform: [
+    { filter: `datum.scenario == '${scenario}'` },
+    { filter: "datum.output_mode == 'native output'" },
+    { filter: 'datum.variable == variable' },
+  ],
+  mark: { type: 'line', point: { filled: false, size: 16 }, clip: true },
+  encoding: timeSeriesEncoding(nativeMethodScale),
+});
+
+export const timingSpec = (scenario) => ({
+  $schema: 'https://vega.github.io/schema/vega-lite/v6.json',
+  ...vegaTextConfig,
+  data: { url: timingsUrl },
+  transform: [
+    { filter: `datum.scenario == '${scenario}'` },
+    { calculate: "datum.output_mode == 'fixed output' ? 'Fixed output' : 'Native output'", as: 'output_mode_label' },
+  ],
+  facet: {
+    column: { field: 'output_mode_label', type: 'nominal', title: null, sort: ['Fixed output', 'Native output'] },
+  },
+  spec: {
+    width: 260,
+    height: 240,
+    layer: [
+      {
+        mark: { type: 'bar', cornerRadiusTopLeft: 2, cornerRadiusTopRight: 2 },
+        encoding: {
+          x: { field: 'method', type: 'nominal', title: null, sort: ['Euler', 'Radau', 'BDF', 'LSODA'] },
+          y: {
+            field: 'median_seconds',
+            type: 'quantitative',
+            title: 'Median wall-clock time (s)',
+            scale: { type: 'log', domain: [1, 30000], clamp: true },
+            axis: { format: '~s' },
+          },
+          color: { field: 'method', type: 'nominal', scale: methodScale, legend: null },
+          tooltip: [
+            { field: 'scenario', type: 'nominal' },
+            { field: 'output_mode_label', type: 'nominal', title: 'Output mode' },
+            { field: 'method', type: 'nominal' },
+            { field: 'median_seconds', type: 'quantitative', title: 'median seconds', format: '.2f' },
+            { field: 'min_seconds', type: 'quantitative', title: 'min seconds', format: '.2f' },
+            { field: 'max_seconds', type: 'quantitative', title: 'max seconds', format: '.2f' },
+            { field: 'rows', type: 'quantitative', title: 'output rows' },
+            { field: 'projected_from_short_run', type: 'nominal', title: 'projected?' },
+          ],
+        },
+      },
+      {
+        mark: { type: 'rule', color: '#333333', strokeWidth: 1.5 },
+        encoding: {
+          x: { field: 'method', type: 'nominal', sort: ['Euler', 'Radau', 'BDF', 'LSODA'] },
+          y: {
+            field: 'min_seconds',
+            type: 'quantitative',
+            scale: { type: 'log', domain: [1, 30000], clamp: true },
+          },
+          y2: { field: 'max_seconds' },
+        },
+      },
+    ],
+  },
+  resolve: { scale: { y: 'shared' } },
+});
+
+I started off using the same integration method as in the paper to get a good
+baseline for validation against the paper's results (see [last
+entry](../berton-2023-replication/)). However, the integration method used in
+the paper (an explicit Euler method) isn't very good. It requires a very small
+timestep (0.02-0.04 seconds), so a very large number of steps (900,000 for the
+oscillatory case in the paper!). The paper makes a comment about the method
+being stable because of the timestep choice, but that's more a comment on the
+bad choice of integration method than anything else.
+
+For future experiments, I wanted to use a better method. The model is stiff:
+the timescale of the oscillations is around 10 hours, while the damping
+coefficient $k$ is around 20 s⁻¹, corresponding to a timescale of around 0.05
+s, giving a stiffness ratio of 720,000. This is why Berton's integrator only
+works for very small timesteps, and a stiff solver is almost guaranteed to do
+a better job.
+
+The [Scipy `solve_ivp`
+function](https://docs.scipy.org/doc/scipy/reference/generated/scipy.integrate.solve_ivp.html#scipy.integrate.solve_ivp)
+gives access to a range of solvers. I took a look at the Radau and BDF methods
+(fairly common methods for stiff system) and LSODA, which is a sophisticated
+"comprehensive" ODE stepper with automatic stiffness detection and method
+switching. I kept the original explicit Euler method for comparison.
+
+## Fixed-output comparisons
+
+The first comparison to do is to force the Scipy integrators to produce output
+points at the same time resolution as the fixed timestep of the explicit Euler
+method. The Scipy methods normally select variable timesteps themselves based
+on solution smoothness and tolerance parameters, but it's possible to get
+`solve_ivp` to run a post-processing step on the solution to produce equally
+spaced output points.
+
+The plots here show solutions for the steady and oscillatory test cases for
+the original explicit Euler method and the Radau, BDF and LSODA integrators
+from Scipy. Three important physical quantities (vertical position $z$,
+crystal mass $m$ and vertical velocity $\dot{z}$) are plotted for each case
+and each integrator.
+
+<TabSet label="Fixed-output comparison scenario">
+  <TabPanel label="Steady">
+    <VegaLite
+      spec={fixedOutputSpec('steady')}
+      caption="Steady case: fixed-output SciPy integrations compared with explicit Euler method. Click Method legend entries to show or hide traces."
+    />
+  </TabPanel>
+  <TabPanel label="Oscillatory">
+    <VegaLite
+      spec={fixedOutputSpec('oscillatory')}
+      caption="Oscillatory case: fixed-output SciPy integrations compared with explicit Euler method. Click method legend entries to show or hide traces."
+    />
+  </TabPanel>
+</TabSet>
+
+At the scale of these plots (which are at a scale where physically meaningful
+differences would be visible), results from the Scipy integrators are
+essentially indistinguishable from the explicit Euler results for both test
+cases.
+
+## Native solver output times
+
+As noted above, the Scipy integrators do not naturally produce output points
+at a fixed timestep. The comparison in the previous section is there simply to
+do a like-for-like comparison with the explicit Euler method. For real
+applications, we will use the natural output times from the Scipy integrators.
+These are generally much sparser that the Δt = 0.02s output of the explicit
+Euler method.
+
+The plots below show the same trajectories as above for the Scipy integrators,
+but here we show exactly the output points the solvers produce to give some
+idea of this sparseness: a few hundred output points instead of 900,000 for
+the oscillatory case.
+
+<TabSet label="Native-output comparison scenario">
+  <TabPanel label="Steady">
+    <VegaLite
+      spec={nativeOutputSpec('steady')}
+      caption="Steady case: native Scipy outputs. Output times are solver-selected rather than fixed. Click Method legend entries to show or hide traces."
+    />
+  </TabPanel>
+  <TabPanel label="Oscillatory">
+    <VegaLite
+      spec={nativeOutputSpec('oscillatory')}
+      caption="Oscillatory case: native Scipy outputs. Output times are solver-selected rather than fixed. Click Method legend entries to show or hide traces."
+    />
+  </TabPanel>
+</TabSet>
+
+## Integration time
+
+The timings here are approximate wall-clock times. For the Scipy integrators,
+each bar is the median of three full simulations. For the explicit Euler
+method, the times are projected from shorter calculations, because the method
+is very slow. A logarithmic $y$-axis is needed to be able to display the
+explicit Euler timings alongside the Scipy integrator times.
+
+<TabSet label="Integration timing scenario">
+  <TabPanel label="Steady">
+    <VegaLite
+      spec={timingSpec('steady')}
+      caption="Steady case: wall-clock integration times."
+    />
+  </TabPanel>
+  <TabPanel label="Oscillatory">
+    <VegaLite
+      spec={timingSpec('oscillatory')}
+      caption="Oscillatory case: wall-clock integration times."
+    />
+  </TabPanel>
+</TabSet>
+
+For the Scipy integrators, the fixed-output integrations have to do more work
+just because of the final fixed timestep interpolation. Otherwise, the most
+striking thing here is the *enormous* difference between the explicit Euler
+method and the Scipy integrators: this is all down to the stiffness of the
+model and the requirement to use a tiny timestep with the Euler method.
+
+From these results, either the BDF or LSODA methods would be a good choice for
+future experiments.

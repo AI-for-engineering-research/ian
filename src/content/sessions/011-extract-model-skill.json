@@ -813,7 +813,7 @@
     }
   ],
   "redaction": {
-    "status": "needs_review",
+    "status": "processed",
     "reviewNotes": [
       "Automated public-safety pass completed. Review generated transcript before publishing.",
       "One or more sensitive-looking values were replaced with explicit redaction markers."

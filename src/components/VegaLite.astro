@@ -1,0 +1,36 @@
+---
+export interface Props {
+  spec: Record<string, unknown>;
+  caption?: string;
+  layout?: 'inline' | 'wide' | 'full';
+}
+
+const { spec, caption, layout = 'inline' } = Astro.props;
+const id = `vega-lite-${Math.random().toString(36).slice(2)}`;
+const className = `vega-lite-figure vega-lite-figure--${layout}`;
+---
+
+<figure class={className}>
+  <div id={id} class="vega-lite-chart" data-spec={JSON.stringify(spec)}></div>
+  {caption && <figcaption>{caption}</figcaption>}
+</figure>
+
+<script>
+  import vegaEmbed from 'vega-embed';
+
+  async function renderVegaLiteCharts() {
+    const charts = document.querySelectorAll<HTMLElement>('.vega-lite-chart[data-spec]:not([data-rendered])');
+    for (const chart of charts) {
+      if (chart.offsetParent === null) continue;
+      const encodedSpec = chart.dataset.spec;
+      if (!encodedSpec) continue;
+      chart.dataset.rendered = 'true';
+      const spec = JSON.parse(encodedSpec);
+      await vegaEmbed(chart, spec, { actions: true, renderer: 'svg' });
+    }
+  }
+
+  renderVegaLiteCharts();
+  document.addEventListener('astro:page-load', renderVegaLiteCharts);
+  document.addEventListener('tabs:activated', renderVegaLiteCharts);
+</script>

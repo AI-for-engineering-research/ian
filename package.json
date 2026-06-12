@@ -22,7 +22,10 @@
     "katex": "latest",
     "rehype-katex": "latest",
     "remark-math": "latest",
-    "typescript": "latest"
+    "typescript": "latest",
+    "vega": "^6.2.0",
+    "vega-embed": "^7.1.0",
+    "vega-lite": "^6.4.3"
   },
   "devDependencies": {
     "@types/node": "^25.9.2"

@@ -1,0 +1,146 @@
+[
+  {
+    "scenario": "oscillatory",
+    "method": "Euler",
+    "output_mode": "fixed output",
+    "median_seconds": 21387.765412801673,
+    "min_seconds": 16330.37207759771,
+    "max_seconds": 24155.55444599886,
+    "rows": 2400,
+    "final_t_h": 40.0,
+    "projected_from_short_run": true,
+    "benchmark_steps": 2000
+  },
+  {
+    "scenario": "oscillatory",
+    "method": "Radau",
+    "output_mode": "fixed output",
+    "median_seconds": 22.021925681998255,
+    "min_seconds": 20.90951757500079,
+    "max_seconds": 22.333006470998953,
+    "rows": 2400,
+    "final_t_h": 39.9833333332972
+  },
+  {
+    "scenario": "oscillatory",
+    "method": "BDF",
+    "output_mode": "fixed output",
+    "median_seconds": 13.965704190999531,
+    "min_seconds": 12.202617340997676,
+    "max_seconds": 14.916817127003014,
+    "rows": 2400,
+    "final_t_h": 39.9833333332972
+  },
+  {
+    "scenario": "oscillatory",
+    "method": "LSODA",
+    "output_mode": "fixed output",
+    "median_seconds": 13.032488081000338,
+    "min_seconds": 12.628220275000785,
+    "max_seconds": 16.044730666999385,
+    "rows": 2400,
+    "final_t_h": 39.9833333332972
+  },
+  {
+    "scenario": "oscillatory",
+    "method": "Radau",
+    "output_mode": "native output",
+    "median_seconds": 15.651306777999707,
+    "min_seconds": 14.86957202999838,
+    "max_seconds": 16.194618811998225,
+    "rows": 345,
+    "final_t_h": 39.99999999816338
+  },
+  {
+    "scenario": "oscillatory",
+    "method": "BDF",
+    "output_mode": "native output",
+    "median_seconds": 6.472435427000164,
+    "min_seconds": 5.923859438000363,
+    "max_seconds": 6.519475249999232,
+    "rows": 432,
+    "final_t_h": 39.99999999816338
+  },
+  {
+    "scenario": "oscillatory",
+    "method": "LSODA",
+    "output_mode": "native output",
+    "median_seconds": 6.695651921003446,
+    "min_seconds": 6.663529145000211,
+    "max_seconds": 8.933910299001582,
+    "rows": 665,
+    "final_t_h": 39.99999999816338
+  },
+  {
+    "scenario": "steady",
+    "method": "Euler",
+    "output_mode": "fixed output",
+    "median_seconds": 5925.156047100063,
+    "min_seconds": 4603.915221301395,
+    "max_seconds": 6170.379878250787,
+    "rows": 1800,
+    "final_t_h": 5.0,
+    "projected_from_short_run": true,
+    "benchmark_steps": 2000
+  },
+  {
+    "scenario": "steady",
+    "method": "Radau",
+    "output_mode": "fixed output",
+    "median_seconds": 10.430536169002153,
+    "min_seconds": 9.923178475000896,
+    "max_seconds": 14.322126684000978,
+    "rows": 1800,
+    "final_t_h": 4.997222222331256
+  },
+  {
+    "scenario": "steady",
+    "method": "BDF",
+    "output_mode": "fixed output",
+    "median_seconds": 10.84050182899955,
+    "min_seconds": 10.829945729001338,
+    "max_seconds": 11.025450324003032,
+    "rows": 1800,
+    "final_t_h": 4.997222222331256
+  },
+  {
+    "scenario": "steady",
+    "method": "LSODA",
+    "output_mode": "fixed output",
+    "median_seconds": 10.70828356200218,
+    "min_seconds": 8.732421052998689,
+    "max_seconds": 11.155557443998987,
+    "rows": 1800,
+    "final_t_h": 4.997222222331256
+  },
+  {
+    "scenario": "steady",
+    "method": "Radau",
+    "output_mode": "native output",
+    "median_seconds": 6.40345496900045,
+    "min_seconds": 5.897154799000418,
+    "max_seconds": 8.200450311000168,
+    "rows": 188,
+    "final_t_h": 5.000000000083349
+  },
+  {
+    "scenario": "steady",
+    "method": "BDF",
+    "output_mode": "native output",
+    "median_seconds": 4.4956163890019525,
+    "min_seconds": 4.416162556997733,
+    "max_seconds": 4.562616998999147,
+    "rows": 341,
+    "final_t_h": 5.000000000083349
+  },
+  {
+    "scenario": "steady",
+    "method": "LSODA",
+    "output_mode": "native output",
+    "median_seconds": 6.321586287998798,
+    "min_seconds": 5.516872914002306,
+    "max_seconds": 6.439275103002728,
+    "rows": 395,
+    "final_t_h": 5.000000000083349
+  }
+]

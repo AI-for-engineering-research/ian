@@ -1,0 +1,72 @@
+---
+export interface Props {
+  label?: string;
+}
+
+const { label = 'Tabbed content' } = Astro.props;
+const id = `tab-set-${Math.random().toString(36).slice(2)}`;
+---
+
+<div id={id} class="tab-set" data-tab-set>
+  <div class="tab-set__list" role="tablist" aria-label={label}></div>
+  <div class="tab-set__panels">
+    <slot />
+  </div>
+</div>
+
+<script>
+  function initializeTabSets() {
+    const tabSets = document.querySelectorAll<HTMLElement>('[data-tab-set]:not([data-tabs-ready])');
+    for (const tabSet of tabSets) {
+      const tabList = tabSet.querySelector<HTMLElement>('.tab-set__list');
+      const panels = Array.from(tabSet.querySelectorAll<HTMLElement>(':scope > .tab-set__panels > .tab-panel'));
+      if (!tabList || panels.length === 0) continue;
+
+      tabSet.dataset.tabsReady = 'true';
+      const tabs = panels.map((panel, index) => {
+        const tabId = `${tabSet.id}-tab-${index}`;
+        const panelId = panel.id || `${tabSet.id}-panel-${index}`;
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.id = tabId;
+        button.className = 'tab-set__tab';
+        button.role = 'tab';
+        button.setAttribute('aria-controls', panelId);
+        button.textContent = panel.dataset.label || `Tab ${index + 1}`;
+        panel.id = panelId;
+        panel.role = 'tabpanel';
+        panel.setAttribute('aria-labelledby', tabId);
+        tabList.append(button);
+        return button;
+      });
+
+      function activate(index: number) {
+        tabs.forEach((tab, tabIndex) => {
+          const selected = tabIndex === index;
+          tab.setAttribute('aria-selected', String(selected));
+          tab.tabIndex = selected ? 0 : -1;
+          panels[tabIndex].hidden = !selected;
+        });
+        window.dispatchEvent(new Event('resize'));
+        document.dispatchEvent(new CustomEvent('tabs:activated'));
+      }
+
+      tabs.forEach((tab, index) => {
+        tab.addEventListener('click', () => activate(index));
+        tab.addEventListener('keydown', (event) => {
+          if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+          event.preventDefault();
+          const direction = event.key === 'ArrowRight' ? 1 : -1;
+          const next = (index + direction + tabs.length) % tabs.length;
+          tabs[next].focus();
+          activate(next);
+        });
+      });
+
+      activate(0);
+    }
+  }
+
+  initializeTabSets();
+  document.addEventListener('astro:page-load', initializeTabSets);
+</script>

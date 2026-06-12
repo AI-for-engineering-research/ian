@@ -1,0 +1,35 @@
+---
+title: "Better numerics for Berton 2023 model"
+date: 2026-06-12
+tags:
+  - agent-logs
+agents:
+  - Pi
+draft: false
+---
+
+[Transcript](../../sessions/012-berton-2023-integration/)
+
+- This session was kind of fun. I did two things: 1. set things up to use more
+  efficient ODE integrators, and validated the results; 2. made some plots
+  using a tool I had read about but never used before, and got the agent to
+  make a new website page with those plots in it.
+- The Berton 2023 paper uses an explicit Euler timestepper to solve the
+  central model ODEs, which isn't very good, because the model is very stiff
+  (about a 10⁶ ratio between the fast and slow timescales), so you have to use
+  a *tiny* timestep and take *lots* of steps (Δt = 0.02s, and 900,000 steps
+  for the oscillatory test case!).
+- There's really no need for this: Scipy exposes a bunch of extremely good
+  stiff integrators, so I got the agent to make choice of integrator an option
+  for the model simulation function.
+- I then got it to make a notebook for evaluating these things, just to check
+  that there was no reason to stick with the Euler scheme.
+- Once I was happy with that, I asked the agent to make a [new
+  page](../../project/berton-integration-methods/) for the project section of
+  the website, explaining what I'd done, and including some plots.
+- For the plots, I asked it to use
+  [Vega-Lite](https://vega.github.io/vega-lite/), a plotting system I've
+  thought about a lot, but have never used. After a little bit of style and
+  user interface massaging, the results look pretty good.
+- (I rewrote the text on the page. My "honest" opinion of agent-written text:
+  "it's not great — it's pretty bad".)

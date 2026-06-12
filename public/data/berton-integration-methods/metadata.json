@@ -1,0 +1,22 @@
+{
+  "generated_at": "2026-06-12T14:53:10.277319+00:00",
+  "repeats": 3,
+  "methods": [
+    "Radau",
+    "BDF",
+    "LSODA"
+  ],
+  "scipy_options": {
+    "rtol": 1e-06,
+    "atol": 1e-09
+  },
+  "variables": {
+    "z_minus_z0_km": "altitude offset (km)",
+    "m_ug": "crystal mass (\u00b5g)",
+    "w_m_s": "vertical velocity (m/s)"
+  },
+  "python": "3.12.13",
+  "platform": "Linux-7.0.11-1-default-x86_64-with-glibc2.43",
+  "note": "Wall-clock timings are local benchmark measurements; compare ratios more than absolute values.",
+  "euler_timing_note": "Euler total times are projected from 2000-step benchmarks rather than full multi-hour wall-clock runs."
+}

@@ -14,6 +14,9 @@ const globalMdxComponents = [
   ['MediaGrid', 'src/components/MediaGrid.astro'],
   ['Sidenote', 'src/components/Sidenote.astro'],
   ['Wikipedia', 'src/components/Wikipedia.astro'],
+  ['VegaLite', 'src/components/VegaLite.astro'],
+  ['TabSet', 'src/components/TabSet.astro'],
+  ['TabPanel', 'src/components/TabPanel.astro'],
 ];
 
 function remarkGlobalMdxComponents() {
