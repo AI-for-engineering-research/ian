@@ -1,0 +1,33 @@
+---
+title: "Some session logs from working on AFCA"
+date: 2026-06-13
+tags:
+  - agent-logs
+agents:
+  - Pi
+draft: false
+---
+
+This is unrelated to the main project, but in the spirit of "working with the
+garage door open", and to fulfil this week's "show us some transcripts" task,
+[here are some session logs](https://hex.mit.edu/~iross/afca-sessions/) from
+some changes I just made to AFCA.
+
+This was all about adding geometric altitude as an output (for Marlene,
+initially). This is trickier than it might sound, because what "geometric
+altitude" means is rather open to interpretation...
+
+For this task, I had a grilling session to pin down exactly what I wanted to
+implement for this first pass (geopotential from ERA5 data + pressure altitude
+⇒ altitude by interpolation in log pressure, and a "geometric altitude"
+correction based on a fixed Earth radius), and I got the agent to write a
+simple Markdown plan for the work.
+
+I then went through the steps of the plan one by one in separate sessions,
+reviewing the code manually in between. This was probably overkill for this
+task, but AFCA is worth taking some care with, so I wanted to see exactly what
+the agent was doing.
+
+When the implementation was complete, I did a couple of code reviews, one with
+GPT 5.5 (the model that built the code) and one with Opus 4.8 (for a bit of
+cross-model verification).
