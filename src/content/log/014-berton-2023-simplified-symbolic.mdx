@@ -1,0 +1,72 @@
+---
+title: "Symbolic analysis of simplified Berton 2023 model"
+date: 2026-06-14
+tags:
+  - agent-logs
+agents:
+  - Pi
+draft: false
+---
+
+[Planning transcript](../../sessions/014-berton-2023-simplified-symbolic/)
+
+[Implementation transcript](../../sessions/015-implementation/)
+
+This session looks like nothing at all, but there was some interesting stuff
+going on here.
+
+## The idea
+
+The idea here was to do some symbolic analysis of a simplified version of the
+Berton 2023 model to see if there might be a transition from the steady state
+to the oscillatory solution in the form of a Hopf bifurcation. This whole idea
+came out of a [long chat with
+Claude](https://claude.ai/share/6f7d1922-e6cf-41fb-81db-531a4fa0b85c), where
+I've been asking Opus 4.8 to look at the Berton 2023 model and another one, to
+get some idea of what I could do with it.
+
+The whole process of doing this is kind of overwhelming: Opus is *so* very
+confident in everything it says, it can produce walls of algebra in seconds,
+and it looks superficially all very convincing. (This is obviously me getting
+my excuses in early. I didn't spot the error that Opus made, even though it
+was pretty elementary.)
+
+## The lesson
+
+However (here's the click bait), it turns out that, left to its own devices,
+*Opus is not very good at algebra*!!! It made a sign error in the calculation
+of the Jacobian of the simplified system, which completely tipped everything
+upside down. See the screen capture from Claude at the bottom, where three
+minus signs turn into zero minus signs, through the magic of LLMs...
+
+The lesson here, and it's one I probably needed to learn and that we all need
+to be aware of: do not trust an LLM to do algebraic manipulations. It's as
+likely (or more likely) to make silly errors than you are yourself. The only
+difference is that it can make sign errors *much* more quickly than you can!
+
+## Doing it the right way
+
+LLMs are better at writing code, so instead of getting Claude to do the
+algebra itself, I got it to write a [project
+brief](/ian/log/additional/berton_3d_hopf_briefing/) for an agent to implement
+the symbolic analysis in Python using
+[Sympy](https://www.sympy.org/en/index.html). This is way more reliable and
+the analysis worked, producing a [detailed
+report](/ian/log/additional/berton_3d_hopf_analysis_summary/).
+
+This is really another repetition of the "let the agent write code" point.
+It's much easier for the agent to do that, producing a persistent artifact
+that can be run repeatedly and modified to improve it, than it is for the
+agent to "one shot" a calculation "by hand" (it really uses that phrase to
+describe its calculations in the chat, which is quite weird).
+
+*In the next episode of this exciting story, I'll use a different method on
+the full Berton 2023 model to show that the approximation used in making the
+simplified model was too much of a simplification, and there isn't a Hopf
+bifurcation after all. But that was all quite complicated and is a story for
+another day.*
+
+## Opus does algebra
+
+<Figure src="/ian/images/opus-sign-error.png"/>
+
