@@ -1,0 +1,31 @@
+---
+title: "Getting the agent to write up results"
+date: 2026-06-18
+summary: I got GPT 5.5 to write up research results, and it wasn't terrible.
+tags:
+  - agent-logs
+agents:
+  - Pi
+draft: false
+---
+
+The last three articles in the log and these three articles in the project
+notes were all written by GPT 5.5:
+
+- [Symbolic treatment of the reduced Berton model](../../project/berton-symbolic-reduced-model/)
+- [AUTO continuation as a stress test](../../project/berton-auto-continuation/)
+- [Python continuation and the final Berton verdict](../../project/berton-python-continuation/)
+
+You can see an export of the session where I got it to do this
+[here](/ian/files/write-berton-articles.html). The reason that it could do
+this, and do it reasonably well (modulo infuriating AI writing style, of
+course!) is because I had been getting it to document things in a lot of
+detail along the way, for example
+[here](https://github.com/ian-ross/cloud-rom/tree/main/episodes/10-full-model-python-continuation/docs).
+When the agent says something interesting that's worth remembering, I often
+ask it to add that information to the documentation (for example,
+[here](../../sessions/berton-python-04-task028-ha3-branch/#entry-15)). I've
+been using an "episode" structure for this project, and each episode has a
+`docs` directory containing Markdown files, alongside code and other
+artifacts, so it's very legible for the agent.
+

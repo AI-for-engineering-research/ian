@@ -5,6 +5,7 @@ import { unified } from '@astrojs/markdown-remark';
 import mdx from '@astrojs/mdx';
 import rehypeKatex from 'rehype-katex';
 import remarkMath from 'remark-math';
+import { repairHeadingOpeningQuotes } from './src/lib/remarkHeadingOpeningQuotes.js';
 
 const globalMdxComponents = [
   ['Callout', 'src/components/Callout.astro'],
@@ -54,7 +55,7 @@ export default defineConfig({
   output: 'static',
   markdown: {
     processor: unified({
-      remarkPlugins: [remarkGlobalMdxComponents, remarkMath],
+      remarkPlugins: [repairHeadingOpeningQuotes, remarkGlobalMdxComponents, remarkMath],
       rehypePlugins: [rehypeKatex],
       shikiConfig: { theme: 'github-light' },
     }),
