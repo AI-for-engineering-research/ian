@@ -7,6 +7,7 @@ import rehypeKatex from 'rehype-katex';
 import remarkMath from 'remark-math';
 
 const globalMdxComponents = [
+  ['Callout', 'src/components/Callout.astro'],
   ['Cite', 'src/components/Cite.astro'],
   ['Citep', 'src/components/Citep.astro'],
   ['Figure', 'src/components/Figure.astro'],

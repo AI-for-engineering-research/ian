@@ -1,0 +1,28 @@
+---
+const calloutTypes = ['note', 'info', 'warning', 'error', 'success'] as const;
+type CalloutType = typeof calloutTypes[number];
+
+export interface Props {
+  type?: CalloutType;
+  title?: string;
+}
+
+const defaultTitles: Record<CalloutType, string> = {
+  note: 'Note',
+  info: 'Info',
+  warning: 'Warning',
+  error: 'Error',
+  success: 'Success',
+};
+
+const requestedType = Astro.props.type ?? 'note';
+const type = calloutTypes.includes(requestedType) ? requestedType : 'note';
+const title = Astro.props.title ?? defaultTitles[type];
+---
+
+<aside class={`callout callout--${type}`} role="note">
+  <p class="callout__title">{title}</p>
+  <div class="callout__body">
+    <slot />
+  </div>
+</aside>

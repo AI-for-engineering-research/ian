@@ -30,6 +30,7 @@ Pushes to `main` run `.github/workflows/deploy.yml`, which installs with `npm ci
 
 MDX components globally available in pages and content entries:
 
+- `Callout`
 - `Figure`
 - `MarginNote`
 - `MediaGrid`
@@ -37,10 +38,16 @@ MDX components globally available in pages and content entries:
 - `Wikipedia`
 
 ```mdx
+<Callout type="warning" title="Numerical caveat">
+  Check solver tolerances before interpreting this branch.
+</Callout>
+
 <Wikipedia>Monte Carlo</Wikipedia>
 <Wikipedia search="Markov chain Monte Carlo" />
 <Wikipedia search="bifurcation theory">Wikipedia article on bifurcation theory</Wikipedia>
 ```
+
+`Callout` supports `type="note"`, `type="info"`, `type="warning"`, `type="error"`, and `type="success"`. The `title` prop is optional and defaults to the capitalized type.
 
 `Wikipedia` links to Wikipedia search URLs, matching the forgiving behavior of browser Wikipedia search shortcuts: exact page titles resolve directly when Wikipedia recognizes them, while other terms show search results.
 
