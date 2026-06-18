@@ -1,0 +1,184 @@
+---
+title: Python continuation and the final Berton verdict
+summary: "Transparent Python continuation sharpened the negative result: no robust full-model Hopf was supported, and the remaining behavior is regularization-sensitive."
+order: 6
+draft: false
+---
+
+import { withBase } from '../../lib/sitePaths.ts';
+import Details from '../../components/Details.astro';
+
+export const ha3Url = withBase('/data/berton-python-continuation/ha3-critical-eigenvalues.json');
+export const widthUrl = withBase('/data/berton-python-continuation/smoothing-width-conditioning.json');
+export const zw0WidthUrl = withBase('/data/berton-python-continuation/zw0-width-map.json');
+export const font = 'STIX Two Text, Georgia, Times New Roman, serif';
+export const cfg = { config: { font, axis: { labelFont: font, titleFont: font, labelFontSize: 16, titleFontSize: 18 }, legend: { labelFont: font, titleFont: font, labelFontSize: 16, titleFontSize: 18 } } };
+export const ha3Spec = {
+  $schema: 'https://vega.github.io/schema/vega-lite/v6.json',
+  ...cfg,
+  width: 'container',
+  height: 300,
+  data: { url: ha3Url },
+  layer: [
+    {
+      mark: { type: 'line', point: true },
+      encoding: {
+        x: { field: 'H_a3', type: 'quantitative', title: 'humidity node H_a3' },
+        y: { field: 'maxReal', type: 'quantitative', title: 'largest eigenvalue real part (s⁻¹)' },
+        color: { field: 'run', type: 'nominal', title: 'continuation direction' },
+        tooltip: [
+          { field: 'run', type: 'nominal' },
+          { field: 'H_a3', type: 'quantitative', format: '.4f' },
+          { field: 'maxReal', type: 'quantitative', format: '.3e' },
+          { field: 'complexPairReal', type: 'quantitative', format: '.3e' },
+        ],
+      },
+    },
+    { mark: { type: 'rule', color: '#333333', opacity: 0.5 }, encoding: { y: { datum: 0 } } },
+  ],
+};
+export const widthSpec = {
+  $schema: 'https://vega.github.io/schema/vega-lite/v6.json',
+  ...cfg,
+  width: 'container',
+  height: 300,
+  data: { url: widthUrl },
+  mark: { type: 'line', point: true },
+  encoding: {
+    x: { field: 'smooth_width_m', type: 'quantitative', scale: { type: 'log' }, title: 'smoothing width (m)' },
+    y: { field: 'max_state_jacobian_condition', type: 'quantitative', scale: { type: 'log' }, title: 'max Jacobian condition number' },
+    tooltip: [
+      { field: 'smooth_width_m', type: 'quantitative', title: 'width (m)' },
+      { field: 'max_state_jacobian_condition', type: 'quantitative', title: 'condition number', format: '.3e' },
+      { field: 'accepted_points', type: 'quantitative', title: 'accepted points' },
+    ],
+  },
+};
+export const widthMapSpec = {
+  $schema: 'https://vega.github.io/schema/vega-lite/v6.json',
+  ...cfg,
+  width: 'container',
+  height: 320,
+  data: { url: zw0WidthUrl },
+  mark: { type: 'circle', filled: true, size: 95 },
+  encoding: {
+    x: { field: 'z_W0_m', type: 'quantitative', scale: { domain: [9000, 10000], zero: false }, title: 'z_W0 (m)' },
+    y: { field: 'smooth_width_m', type: 'quantitative', scale: { type: 'log' }, title: 'smoothing width (m)' },
+    color: { field: 'state_jacobian_condition', type: 'quantitative', scale: { type: 'log', scheme: 'reds' }, title: 'condition' },
+    tooltip: [
+      { field: 'z_W0_m', type: 'quantitative', format: '.0f' },
+      { field: 'smooth_width_m', type: 'quantitative', format: '.0f' },
+      { field: 'state_jacobian_condition', type: 'quantitative', format: '.3e' },
+      { field: 'critical_real_s_inv', type: 'quantitative', format: '.3e' },
+    ],
+  },
+};
+
+The Python continuation work is the closing chapter of this Berton 2023
+investigation. It was introduced after the AUTO phase because the negative
+result needed to be sharpened: were the failures just AUTO/formulation issues,
+or was the full model genuinely not providing robust oscillatory bifurcation
+evidence?
+
+The answer is now clear enough to stop this line of work. The accepted evidence
+does **not** support a robust full-model Hopf bifurcation or sustained
+oscillatory mechanism. The strongest result is a critical one: the reported
+oscillatory behavior is fragile with respect to continuation path,
+regularization of the updraft profile, and parameterization details.
+
+## Why write continuation code in Python?
+
+AUTO is powerful, but when it fails it can be hard to tell whether the problem
+is the model, the scaling, the branch, or the continuation formulation. The
+Python implementation made the algebra and diagnostics explicit: residuals,
+finite-difference Jacobians, predictor-corrector steps, rejected steps, and
+eigenvalue cross-checks were all directly visible.
+
+This was not meant to replace mature continuation software. It was meant to
+answer narrower questions transparently.
+
+<Details summary="What pseudo-arclength continuation adds" variant="math">
+
+Simple parameter continuation fixes a parameter value and solves for an
+equilibrium. That can fail at folds or badly conditioned regions. Pseudo-
+arclength continuation instead follows the curve itself, using a tangent
+prediction and a correction condition that says “stay near the next point on
+this curve.”
+
+In this project the Python code was valuable because each accepted or rejected
+point carried diagnostics: residual norm, Newton iterations, Jacobian condition
+number, tangent estimates, and independently recomputed eigenvalues.
+
+</Details>
+
+## `W_a0`: the easy gate
+
+The `W_a0` branch was a useful sanity check. It covered roughly `0.0995–1.2006
+m/s` with zero rejected steps. That showed the scaled/log-mass continuation
+core was not simply broken. The code could follow a well-behaved full-model
+equilibrium branch.
+
+## `H_a3`: a stability change, but not Hopf
+
+The `H_a3` branch was more scientifically tempting because earlier probes
+suggested that changing this humidity-profile node could move the critical
+stability structure. The Python branch covered the suspected range around
+`H_a3≈0.61–0.65`.
+
+It did bracket a stability-count change, but the right side was dominated by
+real positive eigenvalues rather than a clean complex-pair crossing. In other
+words, the branch did not show the Hopf-style event needed to explain a
+smooth onset of sustained oscillations.
+
+<VegaLite spec={ha3Spec} caption="The Python H_a3 branch changes stability, but the accepted points do not show a clean Hopf-style complex-pair crossing as the explanatory mechanism." />
+
+## `z_W0`: path-sensitive and regularization-sensitive
+
+The most paper-relevant control remained `z_W0`, the updraft transition height.
+Python continuation with a smoothed updraft could follow parts of the branch,
+but the 50 m smoothed branch stalled near the 9.6–10 km transition region. That
+looked suspiciously like a numerical obstruction, so the final test treated the
+smoothing width itself as a parameter.
+
+The result was subtle. Fixed-`z_W0` solves could reach 50 m and below, including
+at `z_W0 = 10000 m`. So the obstruction was not simple nonexistence of a 50 m
+equilibrium. But as the smoothed profile sharpened, conditioning worsened
+rapidly.
+
+<VegaLite spec={widthSpec} caption="Sharper updraft smoothing makes the equilibrium problem much more ill-conditioned. The 10 m cases reach condition numbers above 10⁹." />
+
+<VegaLite spec={widthMapSpec} caption="Accepted fixed-anchor solves across z_W0 and smoothing width show that equilibria can exist in the obstructed region, but the conditioning landscape becomes severe as the profile sharpens." />
+
+The best interpretation is therefore not “we found a hidden Hopf.” It is:
+
+> the `z_W0` region is regularization- and path-sensitive, consistent with a
+> near-singular piecewise-smooth limit rather than a robust smooth Hopf
+> discovery.
+
+## Final verdict
+
+The Berton work should close with a negative but useful conclusion.
+
+Supported:
+
+- the reduced model identifies a plausible damped-spiral feedback loop;
+- the canonical no-Coriolis apparent oscillation is best explained as a damped
+  transient toward a stable spiral equilibrium;
+- transparent Python continuation can follow some full-model branches;
+- the paper-relevant `z_W0` region is highly sensitive to smoothing and path;
+- the physical interpretation is limited by regularization and parameterization
+  choices.
+
+Not supported:
+
+- a robust full-model Hopf bifurcation;
+- a demonstrated finite-amplitude periodic orbit;
+- AUTO failure as hidden-positive evidence;
+- a paper-independent physical oscillation mechanism.
+
+That is enough to move on. Further continuation would only make sense if the
+question changes: for example, to study the nonsmooth updraft limit directly,
+or to compare radius-versus-diameter Reynolds-number conventions as a separate
+model-discrepancy study.
+
+The companion process article is [Python continuation and closure](../../log/016-berton-python-continuation-process/). Useful transcripts include the [way-forward planning session](../../sessions/berton-python-00-way-forward/#entry-2), the [continuation core implementation](../../sessions/berton-python-02-task026-core/), the [`H_a3` branch](../../sessions/berton-python-04-task028-ha3-branch/#entry-4), and the [staged `z_W0` continuation](../../sessions/berton-python-05-task029-zw0-staged/#entry-23).

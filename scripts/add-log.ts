@@ -19,6 +19,7 @@ export interface AddLogOptions {
   date?: string;
   noAnalysis?: boolean;
   requireAnalysis?: boolean;
+  transcriptOnly?: boolean;
   force?: boolean;
   dryRun?: boolean;
   model?: string;
@@ -74,7 +75,9 @@ export async function addLog(options: AddLogOptions): Promise<AddLogResult> {
 
   if (!options.force) {
     await assertPublicOutputAvailable(sessionOutputPath, '--force is required to overwrite an existing public transcript JSON file');
-    await assertPublicOutputAvailable(logOutputPath, '--force is required to overwrite an existing public research-log MDX file');
+    if (!options.transcriptOnly) {
+      await assertPublicOutputAvailable(logOutputPath, '--force is required to overwrite an existing public research-log MDX file');
+    }
   }
 
   const jsonl = await readFile(jsonlInputPath, 'utf8');
@@ -112,7 +115,9 @@ export async function addLog(options: AddLogOptions): Promise<AddLogResult> {
     await writeFile(normalizedSessionPath, `${JSON.stringify(publicTranscript, null, 2)}\n`);
     await writeFile(analysisResultPath, `${JSON.stringify(analysis, null, 2)}\n`);
     await writeFile(sessionOutputPath, `${JSON.stringify(publicTranscript, null, 2)}\n`);
-    await writeFile(logOutputPath, mdx);
+    if (!options.transcriptOnly) {
+      await writeFile(logOutputPath, mdx);
+    }
   }
 
   return {
@@ -142,6 +147,10 @@ export function parseAddLogArgs(argv: string[]): AddLogOptions {
     }
     if (arg === '--require-analysis') {
       parsed.requireAnalysis = true;
+      continue;
+    }
+    if (arg === '--transcript-only') {
+      parsed.transcriptOnly = true;
       continue;
     }
     if (arg === '--force') {
@@ -218,6 +227,7 @@ function validateImportOptions(options: AddLogOptions): void {
   if (!SLUG_PATTERN.test(options.slug)) throw new Error('--slug must contain only lowercase letters, numbers, and hyphens, and start with a letter or number.');
   if (options.date && !/^\d{4}-\d{2}-\d{2}$/.test(options.date)) throw new Error('--date must use YYYY-MM-DD format.');
   if (options.noAnalysis && options.requireAnalysis) throw new Error('--no-analysis and --require-analysis cannot be used together.');
+  if (options.transcriptOnly && options.requireAnalysis) throw new Error('--transcript-only and --require-analysis cannot be used together.');
 }
 
 async function assertPublicOutputAvailable(filePath: string, message: string): Promise<void> {
@@ -310,12 +320,14 @@ async function main(): Promise<void> {
   const verb = result.dryRun ? 'Validated dry run' : 'Imported';
   process.stdout.write(`${verb} ${result.slug}\n`);
   process.stdout.write(`Transcript: ${path.relative(process.cwd(), result.sessionOutputPath)}\n`);
-  process.stdout.write(`Draft log: ${path.relative(process.cwd(), result.logOutputPath)}\n`);
+  if (!parsed.transcriptOnly) {
+    process.stdout.write(`Draft log: ${path.relative(process.cwd(), result.logOutputPath)}\n`);
+  }
   process.stdout.write(`Work artifacts: ${path.relative(process.cwd(), result.workDir)}\n`);
 }
 
 function usage(): string {
-  return `Usage: npm run add-log -- <session.jsonl> --slug <slug> [options]\n\nOptions:\n  --slug <slug>          Required public slug for transcript JSON and log MDX\n  --title <title>        Optional title for transcript and draft log\n  --date <YYYY-MM-DD>    Optional log date (defaults to today)\n  --no-analysis          Skip Pi JSON-mode analysis and use heuristic highlights only\n  --require-analysis     Fail if Pi JSON-mode analysis is unavailable or malformed\n  --force                Overwrite existing public transcript/log files\n  --dry-run              Validate and report without writing files\n  --model <model>        Optional model name passed to the Pi JSON analysis runner\n`;
+  return `Usage: npm run add-log -- <session.jsonl> --slug <slug> [options]\n\nOptions:\n  --slug <slug>          Required public slug for transcript JSON and log MDX\n  --title <title>        Optional title for transcript and draft log\n  --date <YYYY-MM-DD>    Optional log date (defaults to today)\n  --no-analysis          Skip Pi JSON-mode analysis and use heuristic highlights only\n  --require-analysis     Fail if Pi JSON-mode analysis is unavailable or malformed\n  --transcript-only      Write only the public transcript JSON; do not create draft log MDX\n  --force                Overwrite existing public transcript/log files\n  --dry-run              Validate and report without writing files\n  --model <model>        Optional model name passed to the Pi JSON analysis runner\n`;
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {

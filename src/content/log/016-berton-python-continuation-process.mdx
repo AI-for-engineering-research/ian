@@ -1,0 +1,94 @@
+---
+title: "Python continuation and closing the Berton work"
+date: 2026-06-18
+summary: The final phase used transparent Python continuation to turn an inconclusive AUTO search into a bounded negative conclusion.
+tags:
+  - agent-logs
+agents:
+  - Pi
+draft: false
+---
+
+[Project article](../../project/berton-python-continuation/)
+
+The Python continuation phase started because the AUTO phase had reached the
+wrong kind of uncertainty. We had no accepted Hopf point, no periodic seed, and
+several signs of conditioning trouble. Continuing to ask AUTO to find something
+would have been model archaeology. The better question was whether a smaller,
+more transparent continuation tool could tell us what was actually fragile.
+
+## Reframing after AUTO
+
+The pivot started in the [way-forward planning
+session](../../sessions/berton-python-00-way-forward/), especially the [entry where the project was reframed as a numerical-method problem rather than a physics discovery problem](../../sessions/berton-python-00-way-forward/#entry-2). This is one of the
+more interesting process moments: the agent was not asked to implement yet
+another broad search, but to review episodes 6–9 and identify a bounded path
+forward.
+
+That led to a design/implementation sequence:
+
+- [Python continuation design](../../sessions/berton-python-01-task025-design/)
+- [continuation core](../../sessions/berton-python-02-task026-core/)
+- [`W_a0` gate](../../sessions/berton-python-03-task027-wa0-gate/)
+
+The `W_a0` gate was important process-wise because it made the tool earn trust
+on an easier branch before using it to support stronger scientific claims.
+
+## The tempting `H_a3` branch
+
+The [`H_a3` branch session](../../sessions/berton-python-04-task028-ha3-branch/)
+was the place where a positive result still seemed possible. The [initial completion entry](../../sessions/berton-python-04-task028-ha3-branch/#entry-4) was followed by a useful exchange about [what the non-Hopf transition might be](../../sessions/berton-python-04-task028-ha3-branch/#entry-5) and whether [smoothing piecewise profiles](../../sessions/berton-python-04-task028-ha3-branch/#entry-17) should become part of the continuation strategy. Earlier probes had
+suggested that this humidity-profile parameter could move the leading
+eigenvalues through a stability change.
+
+The agent's job here was mostly discipline: accepted points, rejected steps,
+finite-difference robustness, independent eigenvalue checks, and an explicit
+verdict. The result was nuanced but negative. There was a stability-count
+change, but not the clean complex-pair crossing needed for a Hopf explanation.
+
+That distinction is exactly where agent-generated diagnostics are useful. A
+less careful workflow could easily have turned “something changes stability”
+into “we found the oscillatory mechanism.”
+
+## The fragile `z_W0` region
+
+The staged `z_W0` continuation happened in [TASK-029](../../sessions/berton-python-05-task029-zw0-staged/), with the [first staged-branch result](../../sessions/berton-python-05-task029-zw0-staged/#entry-4), the [recap request](../../sessions/berton-python-05-task029-zw0-staged/#entry-7), and the later [closure discussion](../../sessions/berton-python-05-task029-zw0-staged/#entry-23) all in one long session.
+It got closer to the paper-relevant updraft transition region, but the 50 m
+smoothed branch stalled before becoming a clean 7–10 km result.
+
+The final documentation session, [TASK-033](../../sessions/berton-python-06-task033-final-docs/),
+records the synthesis; the [completion entry](../../sessions/berton-python-06-task033-final-docs/#entry-4) is the transcript pointer for the final written verdict. The key final test was smoothing-width sensitivity. If
+50 m equilibria simply did not exist at the obstructed anchors, that would be a
+different story. Instead, fixed-anchor solves could reach 50 m and below,
+including around `z_W0 = 10000 m`, while the conditioning worsened sharply as
+the profile sharpened.
+
+That converted “the branch stalled” into a more precise statement:
+
+> the `z_W0` region is path- and regularization-sensitive, consistent with a
+> near-singular sharp-profile limit, not a robust smooth-Hopf discovery.
+
+## What the agent made easier
+
+The main value of the agent in this final phase was not cleverness. It was
+persistence and auditability. Each task left behind:
+
+- scripts or notebooks that could be rerun;
+- CSV/JSON diagnostics rather than screenshots;
+- explicit accepted/rejected point records;
+- independent eigenvalue checks;
+- written verdict documents that limited what could be claimed.
+
+That audit trail made it easier to stop. Without it, the project could have
+continued indefinitely: another scaling, another control parameter, another
+smoothing width, another AUTO formulation. With it, the negative conclusion is
+specific enough to publish and move on from.
+
+## Closing thought
+
+This is a useful kind of AI-assisted research failure. The agent did not rescue
+the original oscillation story. It helped dismantle it carefully. The outcome
+is not “Berton 2023 is wrong” in some broad sense; it is that this
+implementation and continuation evidence do not support a robust full-model
+Hopf or sustained periodic orbit. The remaining phenomenon is too sensitive to
+regularization and parameter conventions to carry that physical interpretation.

@@ -25,6 +25,12 @@ test('parses the npm add-log CLI options required by TASK-1.5', () => {
     slug: '002-fixture',
     requireAnalysis: true,
   });
+
+  assert.deepEqual(parseAddLogArgs(['session.jsonl', '--slug=003-transcript-only', '--transcript-only']), {
+    jsonlPath: 'session.jsonl',
+    slug: '003-transcript-only',
+    transcriptOnly: true,
+  });
 });
 
 test('imports a JSONL session into private work artifacts, public transcript JSON, and draft MDX after validation', async () => {
@@ -63,6 +69,29 @@ test('imports a JSONL session into private work artifacts, public transcript JSO
     assert.match(mdx, /Imported at: 2026-06-06T20:10:00.000Z/);
     assert.match(mdx, /\.\.\/\.\.\/sessions\/002-add-log-fixture\/#entry-2/);
     assert.match(mdx, /TODO: Decide whether this span supports a claim/);
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+  }
+});
+
+test('transcript-only import writes public transcript JSON without draft MDX', async () => {
+  const cwd = await mkdtemp(path.join(tmpdir(), 'add-log-transcript-only-'));
+  try {
+    const inputPath = path.join(cwd, 'fixture.jsonl');
+    await writeFile(inputPath, fixtureJsonl);
+
+    const result = await addLog({
+      cwd,
+      jsonlPath: inputPath,
+      slug: '003-transcript-only',
+      title: 'Transcript Only',
+      noAnalysis: true,
+      transcriptOnly: true,
+      importedAt: '2026-06-06T20:10:00.000Z',
+    });
+
+    assert.match(await readFile(result.sessionOutputPath, 'utf8'), /"schemaVersion": 1/);
+    await assert.rejects(() => access(result.logOutputPath), /ENOENT/);
   } finally {
     await rm(cwd, { recursive: true, force: true });
   }

@@ -1,0 +1,139 @@
+{
+  "schemaVersion": 1,
+  "title": "Berton full-model H_a3 AUTO verdict",
+  "source": {
+    "kind": "pi",
+    "importedAt": "2026-06-18T12:24:19.223Z",
+    "sessionStartedAt": "2026-06-17T11:44:08.202Z"
+  },
+  "participants": [
+    {
+      "id": "user",
+      "name": "User",
+      "role": "user"
+    },
+    {
+      "id": "assistant",
+      "name": "Pi",
+      "role": "assistant"
+    }
+  ],
+  "entries": [
+    {
+      "id": "entry-1",
+      "index": 0,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "b2264c96",
+      "parentId": "06551513",
+      "content": [
+        {
+          "type": "text",
+          "text": "Please start work on TASK-016.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-2",
+      "index": 1,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "e5b70b6a",
+      "parentId": "7a43c825",
+      "content": [
+        {
+          "type": "text",
+          "text": "Started TASK-016.\n\n- Set status to **In Progress**\n- Assigned to **@pi**\n- Reviewed prerequisite tasks:\n  - TASK-019: `P=M/10` scaling validated\n  - TASK-020: restricted H_a3 result available; no AUTO-supported Hopf, upward direction still inconclusive\n  - TASK-023: z_W0 smoothing lessons available\n  - TASK-013/TASK-015: done\n\nThe existing TASK-016 plan still looks appropriate. I’ll proceed with the full-system H_a3 continuation using the TASK-019/TASK-020 scaling lessons unless you want to revise the plan first.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-3",
+      "index": 2,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "f5fb117d",
+      "parentId": "e5b70b6a",
+      "content": [
+        {
+          "type": "text",
+          "text": "Please go ahead.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-4",
+      "index": 3,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "4feebc6f",
+      "parentId": "c2d1dd78",
+      "content": [
+        {
+          "type": "text",
+          "text": "TASK-016 is complete and marked **Done**.\n\nKey result: **no AUTO-validated full-system H_a3 Hopf candidate**.\n\nAdded:\n- `episodes/08-full-model-auto-ha3/`\n- Full scaled AUTO formulation for TASK-016\n- Raw AUTO `b/s/d` outputs\n- Curated outputs and verdict note\n- Notebook command record\n- Regression tests: `tests/test_episode08_full_task016.py`\n\nValidation run:\n- `uv run pytest tests/test_episode08_full_task016.py tests/test_episode07_restricted_task020.py tests/test_episode06_full_logm_reformulation.py`\n- Result: **11 passed**\n\nVerdict:\n- Full-system AUTO starts at the TASK-011/TASK-012 seed.\n- Both H_a3 directions were attempted.\n- Accepted range remains only canonical `H_a3 = 0.61`.\n- Upward fails before reaching predicted `H_a3≈0.62`; downward records seed plus MX/no movement.\n- No HB/Hopf label. The H_a3 crossing remains a Python/restricted hint only.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-5",
+      "index": 4,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "a2512746",
+      "parentId": "4feebc6f",
+      "content": [
+        {
+          "type": "text",
+          "text": "Please commit the changes.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-6",
+      "index": 5,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "3d983475",
+      "parentId": "09672dce",
+      "content": [
+        {
+          "type": "text",
+          "text": "Committed changes.\n\nCommit: `6aa147d` — `Complete TASK-016 full H_a3 AUTO retry`\n\nWorking tree is clean.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    }
+  ],
+  "highlights": [],
+  "redactionSummary": [],
+  "redaction": {
+    "status": "processed",
+    "reviewNotes": [
+      "Automated public-safety pass completed. Review generated transcript before publishing."
+    ]
+  }
+}

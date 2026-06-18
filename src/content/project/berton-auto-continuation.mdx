@@ -1,0 +1,148 @@
+---
+title: AUTO continuation as a stress test
+summary: AUTO did not reveal a clean full-model Hopf bifurcation; instead it exposed branch choice, scaling, smoothing, and conditioning limits.
+order: 5
+draft: false
+---
+
+import { withBase } from '../../lib/sitePaths.ts';
+import Details from '../../components/Details.astro';
+
+export const envelopeUrl = withBase('/data/berton-auto-continuation/damped-envelope.json');
+export const eigenUrl = withBase('/data/berton-auto-continuation/late-equilibrium-eigenvalues.json');
+export const font = 'STIX Two Text, Georgia, Times New Roman, serif';
+export const cfg = { config: { font, axis: { labelFont: font, titleFont: font, labelFontSize: 16, titleFontSize: 18 }, legend: { labelFont: font, titleFont: font, labelFontSize: 16, titleFontSize: 18 } } };
+export const envelopeSpec = {
+  $schema: 'https://vega.github.io/schema/vega-lite/v6.json',
+  ...cfg,
+  width: 'container',
+  height: 300,
+  data: { url: envelopeUrl },
+  mark: { type: 'line', point: { filled: true, size: 90 }, strokeWidth: 2.5 },
+  encoding: {
+    x: { field: 'window', type: 'nominal', title: 'time window' },
+    y: { field: 'amplitude_m', type: 'quantitative', scale: { type: 'log' }, title: 'altitude envelope (m, log scale)' },
+    color: { field: 'method', type: 'nominal', title: 'integrator', scale: { range: ['#018571', '#5e3c99'] } },
+    detail: { field: 'method' },
+    tooltip: [
+      { field: 'method', type: 'nominal' },
+      { field: 'window', type: 'nominal' },
+      { field: 'amplitude_m', type: 'quantitative', format: '.4g' },
+    ],
+  },
+};
+export const eigenSpec = {
+  $schema: 'https://vega.github.io/schema/vega-lite/v6.json',
+  ...cfg,
+  width: 'container',
+  height: 260,
+  data: { url: eigenUrl },
+  transform: [{ filter: 'abs(datum.imag_s_inv) > 0' }],
+  mark: { type: 'point', filled: true, size: 90 },
+  encoding: {
+    x: { field: 'real_s_inv', type: 'quantitative', title: 'real part (s⁻¹)' },
+    y: { field: 'imag_s_inv', type: 'quantitative', title: 'imaginary part (s⁻¹)' },
+    tooltip: [
+      { field: 'real_s_inv', type: 'quantitative', format: '.3e' },
+      { field: 'imag_s_inv', type: 'quantitative', format: '.3e' },
+      { field: 'period_h', type: 'quantitative', title: 'period (h)', format: '.2f' },
+      { field: 'e_folding_h', type: 'quantitative', title: 'e-folding time (h)', format: '.2f' },
+    ],
+  },
+};
+
+After the reduced symbolic calculation, the natural next question was whether
+the **full** Berton model has a clean oscillatory bifurcation. For that I used
+AUTO-07p, a continuation package designed to follow equilibria and detect
+special points as parameters change.
+
+The short version is negative but useful: **AUTO did not validate a full-model
+Hopf bifurcation**. Instead it helped expose why the apparent oscillation is a
+hard object to interpret: the first branch was the wrong local explanation,
+the canonical oscillation decays, and later formulations ran into scaling and
+conditioning limits rather than clean special-point labels.
+
+## What continuation was supposed to do
+
+A time integration asks, “where does this one initial condition go?”
+Continuation asks a different question: “if I am sitting on an equilibrium and
+slowly turn a parameter knob, where does that equilibrium move, and does its
+stability change?”
+
+For a Hopf bifurcation, the tell-tale local event is a complex pair of
+eigenvalues crossing from negative real part to positive real part. In plainer
+terms: a damped wobble becomes an amplifying wobble.
+
+<Details summary="AUTO labels in plain language" variant="math">
+
+AUTO can mark several special points. The most relevant here were:
+
+- `HB`: Hopf bifurcation, where a complex pair crosses the imaginary axis;
+- `LP`: limit point or fold, where an equilibrium branch turns around;
+- `BP`: branch point, where another branch intersects.
+
+The absence of one of these labels on a computed branch is not a mathematical
+proof that no such point exists anywhere. It only says that this branch, with
+this formulation and numerical conditioning, did not provide accepted evidence
+for it.
+
+</Details>
+
+## The first full-model branch was not the explanation
+
+The first full-model AUTO screen varied `z_W0`, the height of the imposed
+updraft transition. This was the paper-relevant control to try first. It did
+not produce AUTO `LP`, `HB`, or `BP` labels in the 10 km to 9 km regime.
+Independent eigenvalue checks also did not show a complex pair approaching the
+imaginary axis.
+
+That initially sounds informative, but the more important discovery was branch
+choice. The equilibrium being followed sat above the updraft transition, so it
+felt almost no change as `z_W0` moved. The calculation was valid, but it was
+not probing the local mechanism behind the observed oscillatory trajectory.
+
+## The canonical oscillation decays
+
+The decisive follow-up was not another AUTO run. It was a long direct
+integration of the canonical no-Coriolis Case-0 oscillatory setup using both
+BDF and LSODA. Both solvers agreed: the altitude oscillation envelope collapsed
+by about a factor of `4.8e-4` between the 150–200 h window and the 450–500 h
+window.
+
+<VegaLite spec={envelopeSpec} caption="The reported oscillatory setup keeps wobbling for a long time, but the envelope collapses strongly in both BDF and LSODA integrations. The log scale makes the late-time decay visible." />
+
+The late-time state refines to an equilibrium with a stable complex eigenpair:
+period about `10.19 h`, e-folding time about `39.34 h`, and negative real part
+about `-7.06e-6 s^-1`.
+
+<VegaLite spec={eigenSpec} caption="The late-time complex pair has nonzero imaginary part, so it wobbles, but its real part is negative, so the wobble decays." />
+
+This explains the numerical behavior without invoking a sustained limit cycle:
+the trajectory is spiralling into a stable equilibrium.
+
+## Later AUTO work improved the diagnosis but not the verdict
+
+The later AUTO episodes tried better seeds, log-mass variables, scaled states,
+restricted models, alternate controls (`W_a0`, `H_a3`), and smoothed `z_W0`
+profiles. These were not wasted runs. They made the negative result more
+credible by showing where the numerical problem was fragile.
+
+The accepted conclusion is not “AUTO proves no Hopf exists.” It is:
+
+> the completed AUTO evidence does not support a clean full-model Hopf or a
+> validated finite-amplitude periodic orbit.
+
+That distinction matters. Failed continuation can indicate bad scaling,
+ill-conditioning, or the wrong branch. It is not hidden-positive evidence. By
+the end of the AUTO phase, the project needed a more transparent continuation
+implementation to separate numerical formulation issues from dynamical claims.
+That is the transition to the Python continuation work.
+
+## Process notes
+
+The companion research-log article [AUTO continuation as agent-assisted stress
+testing](../../log/015-berton-auto-continuation-process/) follows the work
+session by session. Useful transcript entry points include the [first
+full-model `z_W0` screen](../../sessions/berton-auto-full-03-task010-zw0-screen/#entry-5),
+the [long integration classification](../../sessions/berton-auto-full-05-task011-long-integration/#entry-2),
+and the [seed-continuation retry](../../sessions/berton-auto-full-06-task012-seed-continuation/#entry-4).

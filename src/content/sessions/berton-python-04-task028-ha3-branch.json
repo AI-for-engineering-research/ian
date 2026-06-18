@@ -1,0 +1,446 @@
+{
+  "schemaVersion": 1,
+  "title": "Berton Python H_a3 branch",
+  "source": {
+    "kind": "pi",
+    "importedAt": "2026-06-18T12:24:28.702Z",
+    "sessionStartedAt": "2026-06-17T17:05:06.277Z"
+  },
+  "participants": [
+    {
+      "id": "user",
+      "name": "User",
+      "role": "user"
+    },
+    {
+      "id": "assistant",
+      "name": "Pi",
+      "role": "assistant"
+    }
+  ],
+  "entries": [
+    {
+      "id": "entry-1",
+      "index": 0,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "8a4fd9dc",
+      "parentId": "3659fcef",
+      "content": [
+        {
+          "type": "text",
+          "text": "Please start work on TASK-028.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-2",
+      "index": 1,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "e17b27de",
+      "parentId": "4430c2b5",
+      "content": [
+        {
+          "type": "text",
+          "text": "Started TASK-028 and assigned it to myself.\n\nPlan added:\n1. Review TASK-027 output and existing episode-10 continuation/gate scripts.\n2. Inspect current Python continuation utilities/tests.\n3. Implement/adapt reproducible H_a3 pseudo-arclength continuation across [REDACTED_LOCAL_PATH]\n4. Save branch diagnostics: residuals, scaled residuals, spectra, stable counts, complex-pair tracking.\n5. Validate any candidate Hopf crossing independently; report numerical limits vs negative evidence.\n6. Update task notes/AC/final summary via CLI.\n\nPlease confirm this plan, and I’ll proceed with implementation.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [
+        {
+          "kind": "path",
+          "replacement": "[REDACTED_LOCAL_PATH]",
+          "count": 1
+        }
+      ],
+      "truncated": false
+    },
+    {
+      "id": "entry-3",
+      "index": 2,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "b5a39ae8",
+      "parentId": "e17b27de",
+      "content": [
+        {
+          "type": "text",
+          "text": "Yes, please go ahead.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-4",
+      "index": 3,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "21d90073",
+      "parentId": "b30816f1",
+      "content": [
+        {
+          "type": "text",
+          "text": "TASK-028 is complete and marked Done.\n\nImplemented:\n- `episodes/10-full-model-python-continuation/scripts/berton_full_task028_ha3_branch.py`\n- `episodes/10-full-model-python-continuation/docs/task028_ha3_full_model_branch.md`\n- `episodes/10-full-model-python-continuation/outputs/task028/`\n- `tests/test_episode10_task028_ha3_branch.py`\n- Updated episode README.\n\nResult:\n- Accepted H_a3 branch covers [REDACTED_LOCAL_PATH]`0.6000–0.6500`.\n- Max scaled residual: `9.59e-08`.\n- No Hopf-style complex-pair crossing found.\n- A non-Hopf stable-count transition is bracketed near `H_a3≈0.633731–0.635165`.\n\nValidation:\n- `uv run pytest tests/test_episode10_task028_ha3_branch.py`\n- `uv run pytest tests/test_episode10_task028_ha3_branch.py tests/test_episode10_task027_wa0_gate.py`\n\nReviewer check also found no Hopf overclaim.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [
+        {
+          "kind": "path",
+          "replacement": "[REDACTED_LOCAL_PATH]",
+          "count": 1
+        }
+      ],
+      "truncated": false
+    },
+    {
+      "id": "entry-5",
+      "index": 4,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "7ab8f0f7",
+      "parentId": "21d90073",
+      "content": [
+        {
+          "type": "text",
+          "text": "What could this \"non-Hopf stable-count transition\" be? Two separate bifurcations in a very narrow parameter range? Or something else?",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-6",
+      "index": 5,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "a3df3b15",
+      "parentId": "7ab8f0f7",
+      "content": [
+        {
+          "type": "text",
+          "text": "Most likely: **not one clean “non-Hopf bifurcation”**, but an unresolved narrow transition where our current sampling/eigen tracking is too coarse to classify.\n\nWhat the current evidence says:\n\n- At `H_a3≈0.633731`, the critical pair is complex with negative real part:\n  - `Re ≈ -3.87e-6`, `Im ≈ ±1.83e-4`\n  - stable count = 4\n- By `H_a3≈0.635165`, the critical eigenvalues are real and positive:\n  - one near `2.8e-5`, one near `1.96e-3`\n  - stable count = 2\n\nThat admits a few possibilities:\n\n1. **A Hopf crossing plus a nearby focus–node transition**\n   - The complex pair crosses `Re=0` while still complex: Hopf.\n   - Shortly afterward, the complex pair collides onto the real axis.\n   - Our accepted points skipped over the interval where the pair was complex with positive real part, so the script conservatively refused to call it Hopf.\n\n2. **A focus–node transition first, then two real eigenvalue crossings**\n   - The complex pair becomes two real negative eigenvalues.\n   - Then both real eigenvalues cross zero in a very narrow interval.\n   - That would be a pair of steady-state stability changes, not Hopf.\n\n3. **Numerical/eigenvalue-tracking artifact**\n   - The jump from `Re≈-4e-6 ± i1.8e-4` to real eigenvalues including `0.00196` is pretty abrupt.\n   - Could reflect finite-difference Jacobian sensitivity, nonsmooth model terms, branch-corrector step size, or eigenvalue sorting/tracking ambiguity.\n\nSo I would not yet interpret this as “two real bifurcations” or “definitely Hopf.” The honest statement is:\n\n> Accepted branch points show a real stability change in a narrow interval, but current sampling does not resolve whether it is Hopf followed by focus–node conversion, focus–node followed by real crossings, or numerical Jacobian/tracking pathology.\n\nBest next diagnostic: rerun a dense fixed-branch/eigenvalue refinement over `H_a3≈0.6335–0.6353`, with smaller continuation steps and multiple finite-difference Jacobian step sizes, then track the same eigenvalue pair continuously.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-7",
+      "index": 6,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "89daa340",
+      "parentId": "a3df3b15",
+      "content": [
+        {
+          "type": "text",
+          "text": "Would it be worth replacing the finite-difference Jacobian with something based on autodiff? Maybe using JAX?",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-8",
+      "index": 7,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "80d8cec2",
+      "parentId": "89daa340",
+      "content": [
+        {
+          "type": "text",
+          "text": "Yes — **worth it as a diagnostic**, but I’d be cautious about making JAX the default continuation backend immediately.\n\nWhy it’s worth doing:\n\n- The current ambiguity is exactly where finite-difference Jacobians can mislead:\n  - eigenvalues near zero,\n  - complex pair becoming real,\n  - possible nonsmooth transition,\n  - large scale separation in variables.\n- An autodiff Jacobian would help separate:\n  - genuine eigenvalue behavior,\n  - finite-difference step-size artifacts,\n  - branch/eigenvalue tracking mistakes.\n\nWhy JAX may be nontrivial:\n\n- The Berton RHS may contain NumPy/SciPy functions, conditionals, interpolation, clamps, max/min, or other nonsmooth pieces.\n- If the RHS has hard `if`, `max`, or piecewise transitions, autodiff can give a derivative of the implemented branch but not necessarily a physically smooth derivative.\n- Porting the whole RHS to JAX may be more work than the immediate question requires.\n\nBest path:\n\n1. **First do finite-difference robustness**\n   - Recompute eigenvalues near `H_a3≈0.6335–0.6353` with several FD steps, e.g. `1e-4…1e-8`.\n   - If the transition moves wildly, autodiff is strongly indicated.\n\n2. **Then add an autodiff RHS/Jacobian experiment**\n   - Prefer a small standalone episode-10 diagnostic script.\n   - Port only the RHS pieces needed for equilibrium Jacobian.\n   - Compare JAX Jacobian eigenvalues against FD Jacobian at accepted branch states.\n\n3. **Do not yet replace continuation**\n   - Keep pseudo-arclength correction using existing machinery until JAX parity is established.\n   - Use JAX initially as an independent eigenvalue/Jacobian cross-check.\n\nSo: **yes, probably worth it**, especially because the current “non-Hopf transition” hinges entirely on local eigenvalue structure. But I’d frame it as a follow-up validation task: “Implement autodiff Jacobian cross-check for the resolved H_a3 transition interval,” not as a wholesale rewrite.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-9",
+      "index": 8,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "216a6a36",
+      "parentId": "80d8cec2",
+      "content": [
+        {
+          "type": "text",
+          "text": "OK, that sounds sensible. Just for information, would an alternative be to calculate a *symbolic* Jacobian using Sympy? The system is small, so that seems like it might not be too hard to do.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-10",
+      "index": 9,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "7f5792a0",
+      "parentId": "216a6a36",
+      "content": [
+        {
+          "type": "text",
+          "text": "Yes, a **SymPy symbolic Jacobian is a plausible alternative**, and for a 4D RHS it may actually be more useful than JAX *if* the RHS formulas are explicit and not too branchy.\n\nPros:\n- Exact derivative expressions, so no finite-difference step sensitivity.\n- Easier to inspect individual derivative terms.\n- Can `lambdify` to NumPy for fast numerical evaluation.\n- Good fit for a small 4-state equilibrium system.\n- Helps expose nonsmooth/piecewise terms explicitly.\n\nCaveats:\n- If the RHS uses conditionals, `max`, clipping, empirical lookup/interpolation, or softplus smoothing, the symbolic form may become messy.\n- SymPy expressions can explode if the microphysics terms are complicated.\n- Piecewise derivatives are only meaningful away from switching surfaces; near a transition, classification still needs care.\n- You must ensure the symbolic RHS exactly matches the numerical RHS used in continuation.\n\nA good compromise would be:\n\n1. Build a SymPy RHS for the exact full-model equilibrium equations.\n2. Derive the 4×4 state Jacobian symbolically.\n3. `lambdify` RHS and Jacobian.\n4. Compare at TASK-011 seed and TASK-028 accepted branch points:\n   - symbolic RHS vs existing `python_rhs`\n   - symbolic Jacobian eigenvalues vs finite-difference eigenvalues\n5. Only then use it to resolve the `H_a3≈0.6337–0.6352` transition.\n\nMy instinct: **SymPy is probably the cleaner scientific validation tool**, while **JAX is probably the cleaner engineering/autodiff tool**. Given this repo’s research style and small system size, I’d try SymPy first if the RHS equations are already paper-faithful and explicit.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-11",
+      "index": 10,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "6fc74823",
+      "parentId": "7f5792a0",
+      "content": [
+        {
+          "type": "text",
+          "text": "OK, let's do your suggestion of a finite-different robustness check first. Could you just do that right away and add it to the reporting for the current episode?",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-12",
+      "index": 11,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "6f351c42",
+      "parentId": "4d02ab03",
+      "content": [
+        {
+          "type": "text",
+          "text": "Done. I added a finite-difference robustness check to episode 10.\n\nNew script:\n- `episodes/10-full-model-python-continuation/scripts/berton_full_task028_fd_robustness.py`\n\nNew outputs:\n- `outputs/task028/fd_jacobian_robustness.csv`\n- `outputs/task028/fd_jacobian_robustness_summary.json`\n\nReport updated:\n- `docs/task028_ha3_full_model_branch.md`\n\nResult:\n- For FD perturbation scales from `0.01×` through `10×` the TASK-009 baseline, the interval still shows a stable-count transition and **does not** support a Hopf-style complex-pair sign crossing.\n- Very broad perturbations, `30×–100×`, are classification-unstable:\n  - `30×` gives an artificial-looking Hopf-like case.\n  - `100×` loses the transition entirely.\n- So the conservative interpretation remains: **narrow stability-count transition, not resolved Hopf evidence under useful FD settings**.\n\nValidation:\n- `uv run pytest tests/test_episode10_task028_ha3_branch.py`\n- `uv run pytest tests/test_episode10_task028_ha3_branch.py tests/test_episode10_task027_wa0_gate.py`\n\nBoth passed.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-13",
+      "index": 12,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "3c082466",
+      "parentId": "6f351c42",
+      "content": [
+        {
+          "type": "text",
+          "text": "OK. Is this of any physical interest? What's actually happening at this transition? Are any physically realizable modes changing stability? Presumably, since the range of parameters where this transition happens is so narrow, it's unlikely to be relevant during \"normal\" evolution of the model.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-14",
+      "index": 13,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "19596318",
+      "parentId": "183c9448",
+      "content": [
+        {
+          "type": "text",
+          "text": "Yes — this is probably physically interpretable, but I’d treat it as **an artifact-sensitive transition caused by the equilibrium crossing the prescribed updraft-profile kink**, not as a robust cloud-physics bifurcation.\n\nKey clue: the transition occurs as the accepted equilibrium altitude crosses `z_W0 = 9000 m`.\n\nAround the bracket:\n\n- `H_a3≈0.633731`: `z≈9023 m`, just above `z_W0`\n- `H_a3≈0.635165`: `z≈8995 m`, just below `z_W0`\n\nThe model’s ambient updraft is piecewise:\n\n- below `z_W0 - Δz_W`: zero\n- between `z_W0 - Δz_W` and `z_W0`: linear ramp\n- above `z_W0`: constant `W_a0`\n\nSo at `z=z_W0`, `dW_a/dz` jumps from about\n\n\\[\nW_{a0}/\\Delta z_W = 0.6 / 300 \\approx 0.002\\ \\mathrm{s^{-1}}\n\\]\n\nbelow the cap to `0` above it.\n\nAnd the positive real eigenvalue after the transition is about:\n\n\\[\n\\lambda \\approx 0.00196\\ \\mathrm{s^{-1}}\n\\]\n\nwhich is suspiciously close to that updraft-ramp slope. That is a very strong hint that the “transition” is the equilibrium moving from the constant-updraft plateau into the sloped updraft ramp.\n\nSo I’d summarize it this way:\n\n> The stable-count change is likely a nonsmooth/profile-boundary effect associated with the equilibrium crossing the `W_a(z)` cap at `z_W0`, not two clean nearby smooth bifurcations.\n\nAre physically realizable modes changing stability? Formally yes: the eigenvectors are in the physical state variables, mostly altitude/vertical-velocity dominated, with weak mass participation. But because the instability is tied to a derivative jump in an idealized piecewise-linear atmospheric profile, its physical robustness is questionable.\n\nAlso yes, your intuition is right: the relevant `H_a3` interval is narrow and probably not “normally” important unless the equilibrium is sitting near the updraft transition altitude. A smooth atmospheric updraft profile would likely smear, shift, or remove this sharp transition.\n\nI’d call it:\n\n**“updraft-kink-induced local stability change,” not Hopf evidence.**",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-15",
+      "index": 14,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "36493c40",
+      "parentId": "19596318",
+      "content": [
+        {
+          "type": "text",
+          "text": "OK, that's useful to know. Please add that information to the episode documentation.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-16",
+      "index": 15,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "e64454f4",
+      "parentId": "be321a0f",
+      "content": [
+        {
+          "type": "text",
+          "text": "Added to:\n\n- `episodes/10-full-model-python-continuation/docs/task028_ha3_full_model_branch.md`\n\nNew section: **Physical interpretation**\n\nIt notes that the transition likely occurs as the equilibrium crosses `z_W0=9000 m`, where the piecewise updraft profile changes derivative. It also records the key scale comparison:\n\n- `W_a0 / Δz_W = 0.6 / 300 ≈ 0.002 s^-1`\n- post-transition eigenvalue ≈ `1.96e-3 s^-1`\n\nSo the report now frames this as an **updraft-profile kink-induced local stability feature**, not robust Hopf evidence.\n\nValidation:\n- `uv run pytest tests/test_episode10_task028_ha3_branch.py` passed.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-17",
+      "index": 16,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "e04f2ec5",
+      "parentId": "e64454f4",
+      "content": [
+        {
+          "type": "text",
+          "text": "A question related to this phenomenon: the model from the paper has many piecewise smooth profiles and conditions. Would it be more helpful for continuation analysis to smoothen out *all* of these kinked profiles? The kinks are unphysical, after all.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-18",
+      "index": 17,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "f4a21915",
+      "parentId": "e04f2ec5",
+      "content": [
+        {
+          "type": "text",
+          "text": "Yes — for continuation analysis, smoothing the kinked profiles would probably be helpful, and in some cases essential. But I would not smooth everything blindly without tracking what changed.\n\nWhy smoothing helps:\n\n- Continuation assumes a reasonably smooth vector field.\n- Hopf / fold classification relies on meaningful Jacobians.\n- Piecewise-linear atmospheric profiles create artificial derivative jumps.\n- These jumps can create stability-count changes that look like bifurcations but are really profile-boundary artifacts.\n- Smoothing would make eigenvalue tracking and AUTO/Python continuation much better conditioned.\n\nBut there is a catch:\n\n- Smoothing changes the model.\n- Some “events” may disappear, shift, or broaden.\n- If the paper’s published behavior depends on hard kinks, smoothing may alter replication claims.\n\nBest approach:\n\n1. **Introduce a controlled smoothed-profile variant**\n   - Keep the paper-faithful piecewise model as baseline.\n   - Add a parameterized smoothing width, e.g. `ε_z = 10, 25, 50, 100 m`.\n   - Use smoothstep/tanh/softplus blends around profile breakpoints.\n\n2. **Smooth the main atmospheric profiles**\n   - `W_a(z)` updraft ramp/cap.\n   - `U_a(z)` horizontal wind segments.\n   - temperature profile breakpoints.\n   - humidity profile breakpoints.\n   - any drag/regime/Reynolds condition switches if present.\n\n3. **Do a homotopy**\n   - Start with a smooth model.\n   - Continue branch / classify stability.\n   - Decrease smoothing width toward the paper-faithful piecewise limit.\n   - Ask: does the stability feature persist, converge, vanish, or collapse onto a kink?\n\n4. **Report both**\n   - “Paper-faithful nonsmooth model shows X near kink.”\n   - “Smoothed model with ε=Y shows/does not show corresponding smooth bifurcation.”\n   - “As ε→0, feature behaves like Z.”\n\nFor the current `H_a3` transition specifically, smoothing `W_a(z)` near `z_W0` is the first thing I’d test. If the transition disappears or moves continuously with the smoothing width, that’s strong evidence it is not a robust physical bifurcation.\n\nSo: **yes, smooth them — but as a documented model variant and continuation homotopy, not as an undocumented replacement for the paper model.**",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-19",
+      "index": 18,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "e8d1f584",
+      "parentId": "f4a21915",
+      "content": [
+        {
+          "type": "text",
+          "text": "Ah yes, the homotopy idea is very good. Please create a backlog issue (for a new episode) to add principled smoothing to the current Python continuation setup, to do a continuation analysis for the smoothed model (after identifying suitable steady and oscillatory states to start from by integration), possibly looking at more branches if we can find them, then doing a homotopy to the paper model.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-20",
+      "index": 19,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "6b333f00",
+      "parentId": "8c28c13d",
+      "content": [
+        {
+          "type": "text",
+          "text": "Created backlog issue:\n\n**TASK-031 — Launch smoothed-model continuation and homotopy episode**\n\nIt covers:\n- new episode setup,\n- principled smoothing of kinked profiles/regime switches,\n- integration-derived steady/oscillatory seeds,\n- smoothed-model continuation,\n- possible additional branches,\n- homotopy back to the paper-faithful nonsmooth model,\n- reporting robust dynamics vs kink artifacts.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-21",
+      "index": 20,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "fbbebf5a",
+      "parentId": "6b333f00",
+      "content": [
+        {
+          "type": "text",
+          "text": "OK, please commit the current changes.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-22",
+      "index": 21,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "82c36049",
+      "parentId": "533e05fb",
+      "content": [
+        {
+          "type": "text",
+          "text": "Committed current changes.\n\nCommit:\n- `c5d6f6a Add full-model H_a3 continuation diagnostics`\n\nWorking tree is clean.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    }
+  ],
+  "highlights": [],
+  "redactionSummary": [
+    {
+      "kind": "path",
+      "replacement": "[REDACTED_LOCAL_PATH]",
+      "count": 2
+    }
+  ],
+  "redaction": {
+    "status": "needs_review",
+    "reviewNotes": [
+      "Automated public-safety pass completed. Review generated transcript before publishing.",
+      "One or more sensitive-looking values were replaced with explicit redaction markers."
+    ]
+  }
+}

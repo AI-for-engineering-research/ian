@@ -1,0 +1,152 @@
+{
+  "schemaVersion": 1,
+  "title": "Planning Python continuation after AUTO",
+  "source": {
+    "kind": "pi",
+    "importedAt": "2026-06-18T12:24:19.379Z",
+    "sessionStartedAt": "2026-06-17T12:12:49.074Z"
+  },
+  "participants": [
+    {
+      "id": "user",
+      "name": "User",
+      "role": "user"
+    },
+    {
+      "id": "assistant",
+      "name": "Pi",
+      "role": "assistant"
+    }
+  ],
+  "entries": [
+    {
+      "id": "entry-1",
+      "index": 0,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "a670d3cd",
+      "parentId": "dc34ef56",
+      "content": [
+        {
+          "type": "text",
+          "text": "Please review the results from project episodes 6-9 and identify a way forward, since we've not been able to perform useful continuation in the full Berton model.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-2",
+      "index": 1,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "62204df0",
+      "parentId": "2e39b1e8",
+      "content": [
+        {
+          "type": "text",
+          "text": "I reviewed episodes 6–9. My read: **the full-model AUTO path has become a numerical-method problem, not a physics-discovery path.** The best way forward is to stop making more full 4D AUTO variants until we have an independent continuation backbone that can actually follow the full equilibrium branch.\n\n## What episodes 6–9 established\n\n### Episode 06: canonical Berton “oscillation” is likely damped\n`episodes/06-full-model-auto-seed-continuation/docs/full_berton_dynamics_continuation_report.md`\n\nThe long-integration seed is a stable spiral equilibrium:\n\n- `z_eq ≈ 9618.03 m`\n- stable complex pair: `Re ≈ -7.06e-6 s^-1`, period ≈ `10.19 h`\n- BDF/LSODA oscillation envelope decays by [REDACTED_LOCAL_PATH]`2e3`\n\nSo the canonical no-Coriolis Case 0 is **not currently evidence for a sustained periodic orbit**.\n\n### Episode 07: restricted 3D continuation can be made useful\nThe key success is TASK-019:\n\n- restricted `W_a0` continuation works after using `P = log(m/m_seed)/10`\n- reaches `W_a0 = 1.2` and beyond\n- matches Python branch tightly\n\nBut restricted `H_a3` and `z_W0` only give hints:\n\n- `H_a3`: nearby fold around `0.597`, no AUTO Hopf; upward side fails near `0.611`\n- smoothed `z_W0`: downward direction works; upward transition region remains fragile\n\nThis says the reduced/restricted formulation is useful as a diagnostic sandbox, but not sufficient for full-model claims.\n\n### Episode 08: full 4D `H_a3` retry failed before becoming informative\n`episodes/08-full-model-auto-ha3/docs/task016_full_ha3_scaled_verdict.md`\n\nThe full scaled `H_a3` AUTO run accepted only the seed:\n\n- accepted range: `H_a3 = 0.610000` only\n- no HB label\n- Python finite-difference checks still suggest a possible sign change by `H_a3≈0.625`, but those are not accepted branch points\n\nSo `H_a3` remains a **Python hint**, not a continuation result.\n\n### Episode 09: full 4D smoothed `z_W0` also failed immediately\n`episodes/09-full-model-auto-zw0/docs/task024_full_zw0_smooth_verdict.md`\n\nEven with the smoothed updraft and scaled `q_z`, AUTO accepted only the seed in both directions. The diagnostics show pivot/NaN failures, not a clean dynamical verdict.\n\nImportant point: the Python anchor checks at fixed seed show that changing `z_W0` into the 9.5–10 km transition drastically changes residual/eigenvalues, but those points are **not equilibria** and not accepted AUTO branch points.\n\n## Main conclusion\n\nI would not interpret the full AUTO failures as evidence for or against Hopf. They are mostly evidence that the current full 4D AUTO formulation is unusable for this problem.\n\nThe useful conclusions are:\n\n1. The canonical Berton no-Coriolis case appears damped, not periodic.\n2. Restricted continuation can work when the mass arclength coordinate is fixed.\n3. Full 4D AUTO is failing at the numerical-corrector level before it can answer the scientific question.\n4. Therefore, more full AUTO retries are unlikely to help unless we first build a better continuation workflow.\n\n## Recommended way forward\n\nCreate a new episode, probably:\n\n```text\nepisodes/10-full-model-python-continuation/\n```\n\nGoal: **replace “AUTO-first” with “Python continuation first, AUTO only for final validation.”**\n\n### Step 1: Build a full-model Python pseudo-arclength continuation driver\n\nUse the same scaled variables as the best AUTO attempts:\n\n```text\nZ = (z - z_seed) / 1000\nU = (u - u_seed) / 5\nW = w / w_scale\nP = log(m / m_seed) / 10\n```\n\nBut solve the equilibrium system directly in Python with:\n\n- tangent predictor\n- Newton / least-squares corrector\n- explicit residual scaling\n- finite-difference, complex-step, or JAX/autograd Jacobian if practical\n- condition-number diagnostics at every accepted point\n- saved predictor/corrector traces\n\nThis avoids AUTO’s opaque DGEBAL/pivot failures and lets us see where Newton actually goes bad.\n\n### Step 2: Use `W_a0` as the full 4D gate\n\nBefore touching Hopf controls, require the Python continuation to reproduce a smooth full equilibrium branch in `W_a0`.\n\nAcceptance gate:\n\n- continue at least over `W_a0 = 0.1–1.2`\n- residual norm stays small\n- branch agrees with the previous Python root-continuation probe\n- eigenvalues remain stable as expected\n\nIf even Python pseudo-arclength cannot do this, the issue is with the full residual/scaling/model equations, not AUTO.\n\n### Step 3: Revisit `H_a3` with branch-following, not fixed-seed probes\n\nThen continue the actual full equilibrium branch in `H_a3`.\n\nThe current evidence suggests the interesting region is roughly:\n\n```text\nH_a3 ≈ 0.61–0.65\n```\n\nLook for:\n\n- accepted full equilibrium points across the suspected crossing\n- complex pair real part crossing zero\n- determinant/trace-style reduced diagnostics\n- long time integrations on both sides of the candidate crossing\n\nOnly if this produces a clean full-branch eigenvalue crossing should we try AUTO again.\n\n### Step 4: Treat `z_W0` as a staged transition-region problem\n\nFor `z_W0`, do not jump straight from seed AUTO to the 7–10 km interval.\n\nInstead:\n\n1. use smoothed updraft with a large smoothing width first;\n2. continue the full equilibrium through the transition region;\n3. gradually reduce smoothing width toward the TASK-023/TASK-024 value;\n4. only then compare to the piecewise Berton profile.\n\nThis should clarify whether the 9.6–10 km fragility is a real branch feature or just a nonsmooth/conditioning artifact.\n\n### Step 5: Only use AUTO after Python gives branch points and tangents\n\nIf Python continuation finds a candidate Hopf, then seed AUTO near that point with:\n\n- known accepted equilibrium coordinates\n- known tangent direction\n- tested residual/Jacobian scaling\n- preferably analytic or externally validated Jacobian blocks\n\nAUTO should become a validator, not the exploratory engine.\n\n## Strategic recommendation\n\nI would shift the research question from:\n\n> “Can we make AUTO continue the full Berton model?”\n\nto:\n\n> “Does the full Berton model actually have a nearby Hopf/limit-cycle regime, and if so under which control?”\n\nThe immediate next artifact should be a reproducible Python continuation notebook/script, not another AUTO directory.\n\nIf that Python workflow finds no Hopf and long integrations remain damped across plausible `H_a3`, `W_a0`, `z_W0`, and smoothing/transition variants, then the honest conclusion is that this implementation of the Berton model does **not** reproduce Berton’s reported sustained oscillation under the studied assumptions.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [
+        {
+          "kind": "path",
+          "replacement": "[REDACTED_LOCAL_PATH]",
+          "count": 1
+        }
+      ],
+      "truncated": false
+    },
+    {
+      "id": "entry-3",
+      "index": 2,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "a69c570a",
+      "parentId": "62204df0",
+      "content": [
+        {
+          "type": "text",
+          "text": "Please update the episode index with the latest episodes and commit the change.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-4",
+      "index": 3,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "0cba74a9",
+      "parentId": "98659e19",
+      "content": [
+        {
+          "type": "text",
+          "text": "Updated `episodes/README.md` with episodes 08–09 and refreshed episode 07 status.\n\nCommitted change:\n\n```text\n58a0640 Update episode index through episode 09\n```",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-5",
+      "index": 4,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "08e9a664",
+      "parentId": "0cba74a9",
+      "content": [
+        {
+          "type": "text",
+          "text": "Please create backlog tasks for your \"Python continuation first, AUTO only for final validation\" (in a new episode, as suggested).",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-6",
+      "index": 5,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "ade6719f",
+      "parentId": "daa52812",
+      "content": [
+        {
+          "type": "text",
+          "text": "Created Episode 10 backlog tasks:\n\n- `TASK-025` — Create episode 10 Python continuation scaffold\n- `TASK-026` — Build full-model Python pseudo-arclength continuation core\n- `TASK-027` — Use `W_a0` as full-model Python continuation gate\n- `TASK-028` — Continue full-model `H_a3` branch with Python continuation\n- `TASK-029` — Stage full-model `z_W0` continuation through smoothed updraft transition\n- `TASK-030` — Validate Python-discovered full-model candidates with AUTO\n\nAdded dependencies:\n\n- `026 → 025`\n- `027 → 026`\n- `028 → 027`\n- `029 → 027`\n- `030 → 028, 029`\n\nBacklog auto-committed the task updates; working tree is clean.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    }
+  ],
+  "highlights": [],
+  "redactionSummary": [
+    {
+      "kind": "path",
+      "replacement": "[REDACTED_LOCAL_PATH]",
+      "count": 1
+    }
+  ],
+  "redaction": {
+    "status": "needs_review",
+    "reviewNotes": [
+      "Automated public-safety pass completed. Review generated transcript before publishing.",
+      "One or more sensitive-looking values were replaced with explicit redaction markers."
+    ]
+  }
+}

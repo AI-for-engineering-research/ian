@@ -1,0 +1,65 @@
+[
+  {
+    "smooth_width_m": 10,
+    "z_W0_min_m": 9600,
+    "z_W0_max_m": 9930,
+    "accepted_points": 10,
+    "max_state_jacobian_condition": 1216014596.8646736
+  },
+  {
+    "smooth_width_m": 25,
+    "z_W0_min_m": 9600,
+    "z_W0_max_m": 10000,
+    "accepted_points": 12,
+    "max_state_jacobian_condition": 439242494.83009386
+  },
+  {
+    "smooth_width_m": 35,
+    "z_W0_min_m": 9600,
+    "z_W0_max_m": 10000,
+    "accepted_points": 12,
+    "max_state_jacobian_condition": 18765793.094122488
+  },
+  {
+    "smooth_width_m": 50,
+    "z_W0_min_m": 9600,
+    "z_W0_max_m": 10000,
+    "accepted_points": 12,
+    "max_state_jacobian_condition": 1500694.741857628
+  },
+  {
+    "smooth_width_m": 75,
+    "z_W0_min_m": 9600,
+    "z_W0_max_m": 10000,
+    "accepted_points": 12,
+    "max_state_jacobian_condition": 181193.5250273754
+  },
+  {
+    "smooth_width_m": 100,
+    "z_W0_min_m": 9600,
+    "z_W0_max_m": 10000,
+    "accepted_points": 12,
+    "max_state_jacobian_condition": 59739.09592705841
+  },
+  {
+    "smooth_width_m": 150,
+    "z_W0_min_m": 9600,
+    "z_W0_max_m": 10000,
+    "accepted_points": 12,
+    "max_state_jacobian_condition": 20317.668748584085
+  },
+  {
+    "smooth_width_m": 200,
+    "z_W0_min_m": 9600,
+    "z_W0_max_m": 10000,
+    "accepted_points": 12,
+    "max_state_jacobian_condition": 12489.355476124694
+  },
+  {
+    "smooth_width_m": 300,
+    "z_W0_min_m": 9600,
+    "z_W0_max_m": 10000,
+    "accepted_points": 12,
+    "max_state_jacobian_condition": 8146.449158713557
+  }
+]

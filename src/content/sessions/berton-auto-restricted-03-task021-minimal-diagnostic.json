@@ -1,0 +1,446 @@
+{
+  "schemaVersion": 1,
+  "title": "Berton minimal restricted AUTO diagnostic",
+  "source": {
+    "kind": "pi",
+    "importedAt": "2026-06-18T12:24:18.989Z",
+    "sessionStartedAt": "2026-06-16T13:39:38.929Z"
+  },
+  "participants": [
+    {
+      "id": "user",
+      "name": "User",
+      "role": "user"
+    },
+    {
+      "id": "assistant",
+      "name": "Pi",
+      "role": "assistant"
+    },
+    {
+      "id": "system",
+      "name": "System",
+      "role": "system"
+    }
+  ],
+  "entries": [
+    {
+      "id": "entry-1",
+      "index": 0,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "d4c2dcb6",
+      "parentId": "a065d711",
+      "content": [
+        {
+          "type": "text",
+          "text": "Please start work on TASK-021.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-2",
+      "index": 1,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "7194e093",
+      "parentId": "a91e6ca6",
+      "content": [
+        {
+          "type": "text",
+          "text": "TASK-021 is complete and marked Done.\n\nImplemented:\n- Minimal separate AUTO setup: `episodes/07-restricted-equilibrium-auto/auto/berton_restricted_task021_minimal/`\n- Curated outputs: `episodes/07-restricted-equilibrium-auto/outputs/task021/`\n- Diagnostic note: `episodes/07-restricted-equilibrium-auto/docs/task021_minimal_wa0_auto_diagnostic.md`\n- Repro notebook: `episodes/07-restricted-equilibrium-auto/notebooks/task021_minimal_wa0_auto_diagnostic.ipynb`\n- Parser/synthesis script and tests.\n\nResult:\n- Minimal plus/minus `W_a0` AUTO runs still accepted only the seed at `W_a0=0.6`.\n- No nontrivial branch points were accepted beyond `W_a0=0.6`.\n- Since failure persists with `ICP=['W_a0']`, `ISP=0`, `JAC=0`, empty `PVLS`, and no supplied Jacobian, it is unlikely to be solely TASK-017 diagnostic/PVLS/Jacobian bookkeeping.\n\nVerification:\n- `uv run pytest tests/test_episode07_restricted_task017.py tests/test_episode07_restricted_task018.py tests/test_episode07_restricted_task021.py`\n- 12 passed.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-3",
+      "index": 2,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "4799f0a3",
+      "parentId": "7194e093",
+      "content": [
+        {
+          "type": "text",
+          "text": "OK, so would it be better to stick with this reduced problem and try some other changes here, or is that going to be a dead end? It seems as though we should get continuation working in this restricted setting before putting complexity back in, but I'm not clear on what the next step in that would be.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-4",
+      "index": 3,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "67d81ac7",
+      "parentId": "4799f0a3",
+      "content": [
+        {
+          "type": "text",
+          "text": "I’d **stay in the restricted problem**, but stop doing broad AUTO knob-twiddling. It’s not a dead end; it’s the right sandbox. The TASK-021 result says the failure is probably in the **AUTO formulation/scaling/tangent/corrector setup**, not in PVLS metadata or the full model complexity.\n\nBest next step: make the restricted problem even more diagnostic, not more physical.\n\nRecommended sequence:\n\n1. **Validate the local branch derivative outside AUTO**\n   - At the seed, compute `DF/DU`, `DF/DW_a0`, and the implicit tangent  \n     `dU/dW_a0 = - (DF/DU)^-1 DF/DW_a0`.\n   - Compare that predicted first step to the TASK-012 Python continuation branch.\n   - If this is sane, the mathematical restricted problem is fine.\n\n2. **Run AUTO on a linearized surrogate of the same restricted problem**\n   - Same `NDIM=3`, same `ICP=['W_a0']`, same seed/scaling.\n   - But replace the residual with the affine model:\n     `F(U, W) = A(U-U0) + b(W-W0)`.\n   - If AUTO cannot continue this, the AUTO setup is structurally wrong.\n   - If AUTO can continue it, the issue is nonlinear residual evaluation/scaling/finite-difference behavior.\n\n3. **Try a reparameterized control**\n   - Instead of continuing raw `W_a0`, define a scaled parameter, e.g. `q = (W_a0 - 0.6) / 0.01` or similar.\n   - AUTO often behaves much better when the active parameter has order-one step sizes and sensitivities.\n   - Keep reporting physical `W_a0`, but make AUTO continue `q`.\n\n4. **Then reintroduce a supplied Jacobian, but only after checking it**\n   - TASK-021 removed user Jacobians to rule out bad Jacobian bookkeeping.\n   - The next useful test is not “trust the old Jacobian”; it is “supply a Python-verified finite-difference/analytic Jacobian with controlled step sizes.”\n   - Especially check `DFDP` for the active parameter.\n\nSo yes: **get continuation working here before returning to the full problem**, but the next move should be a controlled tangent/Jacobian/scaling diagnosis, not another full AUTO experiment. My pick for TASK-022 would be: *build a local linearized restricted AUTO surrogate plus Python tangent cross-check*. That will tell us whether AUTO itself is misconfigured or whether the nonlinear restricted residual is causing the first corrector to explode.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-5",
+      "index": 4,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "ff7c4026",
+      "parentId": "67d81ac7",
+      "content": [
+        {
+          "type": "text",
+          "text": "OK. Can you just go ahead and do that, updating the implementation plan for TASK-022 as needed?",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-6",
+      "index": 5,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "f16a321a",
+      "parentId": "3aaa9766",
+      "content": [
+        {
+          "type": "text",
+          "text": "Done — TASK-022 is implemented and marked Done.\n\nKey result:\n- Restricted Fortran residuals/DFDU/DFDP/PVLS validate tightly against Python.\n- Local affine AUTO surrogate continues successfully past `W_a0=1.2`.\n- So the failure is **not likely** basic residual mismatch, Jacobian/indexing bug, PVLS misuse, or generic AUTO inability to continue this coordinate/control setup.\n- Remaining likely issue: **nonlinear restricted corrector/arclength/tangent scaling**, especially once Newton iterates jump away from the local branch.\n\nAdded:\n- `episodes/07-restricted-equilibrium-auto/scripts/berton_restricted_task022_validate_fortran.py`\n- `episodes/07-restricted-equilibrium-auto/outputs/task022/`\n- `episodes/07-restricted-equilibrium-auto/docs/task022_restricted_fortran_validation.md`\n- `episodes/07-restricted-equilibrium-auto/auto/berton_restricted_task022_linear_surrogate/`\n- `tests/test_episode07_restricted_task022.py`\n\nVerification:\n- `uv run pytest tests/test_episode07_restricted_task017.py tests/test_episode07_restricted_task018.py tests/test_episode07_restricted_task021.py tests/test_episode07_restricted_task022.py`\n- 17 passed.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-7",
+      "index": 6,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "ff59b25b",
+      "parentId": "f16a321a",
+      "content": [
+        {
+          "type": "text",
+          "text": "Can you come up with a fix for the arclength scaling?",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-8",
+      "index": 7,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "e626dbeb",
+      "parentId": "045c8a47",
+      "content": [
+        {
+          "type": "text",
+          "text": "Yes. The fix is to **rescale the AUTO log-mass state**, not the continuation parameter.\n\nCurrent restricted state:\n\n```fortran\nU(3)=M=log(m/m_seed)\nUU(4)=LOG(m_seed) + U(3)\n```\n\nThis makes AUTO’s arclength corrector too sensitive/nonlinear in the mass direction. The local tangent from TASK-022 was:\n\n```text\ndZ/dW_a0 = 0.438\ndU/dW_a0 = -0.219\ndM/dW_a0 = 3.086\n```\n\nSo `M` dominates the nonlinear corrector geometry.\n\nThe working fix is:\n\n```fortran\nU(3)=P=M/10\nUU(4)=LOG(m_seed) + 10D0*U(3)\n```\n\ni.e. AUTO continues in `P_log_ratio_over_10`, while the physical model still sees the same `m = m_seed * exp(M)`.\n\nI tested this as a scratch AUTO variant and it immediately fixed the `W_a0` continuation:\n\n```text\nW_a0 reached 1.20000\naccepted nontrivial branch points\nno NaN/DGEBAL first-step failure\n```\n\nRepresentative branch output:\n\n```text\nPT 10  W_a0=0.651\nPT 20  W_a0=0.815\nPT 30  W_a0=0.982\nPT 40  W_a0=1.141\nUZ 44  W_a0=1.200\n```\n\nSo the next repo-level fix should be a new restricted AUTO variant with:\n\n- state `U(3)=P=M/10`\n- inverse map `log(m)=log(m_seed)+10*P`\n- updated `unames`\n- adjusted DFDU finite-difference step for `P`\n- outputs converting back to physical `M=10P` / `m=m_seed*exp(10P)`\n\nI would not pursue parameter-only scaling as the primary fix; the failure is in the nonlinear mass direction of the arclength geometry.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-9",
+      "index": 8,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "752e4773",
+      "parentId": "e626dbeb",
+      "content": [
+        {
+          "type": "text",
+          "text": "OK, that's excellent. Please update the relevant outstanding backlog tasks to reflect this finding and update the documentation for the current task.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-10",
+      "index": 9,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "8b4ca0de",
+      "parentId": "4ca42cf9",
+      "content": [
+        {
+          "type": "text",
+          "text": "Please carry on.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-11",
+      "index": 10,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "e583591d",
+      "parentId": "ab8c0262",
+      "content": [
+        {
+          "type": "text",
+          "text": "Carried on through TASK-019 and started TASK-020.\n\nCompleted:\n- TASK-019 is now Done.\n- Implemented curated `P=M/10` restricted W_a0 AUTO gate.\n- Upward W_a0 continuation now reaches all anchors through `W_a0=1.2` and continues beyond.\n- Compared against TASK-012 Python probe with tight agreement.\n- Added docs, parser outputs, and tests.\n\nKey files:\n- `episodes/07-restricted-equilibrium-auto/auto/berton_restricted_task019_pmass/`\n- `episodes/07-restricted-equilibrium-auto/scripts/berton_restricted_task019_pmass_wa0.py`\n- `episodes/07-restricted-equilibrium-auto/outputs/task019/`\n- `episodes/07-restricted-equilibrium-auto/docs/task019_pmass_wa0_gate.md`\n- `tests/test_episode07_restricted_task019.py`\n\nVerification:\n- `uv run pytest tests/test_episode07_restricted_task019.py tests/test_episode07_restricted_task017.py tests/test_episode07_restricted_task018.py tests/test_episode07_restricted_task021.py tests/test_episode07_restricted_task022.py`\n- 22 passed.\n\nAlso updated TASK-020:\n- Marked In Progress.\n- Noted that W_a0 gate is now passed.\n- Initial scratch H_a3 attempt shows a new H_a3-specific scaling issue: `dZ/dH_a3≈-279`, `dU/dH_a3≈139`, so H_a3 needs its own arclength/control scaling before a Hopf verdict.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-12",
+      "index": 11,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "f439f613",
+      "parentId": "e583591d",
+      "content": [
+        {
+          "type": "text",
+          "text": "Remind me again what the W_a0 and H_a3 parameters actually are? I'm losing track of the names of things.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-13",
+      "index": 12,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "21664e52",
+      "parentId": "f439f613",
+      "content": [
+        {
+          "type": "text",
+          "text": "`W_a0` and `H_a3` are **atmospheric profile parameters** in the Berton model.\n\n- `W_a0`: **updraft speed amplitude**\n  - Units: m/s.\n  - Controls the vertical air velocity profile `W_a(z)`.\n  - In this setup, canonical value is `0.6 m/s`.\n  - Increasing `W_a0` changes the equilibrium altitude/mass branch smoothly.\n  - We used it as a **conditioning sanity-check parameter**, not because it is the Hopf target.\n\n- `H_a3`: **relative humidity control point**\n  - Dimensionless relative humidity value.\n  - It is the humidity profile value at the third humidity control level, around the upper part of the piecewise profile.\n  - Canonical value is `0.61`.\n  - It affects ice growth/sublimation through supersaturation, hence mass/growth balance.\n  - This is the **Hopf-relevant control candidate** from the Python probe: varying `H_a3` changes the critical eigenvalues and may cross stability near `H_a3≈0.62`.\n\nIn short:\n\n```text\nW_a0 = strength of the vertical updraft\nH_a3 = key atmospheric humidity value\n```\n\nWe used `W_a0` first because the Python branch is known smooth/stable, so if AUTO can’t continue it, the AUTO setup is broken. Now that `W_a0` works with `P=M/10`, we can cautiously return to `H_a3`, which is the physically interesting stability-control parameter.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-14",
+      "index": 13,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "8b776f73",
+      "parentId": "21664e52",
+      "content": [
+        {
+          "type": "text",
+          "text": "OK. One question: is the updraft altitude not a continuation candidate? This was the parameter in the original paper that led to the two different (\"steady\" and \"oscillatory\") states. I think we should definitely do the H_a3 continuation, since getting the scaling right for all these different things can only help, but I want to pin down what continuation experiments might be reasonable to do.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-15",
+      "index": 14,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "dc6c8fbb",
+      "parentId": "8b776f73",
+      "content": [
+        {
+          "type": "text",
+          "text": "Yes — the updraft altitude **is absolutely a reasonable continuation candidate**. In this code it is `z_W0`.\n\nRough meanings:\n\n```text\nW_a0  = updraft strength/amplitude\nz_W0  = updraft altitude / top of ramp / where updraft reaches plateau\nH_a3  = humidity profile control value\n```\n\nThe updraft profile is basically:\n\n```text\nbelow z_W0 - Δz_W : W_a(z) = 0\nfrom z_W0 - Δz_W to z_W0 : ramp up\nabove z_W0 : W_a(z) = W_a0\n```\n\nwith `Δz_W = 300 m` currently.\n\nSo yes: if the original paper used the updraft altitude to distinguish “steady” and “oscillatory” states, then `z_W0` should be on our list of serious continuation controls.\n\nThe caveat is that `z_W0` is trickier than `W_a0`:\n\n- At the seed, `z_seed ≈ 9618 m` and `z_W0 = 9000 m`.\n- Since the seed is above `z_W0`, the particle is in the **constant updraft plateau**.\n- Small changes in `z_W0` may initially do almost nothing to the local equilibrium, because `W_a(z_seed)=W_a0` as long as `z_seed > z_W0`.\n- But when `z_W0` approaches the equilibrium altitude, the branch can hit the piecewise updraft kink/ramp, and AUTO may hate that unless we smooth or segment the continuation.\n\nSo I’d classify the reasonable experiments as:\n\n1. **`W_a0` continuation**\n   - Already used as a conditioning gate.\n   - Now works after `P=M/10`.\n   - Not the main science target.\n\n2. **`H_a3` continuation**\n   - Still worth doing.\n   - Local stability/Hopf-relevant in the Python probe.\n   - Helps us get scaling right for a parameter that strongly affects growth/mass balance.\n\n3. **`z_W0` continuation**\n   - Very important physically because it matches the paper’s updraft-altitude story.\n   - Likely should be done after or alongside H_a3.\n   - May require special care around the updraft ramp/kink.\n\n4. Later: **periodic orbit continuation**\n   - If H_a3 or z_W0 reveals a Hopf/stability crossing, then the real “oscillatory state” story probably needs periodic-orbit continuation, not just equilibrium continuation.\n\nMy suggested sequence:\n\n```text\n1. Finish H_a3 restricted continuation with proper scaling.\n2. Add z_W0 restricted continuation using the same P=M/10 formulation.\n3. If z_W0 crosses/runs into the updraft ramp kink, either:\n   a. split continuation into smooth regions, or\n   b. introduce a smoothed updraft profile for continuation diagnostics.\n4. Use any detected stability crossing to seed periodic orbit work.\n```\n\nSo: yes, `z_W0` should definitely be a continuation candidate, and probably the most paper-faithful one. H_a3 is still useful because it isolates the stability mechanism cleanly.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-16",
+      "index": 15,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "a8c979f8",
+      "parentId": "dc6c8fbb",
+      "content": [
+        {
+          "type": "text",
+          "text": "OK, that makes sense. We should use a smoothed updraft profile for the z_W0 continuation: the step change used in the paper is unphysical, as well as being bad news for continuation.\n\nI guess this means we need to close out TASK-017, do TASK-020, then maybe do the z_W0 continuation on the restricted 3D system with a smoothed updraft profile, then take the lessons from these experiments into TASK-016, before doing a z_W0 continuation on the full system. I think that means that we need two more backlog tasks, one for the z_W0 continuation on the restricted system and one for the same on the full system. Can you make some tasks for that? If they're TASK-023 and TASK-024 respectively, then the order we do things in should be TASK-017, TASK-020, TASK-022, TASK-016, TASK-024, I think. Is that right?",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-17",
+      "index": 16,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "0239a6fa",
+      "parentId": "630b67b2",
+      "content": [
+        {
+          "type": "text",
+          "text": "Created:\n\n- `TASK-023` — Continue restricted `z_W0` with smoothed updraft profile\n  - Depends on `TASK-019`, `TASK-020`\n  - Restricted 3D, smoothed updraft, `P=M/10`, paper-motivated `z_W0` continuation.\n\n- `TASK-024` — Continue full Berton `z_W0` with smoothed updraft profile\n  - Depends on `TASK-016`, `TASK-023`\n  - Full-system counterpart after restricted `z_W0` and full H_a3 lessons.\n\nI think the corrected order is:\n\n```text\nTASK-017  close out old W_a0 conditioning record\nTASK-020  finish restricted H_a3 with scaling lessons\nTASK-023  restricted z_W0 with smoothed updraft\nTASK-016  full-system H_a3 retry using restricted lessons\nTASK-024  full-system z_W0 with smoothed updraft\n```\n\nSmall correction: `TASK-022` is already done, so I think you meant `TASK-023` in that sequence.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-18",
+      "index": 17,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "5f3dadb2",
+      "parentId": "0239a6fa",
+      "content": [
+        {
+          "type": "text",
+          "text": "Yes, that was a typo. Can you please write/edit the implementation plans for all those tasks?",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-19",
+      "index": 18,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "ac9b42b7",
+      "parentId": "48e476bf",
+      "content": [
+        {
+          "type": "text",
+          "text": "Updated implementation plans for:\n\n- `TASK-017`\n- `TASK-020`\n- `TASK-023`\n- `TASK-016`\n- `TASK-024`\n\nThe plans now reflect the intended order:\n\n```text\nTASK-017  close out historical W_a0 failure record\nTASK-020  restricted H_a3 with scaling\nTASK-023  restricted z_W0 with smoothed updraft\nTASK-016  full-system H_a3 using restricted lessons\nTASK-024  full-system z_W0 with smoothed updraft\n```\n\nI also made the dependencies/strategy explicit in the plans:\n- `TASK-020` starts from the validated `P=M/10` restricted formulation.\n- `TASK-023` uses the same restricted scaling and introduces smoothed updraft.\n- `TASK-016` waits for restricted H_a3 lessons.\n- `TASK-024` waits for restricted smoothed `z_W0` plus full H_a3 lessons.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-20",
+      "index": 19,
+      "role": "system",
+      "source": "pi",
+      "sourceId": "0b2a7570",
+      "parentId": "ac9b42b7",
+      "createdAt": "2026-06-17T11:07:00.759Z",
+      "content": [
+        {
+          "type": "text",
+          "text": "## Goal\nUpdate outstanding backlog tasks and TASK-022 documentation to reflect the arclength scaling finding: restricted AUTO continuation works when log-mass state is rescaled from `M=log(m/m_seed)` to `P=M/10`.\n\n## Constraints & Preferences\n- User wants backlog tasks updated to reflect the finding.\n- User wants documentation for the current task updated.\n- Keep restricted W_a0 gate working before returning to H_a3/full-model complexity.\n\n## Progress\n### Done\n- [x] TASK-021 implemented and marked Done.\n- [x] TASK-022 implemented and marked Done.\n- [x] Found scratch fix: use `U(3)=P=M/10`, inverse map `UU(4)=LOG(m_seed)+10D0*U(3)`.\n- [x] Scratch AUTO test with `P=M/10` reached `W_a0=1.2` with accepted nontrivial branch points.\n- [x] Updated backlog TASK-019:\n  - Added AC #6 requiring `P=M/10`.\n  - Replaced implementation plan to make `P=M/10` the curated W_a0 gate.\n- [x] Updated backlog TASK-020:\n  - Added notes saying it must wait for TASK-019 validated `P=M/10` gate.\n  - Updated plan to reuse `P=M/10` for H_a3.\n- [x] Updated backlog TASK-016:\n  - Added note deferring full-4D H_a3 until fixed restricted gate is validated.\n- [x] Updated backlog TASK-017:\n  - Added note that `P=M/10` likely fixes AC #3.\n- [x] Updated `episodes/07-restricted-equilibrium-auto/docs/task022_restricted_fortran_validation.md` with “Follow-up arclength scaling fix” section.\n- [x] Ran `uv run pytest tests/test_episode07_restricted_task022.py`; 5 passed.\n\n### In Progress\n- [ ] Final response to user should summarize backlog/doc updates and mention test result.\n\n### Blocked\n- No blockers.\n\n## Key Decisions\n- **Use `P=M/10` as the restricted AUTO mass state**: Scratch run fixed first-step arclength failure and reached `W_a0=1.2`.\n- **Do not use older `M=log(m/m_seed)` coordinate for new verdicts**: TASK-017/TASK-021 failures were due to arclength geometry dominated by `M`.\n- **TASK-019 becomes the curated implementation of the fix**: It should validate the fixed W_a0 gate before TASK-020 H_a3 work.\n- **TASK-020 must reuse TASK-019 fixed coordinate**: H_a3 continuation should not clone the unfixed TASK-017/TASK-021 setup.\n- **TASK-016 remains deferred**: Full-4D H_a3 should wait for restricted fixed W_a0 and H_a3 evidence.\n\n## Next Steps\n1. Respond to user with concise summary of updated backlog tasks and documentation.\n2. If asked to implement next, start TASK-019 using `P=M/10`.\n3. Build curated TASK-019 AUTO artifact from restricted residual:\n   - `Z=(z-z_seed)/100`\n   - `U=(u-u_seed)/(1 m/s)`\n   - `P=M/10`\n   - inverse `m=m_seed*exp(10P)`\n4. Preserve raw AUTO outputs and parse branch to report both `P` and reconstructed `M/m`.\n5. Use TASK-019 output as gate for TASK-020.\n\n## Critical Context\n- Scratch fix:\n  ```fortran\n  U(3)=P=M/10\n  UU(4)=LOG(m_seed) + 10D0*U(3)\n  ```\n- Previous problematic coordinate:\n  ```fortran\n  U(3)=M=log(m/m_seed)\n  UU(4)=LOG(m_seed) + U(3)\n  ```\n- TASK-022 tangent:\n  ```text\n  dZ/dW_a0 =  0.4378165\n  dU/dW_a0 = -0.2189083\n  dM/dW_a0 =  3.0862972\n  ```\n- Scratch AUTO branch result:\n  ```text\n  PT 10  W_a0≈0.651\n  PT 20  W_a0≈0.815\n  PT 30  W_a0≈0.982\n  PT 40  W_a0≈1.141\n  UZ 44  W_a0=1.200\n  ```\n- Updated doc path:\n  `episodes/07-restricted-equilibrium-auto/docs/task022_restricted_fortran_validation.md`\n- Relevant backlog tasks updated:\n  `TASK-019`, `TASK-020`, `TASK-016`, `TASK-017`\n- Test run:\n  `uv run pytest tests/test_episode07_restricted_task022.py` → 5 passed.\n\n---\n\n**Turn Context (split turn):**\n\n## Original Request\nThe user asked the assistant to “Please carry on,” continuing ongoing repo/task work on TASK-019: implementing a scaled restricted 3D AUTO continuation sanity check for Berton `W_a0`.\n\n## Early Progress\n- TASK-019 was marked `In Progress` and reviewed. Acceptance includes adding a new restricted 3D AUTO variant, using TASK-018 scaling, translating the TASK-011 seed, running `W_a0` continuation, documenting diagnostics, and applying the TASK-022 arclength fix using `P=M/10` where `M=log(m/m_seed)`.\n- Created a new AUTO variant under:\n  - `episodes/07-restricted-equilibrium-auto/auto/berton_restricted_task019_pmass/`\n- Derived the Fortran source from the TASK-021 minimal restricted problem, modifying it for TASK-019:\n  - AUTO state uses `U(3)=P=M/10`\n  - Physical mass conversion changed to `m=m_seed*exp(10*P)`\n  - Comments document that any future analytic Jacobian must include `dM/dP=10`\n  - Kept `JAC=0` for finite-difference residuals\n- Added AUTO constants/configs:\n  - `c.bertonrestricted-task019-pmass-wA0-plus`\n  - `c.bertonrestricted-task019-pmass-wA0-minus`\n- Added `run_auto.sh` to compile and run both upward and downward `W_a0` continuations.\n- Ran AUTO successfully:\n  - Upward run accepted many points and hit user anchors through `W_a0=1.2`\n  - Downward run proceeded to about `W_a0≈0.419` before MX/stop\n  - This contrasted with TASK-017/TASK-021, which had zero nontrivial AUTO points.\n\n## Context for Suffix\n- A Python synthesis script was written at:\n  - `episodes/07-restricted-equilibrium-auto/scripts/berton_restricted_task019_pmass_wa0.py`\n- The script parses AUTO `b.*`/`d.*` files, reconstructs physical variables:\n  - `z = z_seed + 100*Z`\n  - `u = u_seed + U`\n  - `M = 10*P`\n  - `m = m_seed*exp(M)`\n- It cross-checks against TASK-018 residual/scaling helpers and the TASK-012 Python `W_a0` equilibrium probe.\n- Generated curated outputs in:\n  - `episodes/07-restricted-equilibrium-auto/outputs/task019/`\n  including `wa0_gate_summary.csv`, `python_probe_comparison.csv`, `task019_wa0_gate_verdict.json`, etc.\n- Key results:\n  - `uses_p_mass_coordinate=True`\n  - Upward run: 257 rows, `W_a0` from 0.6 to 2.407, reached 1.2, altitude span ≈382.273 m\n  - Downward run: 21 rows, reached `W_a0≈0.419`\n  - TASK-017 and TASK-021 had 0 nontrivial AUTO points\n  - Comparison to Python probe: max altitude error ≈`3.21e-05` m, max relative mass error ≈`2.72e-06`\n  - Python probe stable over `W_a0=0.1–1.2`\n  - Verdict: restricted `W_a0` gate passes after `P=M/10`; use this formulation for subsequent `H_a3` work.\n- Documentation was generated at:\n  - `episodes/07-restricted-equilibrium-auto/docs/task019_pmass_wa0_gate.md`\n\n<read-files>\n[REDACTED_TEMP_PATH]\nepisodes/06-full-model-auto-seed-continuation/outputs/task012/python_equilibrium_control_probe.csv\nepisodes/07-restricted-equilibrium-auto/auto/berton_restricted_task017/bertonrestricted_task017.f90\nepisodes/07-restricted-equilibrium-auto/auto/berton_restricted_task017/c.bertonrestricted-task017-wA0-plus\nepisodes/07-restricted-equilibrium-auto/auto/berton_restricted_task017/d.task017-restricted-wA0-plus\nepisodes/07-restricted-equilibrium-auto/auto/berton_restricted_task017/run_auto.sh\nepisodes/07-restricted-equilibrium-auto/auto/berton_restricted_task021_minimal/b.task021-minimal-wA0-plus\nepisodes/07-restricted-equilibrium-auto/auto/berton_restricted_task021_minimal/bertonrestricted_task021_minimal.f90\nepisodes/07-restricted-equilibrium-auto/auto/berton_restricted_task021_minimal/d.task021-minimal-wA0-plus\nepisodes/07-restricted-equilibrium-auto/auto/berton_restricted_task021_minimal/s.task021-minimal-wA0-plus\nepisodes/07-restricted-equilibrium-auto/auto/berton_restricted_task022_linear_surrogate/d.task022-linear-wA0-plus\nepisodes/07-restricted-equilibrium-auto/docs/task019_pmass_wa0_gate.md\nepisodes/07-restricted-equilibrium-auto/docs/task021_minimal_wa0_auto_diagnostic.md\nepisodes/07-restricted-equilibrium-auto/outputs/task019/python_probe_comparison.csv\nepisodes/07-restricted-equilibrium-auto/outputs/task019/wa0_gate_summary.csv\nepisodes/07-restricted-equilibrium-auto/outputs/task021/minimal_config_summary.csv\nepisodes/07-restricted-equilibrium-auto/outputs/task021/minimal_continuation_summary.csv\nepisodes/07-restricted-equilibrium-auto/outputs/task021/task021_minimal_auto_verdict.json\nepisodes/07-restricted-equilibrium-auto/outputs/task022/dfdp_comparison.csv\nepisodes/07-restricted-equilibrium-auto/outputs/task022/dfdu_comparison.csv\nepisodes/07-restricted-equilibrium-auto/outputs/task022/residual_comparison.csv\nepisodes/07-restricted-equilibrium-auto/outputs/task022/seed_implicit_tangent.csv\nepisodes/07-restricted-equilibrium-auto/outputs/task022/validation_summary.csv\nepisodes/07-restricted-equilibrium-auto/scripts/berton_restricted_task017_wa0_sanity.py\nepisodes/07-restricted-equilibrium-auto/scripts/berton_restricted_task018_diagnostics.py\ntests/test_episode07_restricted_task017.py\n</read-files>\n\n<modified-files>\nepisodes/07-restricted-equilibrium-auto/docs/task022_restricted_fortran_validation.md\nepisodes/07-restricted-equilibrium-auto/scripts/berton_restricted_task019_pmass_wa0.py\nepisodes/07-restricted-equilibrium-auto/scripts/berton_restricted_task021_minimal_auto.py\nepisodes/07-restricted-equilibrium-auto/scripts/berton_restricted_task022_validate_fortran.py\ntests/test_episode07_restricted_task021.py\ntests/test_episode07_restricted_task022.py\n</modified-files>",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [
+        {
+          "kind": "temporary-path",
+          "replacement": "[REDACTED_TEMP_PATH]",
+          "count": 1
+        }
+      ],
+      "truncated": false
+    },
+    {
+      "id": "entry-21",
+      "index": 20,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "6aed5523",
+      "parentId": "0b2a7570",
+      "content": [
+        {
+          "type": "text",
+          "text": "Please finish off TASK-017.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-22",
+      "index": 21,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "eb76576b",
+      "parentId": "65fa4400",
+      "content": [
+        {
+          "type": "text",
+          "text": "Finished `TASK-017`.\n\nWhat changed:\n- Added a successor addendum to:\n  - `episodes/07-restricted-equilibrium-auto/docs/task017_wa0_conditioning_sanity_check.md`\n- Clarified that `TASK-017` remains the negative record for the original `M=log(m/m_seed)` coordinate.\n- Pointed to `TASK-019` as the corrected W_a0 gate using `P=M/10`.\n- Checked remaining AC #3 and marked `TASK-017` Done.\n\nValidation:\n- `uv run pytest tests/test_episode07_restricted_task017.py tests/test_episode07_restricted_task019.py`\n- 9 passed.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    }
+  ],
+  "highlights": [],
+  "redactionSummary": [
+    {
+      "kind": "temporary-path",
+      "replacement": "[REDACTED_TEMP_PATH]",
+      "count": 1
+    }
+  ],
+  "redaction": {
+    "status": "needs_review",
+    "reviewNotes": [
+      "Automated public-safety pass completed. Review generated transcript before publishing.",
+      "One or more sensitive-looking values were replaced with explicit redaction markers."
+    ]
+  }
+}

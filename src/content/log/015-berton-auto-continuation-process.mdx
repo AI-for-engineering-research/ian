@@ -1,0 +1,96 @@
+---
+title: "AUTO continuation as agent-assisted stress testing"
+date: 2026-06-17
+summary: The AUTO phase was less a clean success than a disciplined sequence of failed branches, diagnostics, and reframings.
+tags:
+  - agent-logs
+agents:
+  - Pi
+draft: false
+---
+
+[Project article](../../project/berton-auto-continuation/)
+
+The AUTO phase was a good example of an agent being useful without producing a
+neat positive result. The final conclusion was negative, but the process was
+not just “AUTO failed.” It was a sequence of increasingly specific questions:
+which branch are we following, is the apparent oscillation sustained, is the
+seed valid, is mass scaling causing trouble, and are the special-point labels
+actually trustworthy?
+
+## The first branch was valid but unhelpful
+
+The full-model setup began with design and validation sessions for the AUTO
+formulation:
+
+- [full-model AUTO design](../../sessions/berton-auto-full-01-task008-design/)
+- [full-model AUTO validation](../../sessions/berton-auto-full-02-task009-validation/)
+- [`z_W0` screen](../../sessions/berton-auto-full-03-task010-zw0-screen/), especially the [moment where the first result forced a rethink](../../sessions/berton-auto-full-03-task010-zw0-screen/#entry-5)
+
+The important process lesson was that the agent could keep the bookkeeping
+straight: AUTO input files, parameter mappings, labels, independent Python
+cross-checks, and summary tables. The scientific lesson was more awkward. The
+first `z_W0` branch did not see a Hopf, but it also sat above the updraft
+transition and barely felt the control parameter. The branch was not wrong; it
+was the wrong explanation path.
+
+## The “oscillatory” trajectory had to be reclassified
+
+That led to the long-integration planning and classification sessions:
+
+- [orbit-classification planning](../../sessions/berton-auto-full-04-orbit-plan/)
+- [TASK-011 long integration](../../sessions/berton-auto-full-05-task011-long-integration/), including the [completed classification summary](../../sessions/berton-auto-full-05-task011-long-integration/#entry-2)
+
+This was the moment when the project became much more critical. Instead of
+assuming the paper's oscillatory case was a periodic orbit, the agent ran BDF
+and LSODA to 500 h and compared envelopes. The wobble decayed. The late-time
+state refined to a stable spiral equilibrium.
+
+That was exactly the kind of check an eager continuation search can skip. The
+agent was useful here because it could turn “is this really periodic?” into a
+reproducible classification script and outputs.
+
+## Retrying AUTO without turning failure into evidence
+
+The next sessions tried to make continuation from the late-time seed work:
+
+- [seed-based AUTO continuation](../../sessions/berton-auto-full-06-task012-seed-continuation/), especially the [implementation/verdict entry](../../sessions/berton-auto-full-06-task012-seed-continuation/#entry-4)
+- [next-step planning](../../sessions/berton-auto-full-07-next-steps/)
+- [log-mass reformulation](../../sessions/berton-auto-full-08-task015-logm/)
+
+The key discipline was not to overinterpret failure. A failed first
+continuation step is not evidence for a hidden periodic orbit. It is a prompt
+to inspect conditioning, scaling, Jacobians, and parameter directions.
+
+The restricted-model sessions pushed on that question from different angles:
+
+- [`W_a0` conditioning](../../sessions/berton-auto-restricted-02-task017-wa0-conditioning/)
+- [scaling diagnostics](../../sessions/berton-auto-restricted-01-task018-scaling/)
+- [minimal AUTO diagnostic](../../sessions/berton-auto-restricted-03-task021-minimal-diagnostic/)
+- [restricted `H_a3`](../../sessions/berton-auto-restricted-04-task020-ha3/)
+- [restricted smoothed `z_W0`](../../sessions/berton-auto-restricted-05-task023-zw0-smooth/)
+
+The full-model retries then tested whether those ideas transferred back:
+
+- [full-model `H_a3`](../../sessions/berton-auto-full-09-task016-ha3/)
+- [full-model smoothed `z_W0`](../../sessions/berton-auto-full-10-task024-zw0-smooth/), including the [completed no-Hopf verdict](../../sessions/berton-auto-full-10-task024-zw0-smooth/#entry-4)
+
+They did not produce an AUTO-supported Hopf. But they did produce a useful
+negative research state: broad AUTO hunting was no longer the right next move.
+
+## Why this was still successful agent work
+
+The success criterion for this phase was not “find a bifurcation.” It was
+“avoid fooling ourselves.” The agent helped by repeatedly externalizing the
+work into scripts, notebooks, CSV outputs, validation summaries, and final
+verdict documents. That made it possible to say no to several tempting but
+unsupported interpretations:
+
+- no, the first `z_W0` branch was not the local oscillation mechanism;
+- no, a decaying wobble is not a periodic orbit;
+- no, AUTO convergence trouble is not hidden-positive evidence;
+- no, a stability-count change is not automatically a Hopf bifurcation.
+
+By the end, the right next question was not “how do we make AUTO succeed?” It
+was “can a transparent Python continuation implementation separate numerical
+conditioning from dynamical claims?” That became the final Berton phase.

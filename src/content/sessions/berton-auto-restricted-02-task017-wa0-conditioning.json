@@ -1,0 +1,283 @@
+{
+  "schemaVersion": 1,
+  "title": "Berton restricted W_a0 conditioning check",
+  "source": {
+    "kind": "pi",
+    "importedAt": "2026-06-18T12:24:18.909Z",
+    "sessionStartedAt": "2026-06-16T11:22:50.176Z"
+  },
+  "participants": [
+    {
+      "id": "user",
+      "name": "User",
+      "role": "user"
+    },
+    {
+      "id": "assistant",
+      "name": "Pi",
+      "role": "assistant"
+    }
+  ],
+  "entries": [
+    {
+      "id": "entry-1",
+      "index": 0,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "861d5124",
+      "parentId": "e33b0f8d",
+      "content": [
+        {
+          "type": "text",
+          "text": "Please start work on TASK-017.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-2",
+      "index": 1,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "c7f74581",
+      "parentId": "c635b802",
+      "content": [
+        {
+          "type": "text",
+          "text": "Started TASK-017.\n\n- Set status to `In Progress`\n- Assigned to `@pi`\n- Updated the implementation plan to reflect the current evidence:\n  - TASK-015 full-4D log-mass W_a0 still failed seed-only\n  - TASK-018 restricted/scaled 3D diagnostics are complete\n  - TASK-017 should proceed through the restricted/scaled W_a0 sanity-check route rather than rerunning TASK-015 unchanged\n\nPlease confirm you want me to proceed with implementation using this updated plan.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-3",
+      "index": 2,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "995ca337",
+      "parentId": "c7f74581",
+      "content": [
+        {
+          "type": "text",
+          "text": "Please go ahead.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-4",
+      "index": 3,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "ed3dfa47",
+      "parentId": "875c5e04",
+      "content": [
+        {
+          "type": "text",
+          "text": "Implemented the TASK-017 W_a0 sanity-check attempt, but it produced a negative result.\n\nChanged/added:\n- `episodes/07-restricted-equilibrium-auto/auto/berton_restricted_task017/`\n  - restricted/scaled AUTO variant using TASK-018 coordinates\n  - W_a0 plus/minus configs and `run_auto.sh`\n- `episodes/07-restricted-equilibrium-auto/scripts/berton_restricted_task017_wa0_sanity.py`\n- `episodes/07-restricted-equilibrium-auto/outputs/task017/`\n- `episodes/07-restricted-equilibrium-auto/docs/task017_wa0_conditioning_sanity_check.md`\n- `tests/test_episode07_restricted_task017.py`\n- Updated episode 07 README\n\nResult:\n- TASK-012 Python W_a0 probe remains smooth/stable over `0.1–1.2 m/s`.\n- Restricted/scaled AUTO still accepts only the seed at `W_a0=0.6`.\n- AUTO diagnostics still show DGEBAL/NaN first-step failures.\n- Conclusion: current H_a3 failures should **not** be treated as control-specific Hopf evidence; they remain broader AUTO formulation/conditioning concerns.\n\nValidation:\n- `uv run pytest` → `66 passed`\n\nBacklog:\n- Checked AC #1, #2, #4, #5.\n- Left AC #3 unchecked because the branch still does **not** move beyond the seed as written.\n- TASK-017 remains `In Progress`, with notes pointing to TASK-019 refinement.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-5",
+      "index": 4,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "43ea6605",
+      "parentId": "ed3dfa47",
+      "content": [
+        {
+          "type": "text",
+          "text": "OK, it sounds like we need to rethink things again. Do you have any thoughts on why the AUTO continuation is failing even though the Jacobian is not particularly badly conditioned? (The condition number was about 7 or 8 after the variable rescaling you did, I think.) I don't *think* that this could be to do with the piecewise smooth conditions in the model, since the start point for the continuation is not close to any of the non-smooth points in those (is that true?). What else could be happening here? The equilibrium from which we trying to continue is stable (we know that from the long integration we did), and there isn't anything obviously singular going on, so what's happening?",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-6",
+      "index": 5,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "7a4c042a",
+      "parentId": "5c89addc",
+      "content": [
+        {
+          "type": "text",
+          "text": "Yes — I agree this no longer looks like “the equilibrium branch is singular” or “the physical model is near a bifurcation.” The failure pattern looks much more like an AUTO formulation / Jacobian / continuation-setup problem.\n\nKey observations:\n\n1. **The seed is not especially close to a piecewise kink**\n   - Seed altitude: `z ≈ 9618 m`\n   - Nearest important profile kinks:\n     - humidity / eta at `10000 m`: about `382 m` away\n     - eta lower kink at `9000 m`: about `618 m` away\n     - updraft top `z_W0=9000 m`: about `618 m` below\n   - TASK-012 Python W_a0 probe only moves altitude by about `55 m` over `W_a0=0.1–1.2`, so the expected branch stays comfortably away from the 10 km kink.\n   - So I do **not** think piecewise smoothness is the primary explanation.\n\n2. **The AUTO Newton trace screams “bad augmented continuation system,” not physical singularity**\n   \n   In the restricted run, AUTO starts with a tiny predictor:\n\n   ```text\n   IT 0: PAR = 0.600305, L2-NORM = 9.5e-4\n   ```\n\n   Then Newton immediately jumps to:\n\n   ```text\n   IT 1: PAR = 0.474788, L2-NORM = 3.49\n   IT 2: PAR = 1.49853,  L2-NORM = 4.75\n   IT 3: PAR = 3.35938,  L2-NORM = 16.1\n   IT 4: PAR = -8.8e5,  L2-NORM = 1.6e5\n   ```\n\n   That is not “the branch gently curves and Newton struggles.” That is “the correction equation is wrong or badly scaled in the augmented AUTO system.”\n\n3. **The condition number ≈ 7 only covers part of the problem**\n\n   TASK-018 measured the condition number of the **state residual Jacobian**:\n\n   \\[\n   J_x = \\partial F / \\partial (Z,U,M)\n   \\]\n\n   after scaling. That matrix is fine.\n\n   But AUTO’s continuation Newton solve uses an augmented system involving:\n\n   \\[\n   [J_x \\quad F_\\lambda]\n   \\]\n\n   plus a pseudo-arclength/tangent equation, parameter scaling, previous tangent, and whatever AUTO thinks the active continuation parameters are. So a well-conditioned `J_x` does **not** guarantee the augmented continuation correction is well behaved.\n\n4. **My strongest suspicion: AUTO is seeing a wrong or incomplete continuation Jacobian/tangent**\n\n   The immediate Newton blow-up suggests one of these:\n\n   - `DFDP` / parameter derivatives are wrong, missing, ignored, or indexed differently than expected.\n   - AUTO is finite-differencing parameters in a numerically bad way.\n   - The `ICP` list includes diagnostic PVLS parameters in a way that confuses the augmented system.\n   - The continuation parameter scaling is poor relative to the state variables despite the state residual scaling being good.\n   - The FORTRAN residual/Jacobian matches Python at the seed but not off-seed.\n\n   The most concrete next check is: compare the exact Jacobian block AUTO should be using — both `DFDU` and `DFDP` — against Python finite differences at the seed and at the first predicted point.\n\n5. **Physical stability is not enough to guarantee this restricted AUTO problem behaves**\n\n   The long integration tells us the **full 4D ODE equilibrium** is stable.\n\n   But the restricted 3D residual is not literally the same dynamical system. We fixed `w=0` and solve balances in `(z,u,log m)`. Its Jacobian/eigenvalues are artificial diagnostics unless carefully mapped back to the full system.\n\n   In fact, AUTO printed a positive eigenvalue for the restricted scaled residual. That does not contradict the full-system stability, but it does mean AUTO’s internal equilibrium/eigenvalue machinery is being applied to a constructed vector field whose stability interpretation is not physical.\n\n6. **I would simplify the AUTO problem aggressively before trusting any result**\n\n   My next move would be to strip the setup down to the minimum:\n\n   - `NDIM=3`\n   - `ICP = ['W_a0']` only\n   - no PVLS diagnostic parameters\n   - no eigenvalue/Hopf detection: `ISP=0`\n   - try `JAC=0` first, letting AUTO finite-difference everything\n   - no UZR except maybe one nearby anchor\n   - tiny `DS`, but also test whether `DS` sign/magnitude matters\n   - compare with a Python pseudo-arclength continuation implementation on the same residual\n\n   If that minimal version works, then the bug is in diagnostics/Jacobian/parameter bookkeeping. If it still fails, then the issue is deeper in how AUTO handles this algebraic equilibrium formulation.\n\nMy current best hypothesis: **the branch is real and smooth, but AUTO’s augmented Newton system is being given inconsistent derivative/parameter information or confused by the current ICP/PVLS/JAC setup.** The evidence points more to a formulation/implementation issue than to the Berton equilibrium itself.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-7",
+      "index": 6,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "04dd146d",
+      "parentId": "7a4c042a",
+      "content": [
+        {
+          "type": "text",
+          "text": "Did we ever verify that the Fortran version of the Berton model for AUTO matches the Python implementation? And did we ever verify the ancillary information that goes in the AUTO Fortran model? Is there any straightforward way to check the potential problems in #4 in your list here?",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-8",
+      "index": 7,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "16c26803",
+      "parentId": "f190a323",
+      "content": [
+        {
+          "type": "text",
+          "text": "Yes, but only partially.\n\n## What we already verified\n\n- **Episode 04 / TASK-009:** verified the original full AUTO Fortran RHS against the Python Berton implementation at validation samples.\n- **TASK-015:** verified the log-mass full-4D Fortran RHS against Python at the TASK-011 seed:\n  - `fortran_python_transformed_rhs_max_abs_diff < 1e-12`\n  - transformed eigenvalues matched Python physical-coordinate eigenvalues.\n\nSo: **the core Fortran RHS has been spot-checked and likely matches Python near the seed.**\n\n## What we have *not* fully verified\n\nWe have not yet done the most relevant checks for the current failure:\n\n1. **Restricted/scaled TASK-017 Fortran residual vs Python residual off-seed**\n   - We checked the seed via Python, but I don’t think we independently compiled the restricted Fortran `FUNC` and compared it to Python at:\n     - seed,\n     - first AUTO predictor,\n     - modest W_a0 perturbations,\n     - known TASK-012 Python probe points.\n\n2. **AUTO-supplied `DFDU` vs finite-difference Python/Fortran**\n   - This is crucial. A wrong Jacobian would exactly explain the Newton explosion.\n\n3. **AUTO-supplied `DFDP` vs finite differences**\n   - Also crucial for the augmented continuation system.\n   - Even if `J_x` has condition number 7, a wrong `F_W_a0` column can wreck pseudo-arclength correction.\n\n4. **PVLS ancillary diagnostics**\n   - We have sanity-used them, but I don’t think we have a systematic Fortran-vs-Python test for every PVLS diagnostic field.\n   - Less likely to cause Newton failure unless those diagnostic `PAR`s are included in `ICP` in a way AUTO treats as active.\n\n## Straightforward checks for #4 from my list\n\nYes. I’d do a direct Fortran-driver validation script. It should compile the AUTO Fortran file outside AUTO and call:\n\n```fortran\nCALL STPNT(...)\nCALL FUNC(..., IJAC=2, F, DFDU, DFDP)\nCALL PVLS(...)\n```\n\nThen compare against Python.\n\nConcrete checks:\n\n### 1. Restricted residual check\n\nEvaluate Fortran `FUNC` at:\n\n- seed: `U=(0,0,0), W_a0=0.6`\n- tiny predictor-like perturbation: e.g. `W_a0=0.6003`, `U≈O(1e-3)`\n- Python probe equilibria converted into restricted coordinates for `W_a0=0.5, 0.7, 1.0`\n\nExpected:\n- Fortran residual equals Python restricted/scaled residual to tight tolerance.\n- At Python probe equilibria, residual should be near zero.\n\n### 2. `DFDU` check\n\nCompare Fortran-returned `DFDU` against centered finite differences of the Fortran `FUNC` itself.\n\nThis isolates whether our `DFDU` implementation is self-consistent.\n\n### 3. `DFDP` check\n\nCompare Fortran-returned `DFDP(:, W_a0)` against finite differences in `PAR(2)`.\n\nThis is probably the most important check.\n\nExpected:\n- `DFDP(:,2)` should match finite difference.\n- If it doesn’t, that explains AUTO’s immediate Newton blow-up.\n\n### 4. `ICP` minimization check\n\nRun a deliberately stripped AUTO config:\n\n```python\nICP = ['W_a0']\nISP = 0\nJAC = 0\n```\n\nNo diagnostic parameters. No PVLS parameters in `ICP`. Let AUTO finite-difference everything.\n\nIf that works, the problem is almost certainly in our Jacobian/DFDP/ICP/PVLS bookkeeping rather than the branch.\n\n### 5. PVLS check\n\nCall `PVLS`, then compare `PAR(60:)` against Python local diagnostics at the same physical state.\n\nThis is useful, but I’d rank it below `FUNC/DFDU/DFDP`.\n\n## One thing I now strongly suspect\n\nOur `ICP` lists include many diagnostic/PVLS parameters:\n\n```python\nICP = ['W_a0', 'z_W0', 'H_a3', 'z_phys', 'u_phys', 'm_phys', ...]\n```\n\nThat may be too clever. If AUTO treats those as continuation-active or derivative-relevant rather than mere output columns, we may be confusing the augmented system.\n\nSo the fastest diagnostic is:\n\n> Run the restricted problem with `ICP = ['W_a0']`, `ISP=0`, `JAC=0`.\n\nIf that succeeds, the physical branch is fine and our AUTO metadata/Jacobian setup is the bug.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-9",
+      "index": 8,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "a5767e5d",
+      "parentId": "16c26803",
+      "content": [
+        {
+          "type": "text",
+          "text": "OK, please add two backlog tasks, one to run the \"fastest diagnostic\", and one to do the more systematic checks above (1-5).",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-10",
+      "index": 9,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "bb99d44b",
+      "parentId": "61709697",
+      "content": [
+        {
+          "type": "text",
+          "text": "Created two backlog tasks:\n\n- `TASK-021` — Run minimal AUTO W_a0 diagnostic for restricted Berton branch\n  - Fast stripped config: only `W_a0` in `ICP`, no PVLS/diagnostic parameters, `ISP=0`, `JAC=0` first.\n\n- `TASK-022` — Validate restricted Berton AUTO Fortran residuals Jacobians and PVLS diagnostics\n  - Systematic standalone Fortran-vs-Python checks for `FUNC`, `DFDU`, `DFDP`, and `PVLS`.\n\nBoth are high priority and linked to the relevant prior tasks.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-11",
+      "index": 10,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "1956ecbc",
+      "parentId": "bb99d44b",
+      "content": [
+        {
+          "type": "text",
+          "text": "OK, please commit the current changes. Do not close TASK-017, since we'll come back to it after looking at these validation tasks.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-12",
+      "index": 11,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "b13b5950",
+      "parentId": "4104229d",
+      "content": [
+        {
+          "type": "text",
+          "text": "Committed current changes.\n\nCommits now include:\n- `d73f569` — `Add TASK-017 restricted W_a0 sanity check artifacts`\n- Backlog CLI also created separate commits for:\n  - `TASK-021`\n  - `TASK-022`\n  - TASK-017 updates\n\nTASK-017 remains `In Progress` and is not closed.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-13",
+      "index": 12,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "49aad29d",
+      "parentId": "b13b5950",
+      "content": [
+        {
+          "type": "text",
+          "text": "Please write implementation plans for TASK-021 and TASK-022.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-14",
+      "index": 13,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "a3d58e82",
+      "parentId": "fdcdd132",
+      "content": [
+        {
+          "type": "text",
+          "text": "Wrote implementation plans for both tasks and set them `In Progress` / assigned to `@pi`:\n\n- `TASK-021` — plan focuses on the stripped minimal AUTO diagnostic (`ICP=['W_a0']`, `ISP=0`, `JAC=0`, no diagnostic/PVLS parameters).\n- `TASK-022` — plan focuses on standalone Fortran-vs-Python validation of `FUNC`, `DFDU`, `DFDP`, and `PVLS`, using seed/off-seed/probe samples.\n\nNo implementation started yet.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    }
+  ],
+  "highlights": [],
+  "redactionSummary": [],
+  "redaction": {
+    "status": "processed",
+    "reviewNotes": [
+      "Automated public-safety pass completed. Review generated transcript before publishing."
+    ]
+  }
+}

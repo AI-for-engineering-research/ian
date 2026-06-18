@@ -1,0 +1,17 @@
+---
+export interface Props {
+  summary: string;
+  variant?: 'default' | 'math' | 'reproducibility' | 'process' | 'caution';
+  open?: boolean;
+}
+
+const { summary, variant = 'default', open = false } = Astro.props;
+const className = `content-details content-details--${variant}`;
+---
+
+<details class={className} open={open}>
+  <summary>{summary}</summary>
+  <div class="content-details__body">
+    <slot />
+  </div>
+</details>

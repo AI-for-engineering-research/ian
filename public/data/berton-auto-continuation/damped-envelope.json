@@ -1,0 +1,22 @@
+[
+  {
+    "method": "BDF",
+    "window": "150–200 h",
+    "amplitude_m": 19.208274353240995
+  },
+  {
+    "method": "BDF",
+    "window": "450–500 h",
+    "amplitude_m": 0.009235795820131898
+  },
+  {
+    "method": "LSODA",
+    "window": "150–200 h",
+    "amplitude_m": 19.20820543636728
+  },
+  {
+    "method": "LSODA",
+    "window": "450–500 h",
+    "amplitude_m": 0.00920939251955133
+  }
+]

@@ -1,0 +1,139 @@
+{
+  "schemaVersion": 1,
+  "title": "Berton restricted H_a3 AUTO verdict",
+  "source": {
+    "kind": "pi",
+    "importedAt": "2026-06-18T12:24:19.067Z",
+    "sessionStartedAt": "2026-06-17T11:15:28.665Z"
+  },
+  "participants": [
+    {
+      "id": "user",
+      "name": "User",
+      "role": "user"
+    },
+    {
+      "id": "assistant",
+      "name": "Pi",
+      "role": "assistant"
+    }
+  ],
+  "entries": [
+    {
+      "id": "entry-1",
+      "index": 0,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "e820c1a5",
+      "parentId": "ef6b9972",
+      "content": [
+        {
+          "type": "text",
+          "text": "Please start work on TASK-020.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-2",
+      "index": 1,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "f2e72cc3",
+      "parentId": "7b500427",
+      "content": [
+        {
+          "type": "text",
+          "text": "TASK-020 is completed and marked Done.\n\nKey outputs:\n- `episodes/07-restricted-equilibrium-auto/auto/berton_restricted_task020_ha3_scaled/`\n- `episodes/07-restricted-equilibrium-auto/auto/berton_restricted_task020_ha3_hscaled/`\n- `episodes/07-restricted-equilibrium-auto/scripts/berton_restricted_task020_ha3_scaled.py`\n- `episodes/07-restricted-equilibrium-auto/outputs/task020/`\n- `episodes/07-restricted-equilibrium-auto/docs/task020_ha3_scaled_restricted_verdict.md`\n- `tests/test_episode07_restricted_task020.py`\n\nResult:\n- Reused TASK-019’s validated restricted `P=M/10` formulation.\n- Added scaled control `q_H=(H_a3-0.61)/0.001`.\n- AUTO found a nontrivial downward branch with an LP near `H_a3≈0.5971`.\n- Upward/Hopf-relevant direction remains numerically inconclusive, stopping near `H_a3≈0.611`.\n- No AUTO-supported HB/Hopf candidate; TASK-012 crossing remains a Python hint only.\n\nValidation run:\n```bash\nuv run pytest tests/test_episode07_restricted_task019.py tests/test_episode07_restricted_task020.py\n```\n\nPassed: 9 tests.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-3",
+      "index": 2,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "444d29f6",
+      "parentId": "f2e72cc3",
+      "content": [
+        {
+          "type": "text",
+          "text": "Please commit the changes.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-4",
+      "index": 3,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "49a3c3c4",
+      "parentId": "debd6138",
+      "content": [
+        {
+          "type": "text",
+          "text": "Committed TASK-020 changes.\n\nCommit:\n```text\ne865fd0 Add TASK-020 restricted H_a3 continuation verdict\n```\n\nNote: there are still pre-existing/unrelated uncommitted TASK-017/019/021/022 files in the working tree; I left those untouched.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-5",
+      "index": 4,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "71e45134",
+      "parentId": "49a3c3c4",
+      "content": [
+        {
+          "type": "text",
+          "text": "Ah, my mistake. Please make commits for those files as well, labeling them with the relevant task.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-6",
+      "index": 5,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "d27418c4",
+      "parentId": "cb394f0d",
+      "content": [
+        {
+          "type": "text",
+          "text": "Done. Created these additional commits:\n\n- `fefbcd4` — Update TASK-017 with TASK-019 gate addendum\n- `7813dd7` — Add TASK-019 P-mass W_a0 gate\n- `b1f7745` — Add TASK-021 minimal W_a0 AUTO diagnostic\n- `7abfc28` — Add TASK-022 restricted Fortran validation\n\nWorking tree is clean.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    }
+  ],
+  "highlights": [],
+  "redactionSummary": [],
+  "redaction": {
+    "status": "processed",
+    "reviewNotes": [
+      "Automated public-safety pass completed. Review generated transcript before publishing."
+    ]
+  }
+}

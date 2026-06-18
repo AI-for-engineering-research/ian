@@ -1,0 +1,169 @@
+---
+title: Symbolic treatment of the reduced Berton model
+summary: A three-variable reduction shows how a stable spiral could become oscillatory, while also showing why symbolic algebra needs executable checks.
+order: 4
+draft: false
+---
+
+import { withBase } from '../../lib/sitePaths.ts';
+import Details from '../../components/Details.astro';
+
+export const rootSweepUrl = withBase('/data/berton-symbolic-reduced-model/root-sweep.json');
+export const font = 'STIX Two Text, Georgia, Times New Roman, serif';
+export const baseConfig = {
+  config: {
+    font,
+    axis: { labelFont: font, titleFont: font, labelFontSize: 16, titleFontSize: 18 },
+    legend: { labelFont: font, titleFont: font, labelFontSize: 16, titleFontSize: 18 },
+  },
+};
+export const rootSweepSpec = {
+  $schema: 'https://vega.github.io/schema/vega-lite/v6.json',
+  ...baseConfig,
+  width: 'container',
+  height: 290,
+  data: { url: rootSweepUrl },
+  transform: [{ filter: "datum.mode == 'slow pair'" }],
+  layer: [
+    {
+      mark: { type: 'line', point: true },
+      encoding: {
+        x: { field: 'k', type: 'quantitative', scale: { type: 'log' }, title: 'drag relaxation rate k (s⁻¹)' },
+        y: { field: 'real', type: 'quantitative', title: 'real part of slow eigenvalue (s⁻¹)' },
+        tooltip: [
+          { field: 'k', type: 'quantitative', title: 'k' },
+          { field: 'real', type: 'quantitative', title: 'real part', format: '.3e' },
+          { field: 'imagAbs', type: 'quantitative', title: '|imaginary part|', format: '.3e' },
+        ],
+      },
+    },
+    { mark: { type: 'rule', color: '#333333', opacity: 0.5 }, encoding: { y: { datum: 0 } } },
+  ],
+};
+
+The first symbolic question was deliberately modest: can a simplified version
+of the <Cite>berton-2023</Cite> cirrus model explain why the numerical
+solutions wobble? Not prove the full model has a sustained oscillation, but
+identify the local feedback loop that might make oscillations plausible.
+
+The answer is: **yes, as a mechanism guide**. The corrected reduced model has a
+stable spiral equilibrium. In ordinary language, if the system is displaced
+from its resting state, it circles back toward rest instead of returning in a
+straight line. That is the right kind of local behavior to become a sustained
+oscillation if some control parameter pushes the spiral from stable to
+unstable.
+
+The important caveat is equally important: this reduced calculation is not the
+final verdict on the full Berton model. It is a map of where to look next.
+
+## The reduced model
+
+The reduced system keeps three quantities:
+
+- altitude-like displacement `zeta`,
+- vertical velocity `v`,
+- ice-crystal radius `r`.
+
+The model asks how vertical motion, fall speed, supersaturation, and radiative
+growth couple near a resting state. An equilibrium is a self-consistent resting
+configuration: the vertical velocity is zero, fall speed balances the ambient
+updraft, and crystal growth balances the radiative term.
+
+The useful simplification is that the local stability problem becomes a
+three-by-three matrix. The signs in that matrix tell us whether a small
+perturbation decays, grows, or spirals.
+
+<Details summary="Mathematical details: corrected Jacobian and Hopf condition" variant="math">
+
+The reduced variables are `(zeta, v, r)` and the corrected Jacobian at the fixed
+point is
+
+```text
+J = [[ 0,   1,   0 ],
+     [-a,  -k,  -b ],
+     [-d,   0,  -c ]]
+```
+
+with
+
+```text
+a = k w
+b = 2 k beta r*
+c = (G / r*) R_r
+d = (G / r*) (sigma_S + R_zeta).
+```
+
+The characteristic polynomial is
+
+```text
+lambda^3 + a2 lambda^2 + a1 lambda + a0
+```
+
+where
+
+```text
+a2 = k + c
+a1 = k c + a
+a0 = a c - b d.
+```
+
+The corrected Routh-Hurwitz Hopf condition is
+
+```text
+a2 a1 = a0,
+```
+
+or equivalently
+
+```text
+k*(k*c + a + c^2) + b*d = 0.
+```
+
+This is the executable SymPy result documented in the episode 2 analysis, not
+a hand-derived expression.
+
+</Details>
+
+## The sign that changed the story
+
+The most useful diagnostic is the combined gradient
+
+```text
+sigma_S + R_zeta = -5.640219674712e-05 m^-1.
+```
+
+For the corrected Case-0 reduced equilibrium this is negative. Combined with
+the corrected sign in the Jacobian, that makes the equilibrium a stable spiral
+rather than the saddle suggested by the erroneous hand derivation.
+
+That distinction matters. A saddle is already unstable in a non-oscillatory
+way. A stable spiral is different: it says the local physics naturally produces
+a damped wobble, and a Hopf bifurcation would be the event where that wobble
+stops damping and becomes self-sustaining.
+
+<VegaLite spec={rootSweepSpec} caption="The slow complex pair remains just on the stable side of zero over the drag-rate sweep in the reduced model. The imaginary part corresponds to the wobbling frequency; the negative real part means the wobble decays." />
+
+The plot shows the real part of the slow complex eigenvalue pair as the drag
+relaxation rate `k` is varied. The values stay negative, so this particular
+baseline point is stable. But it is close enough to the Hopf-style picture to
+make the reduced model a useful mechanism finder.
+
+## What this does and does not establish
+
+This result establishes three things:
+
+1. the reduced feedback loop is capable of spiral dynamics;
+2. the corrected symbolic calculation points to a Hopf-capable sign structure;
+3. executable symbolic algebra is essential, because a small sign error changes
+the qualitative conclusion.
+
+It does **not** establish that the full Berton model has a robust Hopf
+bifurcation. The full model contains feedbacks and parameterization details
+that the reduced calculation freezes or simplifies. That is why the next stage
+was continuation: turn model parameters gradually and watch equilibria and
+eigenvalues move.
+
+A companion research-log note describes the agent-process side of this step,
+including the LLM sign error and the switch to a SymPy-based calculation: [the
+symbolic analysis log](../../log/014-berton-2023-simplified-symbolic/). The
+main planning and implementation transcripts are [here](../../sessions/014-berton-2023-simplified-symbolic/) and [here](../../sessions/015-implementation/).

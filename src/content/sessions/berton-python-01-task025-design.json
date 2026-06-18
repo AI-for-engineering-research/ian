@@ -1,0 +1,103 @@
+{
+  "schemaVersion": 1,
+  "title": "Berton Python continuation design",
+  "source": {
+    "kind": "pi",
+    "importedAt": "2026-06-18T12:24:19.467Z",
+    "sessionStartedAt": "2026-06-17T16:42:28.785Z"
+  },
+  "participants": [
+    {
+      "id": "user",
+      "name": "User",
+      "role": "user"
+    },
+    {
+      "id": "assistant",
+      "name": "Pi",
+      "role": "assistant"
+    }
+  ],
+  "entries": [
+    {
+      "id": "entry-1",
+      "index": 0,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "fb87a418",
+      "parentId": "32555dc9",
+      "content": [
+        {
+          "type": "text",
+          "text": "Please start on TASK-025.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-2",
+      "index": 1,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "0700a9c2",
+      "parentId": "945ee72a",
+      "content": [
+        {
+          "type": "text",
+          "text": "Started TASK-025, assigned it to @pi, and added this implementation plan:\n\n1. Inspect existing episode README/index conventions, especially episodes 06–09 and repository-level episode index.\n2. Create `episodes/10-full-model-python-continuation/` with README and standard subdirectories.\n3. Write README context covering purpose, scope, relationship to episodes 06–09, and Python-continuation-first / AUTO-final-validation strategy.\n4. Update the repository episode index to include episode 10.\n5. Verify no old top-level research artifact directories are touched/used, then mark AC complete.\n\nPlease confirm the plan, and I’ll proceed.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-3",
+      "index": 2,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "2420db90",
+      "parentId": "0700a9c2",
+      "content": [
+        {
+          "type": "text",
+          "text": "Please go ahead.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-4",
+      "index": 3,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "ce1fe27b",
+      "parentId": "b4ab810b",
+      "content": [
+        {
+          "type": "text",
+          "text": "TASK-025 is complete and marked Done.\n\nChanged:\n- Added `episodes/10-full-model-python-continuation/README.md`\n- Added scaffold dirs:\n  - `docs/`\n  - `notebooks/`\n  - `scripts/`\n  - `outputs/`\n  - `auto/`\n- Updated:\n  - `episodes/README.md`\n  - `README.md`\n\nValidation:\n- All AC checked.\n- Verified no old top-level `scripts/`, `notebooks/`, `docs/`, `auto/`, or `outputs/` directories were created/used.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    }
+  ],
+  "highlights": [],
+  "redactionSummary": [],
+  "redaction": {
+    "status": "processed",
+    "reviewNotes": [
+      "Automated public-safety pass completed. Review generated transcript before publishing."
+    ]
+  }
+}

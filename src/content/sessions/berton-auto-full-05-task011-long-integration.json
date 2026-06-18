@@ -1,0 +1,116 @@
+{
+  "schemaVersion": 1,
+  "title": "Berton long integration classification",
+  "source": {
+    "kind": "pi",
+    "importedAt": "2026-06-18T12:23:59.497Z",
+    "sessionStartedAt": "2026-06-15T14:10:56.522Z"
+  },
+  "participants": [
+    {
+      "id": "user",
+      "name": "User",
+      "role": "user"
+    },
+    {
+      "id": "assistant",
+      "name": "Pi",
+      "role": "assistant"
+    }
+  ],
+  "entries": [
+    {
+      "id": "entry-1",
+      "index": 0,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "9b9aeaa7",
+      "parentId": "6be3ad24",
+      "content": [
+        {
+          "type": "text",
+          "text": "Please start work on TASK-011.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-2",
+      "index": 1,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "4476e012",
+      "parentId": "1135f430",
+      "content": [
+        {
+          "type": "text",
+          "text": "Completed TASK-011 and marked it Done in Backlog.\n\nImplemented:\n- New episode: `episodes/05-full-model-oscillatory-orbit/`\n- Notebook workflow: `notebooks/task011_case0_long_integration.ipynb`\n- Reproducible runner: `scripts/berton_full_task011_classify.py`\n- Companion note: `docs/task011_case0_long_integration.md`\n- Curated outputs/plots/seeds under `outputs/task011/`\n- Tests: `tests/test_episode05_full_oscillatory_orbit.py`\n- Updated `episodes/README.md`\n\nResult:\n- BDF and LSODA both run to 500 h after the documented 200 h extension rule.\n- Classification: **damped/equilibrium-like**, not a finite-amplitude limit cycle.\n- Exported equilibrium continuation seed and finite-difference eigenvalue diagnostics.\n- Stable complex pair: [REDACTED_LOCAL_PATH] h period, [REDACTED_LOCAL_PATH] h e-folding time.\n\nValidation run:\n- `uv run python episodes/05-full-model-oscillatory-orbit/scripts/berton_full_task011_classify.py`\n- `uv run pytest tests/test_episode05_full_oscillatory_orbit.py`\n- `uv run pytest` → 49 passed\n\nNote: `git status` also shows deletions of older backlog task filenames for TASK-011/012/013; I did not directly edit those files.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [
+        {
+          "kind": "path",
+          "replacement": "[REDACTED_LOCAL_PATH]",
+          "count": 2
+        }
+      ],
+      "truncated": false
+    },
+    {
+      "id": "entry-3",
+      "index": 2,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "473af30d",
+      "parentId": "4476e012",
+      "content": [
+        {
+          "type": "text",
+          "text": "Please commit the changes, including the backlog issue file deletions.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-4",
+      "index": 3,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "cef2175c",
+      "parentId": "e007078f",
+      "content": [
+        {
+          "type": "text",
+          "text": "Committed changes.\n\nCommit:\n- `4be074e Classify full Berton Case-0 oscillation`\n\nWorking tree is clean.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    }
+  ],
+  "highlights": [],
+  "redactionSummary": [
+    {
+      "kind": "path",
+      "replacement": "[REDACTED_LOCAL_PATH]",
+      "count": 2
+    }
+  ],
+  "redaction": {
+    "status": "needs_review",
+    "reviewNotes": [
+      "Automated public-safety pass completed. Review generated transcript before publishing.",
+      "One or more sensitive-looking values were replaced with explicit redaction markers."
+    ]
+  }
+}

@@ -1,0 +1,139 @@
+{
+  "schemaVersion": 1,
+  "title": "Berton seed-based AUTO continuation",
+  "source": {
+    "kind": "pi",
+    "importedAt": "2026-06-18T12:23:59.572Z",
+    "sessionStartedAt": "2026-06-15T15:04:02.071Z"
+  },
+  "participants": [
+    {
+      "id": "user",
+      "name": "User",
+      "role": "user"
+    },
+    {
+      "id": "assistant",
+      "name": "Pi",
+      "role": "assistant"
+    }
+  ],
+  "entries": [
+    {
+      "id": "entry-1",
+      "index": 0,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "45f47683",
+      "parentId": "d378a3a7",
+      "content": [
+        {
+          "type": "text",
+          "text": "Please start work on TASK-012.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-2",
+      "index": 1,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "867f9bc0",
+      "parentId": "79586072",
+      "content": [
+        {
+          "type": "text",
+          "text": "TASK-012 is now In Progress and assigned to @iross.\n\nThe task already has this implementation plan recorded:\n\n1. Review TASK-011 notebook outputs, classification verdict, and seed files.\n2. Choose the continuation path based on the verdict.\n3. Translate the TASK-011 seed into AUTO initialization format.\n4. Run the selected AUTO continuation experiment.\n5. Extract branch diagnostics.\n6. Compare continuation results with TASK-011 classification.\n7. Write a reproducibility/diagnostics note.\n\nPlease confirm you want me to proceed with implementation using this plan.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-3",
+      "index": 2,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "4df3e23a",
+      "parentId": "867f9bc0",
+      "content": [
+        {
+          "type": "text",
+          "text": "Please go ahead.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-4",
+      "index": 3,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "42ecba6b",
+      "parentId": "607e7c5d",
+      "content": [
+        {
+          "type": "text",
+          "text": "TASK-012 is complete and marked Done.\n\nImplemented:\n- New episode: `episodes/06-full-model-auto-seed-continuation/`\n- Notebook entry point: `notebooks/task012_seed_continuation.ipynb`\n- AUTO setup for TASK-011 equilibrium seed with `W_a0` and `H_a3` controls\n- Companion note: `docs/task012_seed_continuation.md`\n- Curated outputs under `outputs/task012/`\n- Regression tests: `tests/test_episode06_full_seed_continuation.py`\n- Updated `episodes/README.md`\n\nKey result:\n- TASK-011 was equilibrium/transient-like, so periodic-orbit continuation was not applicable.\n- AUTO accepted the seed and reproduced the stable complex eigenpair, but first continuation steps failed at minimum-step `MX`.\n- Python equilibrium-control probe shows:\n  - `W_a0` shifts stable equilibrium altitude over 0.1–1.2 m/s.\n  - `H_a3` affects the critical eigenvalue and is a plausible follow-up Hopf-control candidate after better AUTO scaling/log-mass reformulation.\n\nValidation passed:\n- `bash episodes/06-full-model-auto-seed-continuation/auto/berton_full_task012/run_auto.sh`\n- `uv run python episodes/06-full-model-auto-seed-continuation/scripts/berton_full_task012_seed_continuation.py`\n- `uv run pytest tests/test_episode06_full_seed_continuation.py`\n- `uv run pytest` — 52 passed.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-5",
+      "index": 4,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "f152a5f6",
+      "parentId": "42ecba6b",
+      "content": [
+        {
+          "type": "text",
+          "text": "Please commit the changes.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-6",
+      "index": 5,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "fc72b40e",
+      "parentId": "de0c0e8b",
+      "content": [
+        {
+          "type": "text",
+          "text": "Committed changes.\n\nCommit:\n`08b28cd Add TASK-012 seed continuation episode`\n\nWorking tree is clean.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    }
+  ],
+  "highlights": [],
+  "redactionSummary": [],
+  "redaction": {
+    "status": "processed",
+    "reviewNotes": [
+      "Automated public-safety pass completed. Review generated transcript before publishing."
+    ]
+  }
+}
