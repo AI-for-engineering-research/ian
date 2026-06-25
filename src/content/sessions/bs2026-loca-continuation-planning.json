@@ -1,0 +1,698 @@
+{
+  "schemaVersion": 1,
+  "title": "B&S2026 LOCA continuation planning",
+  "source": {
+    "kind": "pi",
+    "importedAt": "2026-06-25T20:09:53.173Z",
+    "sessionStartedAt": "2026-06-25T10:25:53.192Z"
+  },
+  "participants": [
+    {
+      "id": "user",
+      "name": "User",
+      "role": "user"
+    },
+    {
+      "id": "assistant",
+      "name": "Pi",
+      "role": "assistant"
+    }
+  ],
+  "entries": [
+    {
+      "id": "entry-1",
+      "index": 0,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "b22cf83e",
+      "parentId": "ea90af68",
+      "content": [
+        {
+          "type": "text",
+          "text": "<skill name=\"grill-me\" location=\"[REDACTED_LOCAL_PATH]\">\nReferences are relative to [REDACTED_LOCAL_PATH]\n\nInterview me relentlessly about every aspect of this plan until we reach a shared understanding. Walk down each branch of the design tree, resolving dependencies between decisions one-by-one. For each question, provide your recommended answer.\n\nAsk the questions one at a time.\n\nIf a question can be answered by exploring the codebase, explore the codebase instead.\n</skill>\n\nLet's move on to episode 4. This is more or less a repeat of episode 3, but using LOCA (from Trilinos) instead of AUTO. Trilinos is installed in /opt/Trilinos, g++ is available, OpenMPI is installed.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [
+        {
+          "kind": "path",
+          "replacement": "[REDACTED_LOCAL_PATH]",
+          "count": 2
+        }
+      ],
+      "truncated": false
+    },
+    {
+      "id": "entry-2",
+      "index": 1,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "5cb79af7",
+      "parentId": "053c844e",
+      "content": [
+        {
+          "type": "text",
+          "text": "I checked Episodes 2–3: Episode 3 explicitly anticipated LOCA as the next backend and already defines the branch schema/contract LOCA should reuse.\n\n### Question 1\n\nWhat is Episode 4’s primary success criterion?\n\nRecommended answer:\n\n> Episode 4 should be a backend-equivalence episode for Figure 1 only: reproduce the same `p = 300 hPa`, `F = 1`, `T ∈ {190,210,230} K`, `w ∈ [0.005,2.0] m/s` equilibrium branches using LOCA/Trilinos, normalize outputs to the existing backend-neutral schema, and extend the Episode 3 comparison to include `python`, `auto`, and `loca`.\n\nI would **not** make Episode 4 about new physics, Figure 4 dynamics, broad Trilinos abstraction, or automated production-quality LOCA infrastructure yet. The clean win is: “LOCA independently lands on the same Figure 1 branches.”\n\nDo you agree that Episode 4’s target is exactly this backend-equivalence Figure 1 reproduction, or do you want a broader LOCA integration goal?",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-3",
+      "index": 2,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "29d8702e",
+      "parentId": "5cb79af7",
+      "content": [
+        {
+          "type": "text",
+          "text": "Yes, exactly. It's intended as a \"training wheels\" task for LOCA setup, more than anything else, and we should treat it the same way as the AUTO task in episode 3.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-4",
+      "index": 3,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "9d8ebcc4",
+      "parentId": "8fdd8f0a",
+      "content": [
+        {
+          "type": "text",
+          "text": "### Question 2\n\nShould Episode 4 create **shared top-level LOCA/Trilinos infrastructure** now, or keep nearly everything episode-local?\n\nRecommended answer:\n\n> Create `episodes/004-figure1-loca-continuation/` for the episode, but put reusable C++ model/evaluator infrastructure in a top-level `loca/` directory only if it is genuinely backend infrastructure analogous to top-level `auto/`. Keep run configs, generated build trees, raw LOCA outputs, scripts, normalized branches, comparison plots, and docs inside Episode 4.\n\nConcretely I’d structure it like:\n\n- `loca/src/` — reusable C++ model/residual code if we need it beyond this episode.\n- `loca/README.md` — how to build/run the reusable Trilinos/LOCA evaluator.\n- `episodes/004-figure1-loca-continuation/README.md`\n- `episodes/004-figure1-loca-continuation/docs/planning-decisions.md`\n- `episodes/004-figure1-loca-continuation/loca/` — episode-local CMake/config/input files if not reusable.\n- `episodes/004-figure1-loca-continuation/scripts/run_loca_figure1.py`\n- `episodes/004-figure1-loca-continuation/scripts/compare_loca_figure1.py` or an extended backend-comparison script.\n- `episodes/004-figure1-loca-continuation/outputs/figure1_loca_branches/`\n- `episodes/004-figure1-loca-continuation/outputs/figure1_backend_comparison/`\n\nI would avoid dumping C++/CMake into top-level `scripts/`, `outputs/`, or a generic `trilinos/` directory unless we know it is shared infrastructure.\n\nDo you agree with this split: **episode-local orchestration/results, top-level `loca/` only for reusable Trilinos model/backend assets**?",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-5",
+      "index": 4,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "6534a69e",
+      "parentId": "9d8ebcc4",
+      "content": [
+        {
+          "type": "text",
+          "text": "Yes.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-6",
+      "index": 5,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "505471bd",
+      "parentId": "d4ffe654",
+      "content": [
+        {
+          "type": "text",
+          "text": "### Question 3\n\nWhich LOCA integration style should Episode 4 use: a minimal dense serial `LOCA::LAPACK` application, or a fuller Tpetra/Thyra/Piro/OpenMPI stack?\n\nRecommended answer:\n\n> Use the simplest serial dense LOCA path first: `LOCA::LAPACK` / NOX-style dense vectors and matrices for the 3-variable equilibrium residual `(log_n, log_q, s)` with continuation parameter `log_w`.\n\nWhy:\n\n- The problem is only 3 unknowns plus 1 continuation parameter.\n- Episode 4 is explicitly “training wheels” for LOCA setup.\n- A dense serial app minimizes Trilinos surface area: no distributed maps, communicators, Tpetra operators, Thyra model evaluators, or Piro parameter-list complexity.\n- OpenMPI can be recorded as installed/probed, but we do not need parallelism for this task.\n- Once LOCA is validated scientifically, a later episode/task can decide whether a Tpetra/Piro wrapper is useful.\n\nThe C++ executable would still be a real LOCA continuation run, just not a distributed-memory one.\n\nDo you agree that Episode 4 should start with **serial dense `LOCA::LAPACK`**, not Tpetra/Piro/MPI?",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-7",
+      "index": 6,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "4d84ea23",
+      "parentId": "505471bd",
+      "content": [
+        {
+          "type": "text",
+          "text": "Yes.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-8",
+      "index": 7,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "12fd1ab8",
+      "parentId": "9c25a84f",
+      "content": [
+        {
+          "type": "text",
+          "text": "### Question 4\n\nShould the LOCA executable reimplement the Bergner–Spichtinger model formulas directly in C++, or call/reuse the existing Python/Fortran model somehow?\n\nRecommended answer:\n\n> Reimplement the minimal residual model directly in C++ for LOCA, but make it reusable under top-level `loca/src/` and verify it against the existing Python implementation before trusting continuation output.\n\nSpecifically:\n\n- Unknown vector: `x = [log_n, log_q, s]`\n- Continuation parameter: `log_w`\n- Residual: same backend-normalized equilibrium residual used by Python/AUTO:\n  - `dn/dt / n`\n  - `dq/dt / q`\n  - `ds/dt`\n- Fixed environment fields: `p`, `T`, `F`, `N_a`, `dz`\n- Initial state: generated from Python’s existing equilibrium approximation/root solve, just as AUTO used Python to render starts.\n- Jacobian: start with finite differences in the LOCA/LAPACK interface unless exact Jacobian becomes necessary.\n\nI would **not** bind C++ to Python, and I would **not** try to call the AUTO Fortran core from LOCA. That would reduce backend independence and complicate build/linking. But I would use Python tests/scripts to compare C++ residual evaluations against `bergner_spichtinger_2026.residuals.equilibrium_residual`.\n\nDo you agree: **independent C++ model/residual implementation, validated against Python, finite-difference Jacobian initially**?",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-9",
+      "index": 8,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "ab1149bb",
+      "parentId": "12fd1ab8",
+      "content": [
+        {
+          "type": "text",
+          "text": "Almost. The C++ code should definitely be completely independent: no calling out to Python, but validating against the Python results. One thing I would like to see in the C++ code is automatic differentiation. Even at this early stage, it would be interesting to see how that looks, rather than using finite differences for Jacobian calculations.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-10",
+      "index": 9,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "c604f5e5",
+      "parentId": "bf41e581",
+      "content": [
+        {
+          "type": "text",
+          "text": "Good correction. We should make AD part of the design, not a later refinement.\n\n### Question 5\n\nWhat should the automatic differentiation scope be in Episode 4: only derivatives with respect to the 3 state variables, or also with respect to the continuation parameter `log_w`?\n\nRecommended answer:\n\n> Use Sacado forward-mode AD for the 3×3 Newton Jacobian with respect to state variables `x = [log_n, log_q, s]`; additionally make the residual templated so derivative w.r.t. `log_w` can be computed later, but do not require LOCA integration to consume an analytic `∂F/∂log_w` on day one unless the LAPACK interface makes that straightforward.\n\nRationale:\n\n- LOCA’s nonlinear solves definitely need `J = ∂F/∂x`; Sacado is perfect for this tiny 3-variable residual.\n- LOCA continuation may internally finite-difference parameter derivatives depending on the group/interface path. That’s acceptable for “training wheels” as long as the Newton Jacobian is AD-backed.\n- The right implementation pattern is still to write model functions templated on scalar type:\n  - `template<class Scalar> residual(...)`\n  - instantiate with `double` for values\n  - instantiate with `Sacado::Fad::SFad<double,3>` or similar for state Jacobian\n- We can record in docs whether parameter derivatives are supplied analytically or left to LOCA.\n\nSo: **AD-backed state Jacobian required; parameter derivative optional/documented**.\n\nDo you agree, or do you want the Episode 4 acceptance bar to require AD for both `∂F/∂x` and `∂F/∂log_w`?",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-11",
+      "index": 10,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "d7b5c4b9",
+      "parentId": "c604f5e5",
+      "content": [
+        {
+          "type": "text",
+          "text": "That sounds like a good compromise to start with. We'll be doing more complex continuation experiments later, and that will be the time to look at AD for the expanded Jacobians needed for continuation.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-12",
+      "index": 11,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "3005f42a",
+      "parentId": "d7b5c4b9",
+      "content": [
+        {
+          "type": "text",
+          "text": "### Question 6\n\nShould Episode 4’s comparison code be a LOCA-specific copy of Episode 3’s `compare_auto_figure1.py`, or should we refactor comparison toward a generic multi-backend Figure 1 comparator?\n\nRecommended answer:\n\n> For Episode 4, create an episode-local `compare_loca_figure1.py` by adapting Episode 3’s comparison logic, but design its inputs/outputs so it compares **LOCA vs Python**, **LOCA vs AUTO**, **LOCA vs Eq. 92–94**, root-solve checks, and digitized paper curves. Do not do a big cross-episode comparator refactor yet unless duplication becomes painful.\n\nReasoning:\n\n- Episode 4 is training wheels for LOCA, not a software-architecture episode.\n- A careful adaptation is lower risk than refactoring Episode 3 while also learning LOCA.\n- But the output should already include all three backends where relevant:\n  - `loca_vs_python_continuation`\n  - `loca_vs_auto_continuation`\n  - `loca_vs_eq_92_94`\n  - `loca_vs_python_root_solve`\n  - `loca_vs_digitized_figure1`\n- The plot should overlay Python, AUTO, LOCA, analytic approximation, and digitized paper, with LOCA visually distinct but not inventing a new schema.\n\nI’d only extract shared comparison utilities later, after both AUTO and LOCA scripts exist and we can see the real common shape.\n\nDo you agree with **episode-local adapted comparator now, generic refactor later**?",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-13",
+      "index": 12,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "2a1ae105",
+      "parentId": "3005f42a",
+      "content": [
+        {
+          "type": "text",
+          "text": "Agreed. Once we get around to creating backlog tasks, please create a post-episode 4 comparison refactoring task.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-14",
+      "index": 13,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "09d89f7d",
+      "parentId": "2a1ae105",
+      "content": [
+        {
+          "type": "text",
+          "text": "Noted: when we get to backlog creation, include a **post-Episode 4 comparison refactoring** follow-up task.\n\n### Question 7\n\nWhat should the Episode 4 LOCA branch-output contract be: exactly reuse Episode 3’s normalized schema, or add LOCA-specific required fields?\n\nRecommended answer:\n\n> Reuse Episode 3’s backend-neutral schema exactly for required fields, with `backend = \"loca\"` and optional LOCA-specific columns appended.\n\nRequired fields should include the existing contract:\n\n- `backend`\n- `schema_version`\n- `branch_id`\n- `T_K` / `temperature_K`\n- `p_Pa` / `pressure_Pa`\n- `F`\n- `N_a_m3`\n- `log_w`\n- `w_m_s`\n- `log_n`\n- `log_q`\n- `n` / `n_kg_dry_air_inv`\n- `q` / `q_kg_kg`\n- `s`\n- `residual_norm`\n- `converged`\n- `stability`\n- `backend_step_index`\n- `source_file`\n\nOptional LOCA fields can be added, e.g.:\n\n- `loca_step_index`\n- `loca_step_status`\n- `loca_continuation_parameter`\n- `loca_predictor`\n- `loca_step_size`\n- `loca_newton_iterations`\n- `loca_continuation_status`\n- `loca_norm_f`\n- `loca_turning_point_flag` if available\n\nI would **not** make LOCA-specific fields required for comparison. Comparison scripts should only depend on backend-neutral fields.\n\nDo you agree: **same required schema, optional LOCA diagnostics appended**?",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-15",
+      "index": 14,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "c0283879",
+      "parentId": "09d89f7d",
+      "content": [
+        {
+          "type": "text",
+          "text": "Yes.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-16",
+      "index": 15,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "4528b81e",
+      "parentId": "c131f359",
+      "content": [
+        {
+          "type": "text",
+          "text": "### Question 8\n\nHow should Episode 4 handle build/toolchain assumptions, especially since OpenMPI is installed but `mpicxx` is not on `PATH` in this shell?\n\nRecommended answer:\n\n> Treat Episode 4 as a serial CMake/g++ build against `/opt/Trilinos/lib64/cmake/Trilinos/TrilinosConfig.cmake`, and record MPI/OpenMPI availability only as provenance. Do not require `mpicxx` or MPI execution for the Episode 4 success path.\n\nConcrete plan:\n\n- Build with CMake, `g++`, and Trilinos CMake config:\n  - `-DTrilinos_DIR=/opt/Trilinos/lib64/cmake/Trilinos`\n- Require packages conceptually: `LOCA`, `NOX`, `Sacado`, `Teuchos`.\n- Let CMake discover/link Trilinos through `find_package(Trilinos REQUIRED)`.\n- Python orchestration can build into an episode output/build directory or ignored build directory.\n- `run_metadata.json` should record:\n  - `g++ --version`\n  - CMake version\n  - Trilinos config path\n  - selected/available Trilinos packages\n  - OpenMPI probe results, including whether `mpicxx` exists\n- If `mpicxx` is absent, that is not a failure.\n\nThis keeps the training-wheels task focused and avoids fake MPI complexity.\n\nDo you agree: **serial CMake/g++ build; MPI not required, just recorded**?",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-17",
+      "index": 16,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "4d6c856e",
+      "parentId": "4528b81e",
+      "content": [
+        {
+          "type": "text",
+          "text": "Yes. On this machine, OpenMPI 5 is installed in /usr/lib64/mpi/gcc/openmpi5 (don't ask me: it's a weird OpenSUSE thing). You can remember that for if we ever want to use MPI.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-18",
+      "index": 17,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "9098540f",
+      "parentId": "4d6c856e",
+      "content": [
+        {
+          "type": "text",
+          "text": "Noted: OpenMPI 5 lives at `/usr/lib64/mpi/gcc/openmpi5` for future MPI work, but Episode 4 should not depend on it.\n\n### Question 9\n\nShould Episode 4 require a **true LOCA continuation run**, or is it acceptable to use LOCA/NOX as a parameter-sweep nonlinear solver over a fixed `log_w` grid?\n\nRecommended answer:\n\n> Require a true LOCA continuation run, not just a grid sweep of independent solves.\n\nReasoning:\n\n- The episode’s purpose is learning LOCA setup, so bypassing continuation would miss the main point.\n- Episode 3 used AUTO as an actual continuation backend; Episode 4 should be analogous.\n- The output can still be clipped/interpolated to the same `w ∈ [0.005, 2.0]` range.\n- If LOCA setup proves difficult, a NOX parameter sweep can be a diagnostic fallback, but it should not satisfy the primary acceptance criteria.\n\nSo the hierarchy should be:\n\n1. Primary: LOCA continuation in `log_w`.\n2. Diagnostic fallback: NOX solves at sampled `log_w` values, useful for debugging residual/Jacobian/model correctness.\n3. Not acceptable as final: only a Python-driven sweep masquerading as LOCA continuation.\n\nDo you agree that the Episode 4 bar is **real LOCA continuation**, with sweeps only as debugging scaffolding?",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-19",
+      "index": 18,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "8f4804ad",
+      "parentId": "9098540f",
+      "content": [
+        {
+          "type": "text",
+          "text": "Yes. Getting LOCA working is the main goal of this episode.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-20",
+      "index": 19,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "3e8112c8",
+      "parentId": "8f4804ad",
+      "content": [
+        {
+          "type": "text",
+          "text": "### Question 10\n\nWhat branch traversal strategy should LOCA use for Figure 1: start at `w_min` and continue upward to `w_max`, or use a midpoint/start strategy with bidirectional continuation?\n\nRecommended answer:\n\n> Start at `w_min = 0.005 m/s` (`log_w_min`) for each temperature using the Python-computed equilibrium as the initial solution, then continue monotonically upward to `w_max = 2.0 m/s` (`log_w_max`) with LOCA’s natural/pseudo-arclength continuation as needed. Add bidirectional or midpoint continuation only if upward traversal fails.\n\nWhy:\n\n- This matches Episode 3’s AUTO setup, which rendered starts at `LOG_W_MIN`.\n- The Figure 1 branch appears straightforward over this range; no need to complicate the first LOCA task.\n- Starting at `w_min` gives consistent endpoint coverage and branch IDs.\n- If LOCA needs an initial secant/tangent, use a tiny positive second step in `log_w` or LOCA’s predictor settings rather than changing the scientific path.\n\nImplementation detail I’d document:\n\n- Output rows should be clipped to the requested `log_w` interval.\n- Endpoint coverage diagnostics should mirror AUTO: error if min/max `log_w` do not reach requested bounds within tolerance.\n- If continuation overshoots past `w_max`, keep raw logs but normalize only requested range.\n\nDo you agree: **start at `w_min`, continue upward, only complicate if necessary**?",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-21",
+      "index": 20,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "c660361b",
+      "parentId": "3e8112c8",
+      "content": [
+        {
+          "type": "text",
+          "text": "Yes.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-22",
+      "index": 21,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "9fd2e41c",
+      "parentId": "c660361b",
+      "content": [
+        {
+          "type": "text",
+          "text": "### Question 11\n\nWhat should the initial LOCA continuation step/control tolerances be?\n\nRecommended answer:\n\n> Start with conservative, reproducible continuation settings chosen for robustness rather than speed, then tune only if LOCA struggles.\n\nProposed initial targets:\n\n- Continuation parameter:\n  - min `log_w = log(0.005)`\n  - max `log_w = log(2.0)`\n- Initial continuation step size in `log_w`: about `0.02–0.05`\n- Max continuation step size: about `0.05–0.10`\n- Min continuation step size: about `1e-5`\n- Max continuation steps: enough to cover the interval, e.g. `300–600`\n- Newton residual tolerance: `1e-10` or tighter if stable\n- Newton max iterations: `15–25`\n- Linear solve: dense direct LAPACK from LOCA/NOX\n- Normalized output: accept branch residual norms below around `1e-8` initially\n- Backend comparison expectation:\n  - LOCA vs Python/AUTO max relative differences ideally `[REDACTED_LOCAL_PATH]`\n  - Do not fail immediately on slightly larger differences until we inspect residuals and interpolation density.\n\nI would record exact LOCA parameter-list values in `run_metadata.json` and in `docs/planning-decisions.md`.\n\nDo these initial tolerances/step-size expectations sound right, or do you want stricter scientific acceptance from the start?",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [
+        {
+          "kind": "path",
+          "replacement": "[REDACTED_LOCAL_PATH]",
+          "count": 1
+        }
+      ],
+      "truncated": false
+    },
+    {
+      "id": "entry-23",
+      "index": 22,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "d046bd25",
+      "parentId": "9fd2e41c",
+      "content": [
+        {
+          "type": "text",
+          "text": "Yeah, sounds OK.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-24",
+      "index": 23,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "cee04620",
+      "parentId": "d046bd25",
+      "content": [
+        {
+          "type": "text",
+          "text": "### Question 12\n\nHow should we expose the LOCA executable interface to Python orchestration?\n\nRecommended answer:\n\n> Build one C++ executable that supports simple subcommands for both validation and continuation, with stable machine-readable text/CSV output.\n\nSuggested executable behavior:\n\n```bash\n./bs2026_loca_figure1 residual \\\n  --p 30000 --T 210 --log-w -2.302585... --F 1 --N-a 1e10 \\\n  --log-n ... --log-q ... --s ...\n\n./bs2026_loca_figure1 jacobian \\\n  --p 30000 --T 210 --log-w ... --F 1 --N-a 1e10 \\\n  --log-n ... --log-q ... --s ...\n\n./bs2026_loca_figure1 continue \\\n  --p 30000 --T 210 --F 1 --N-a 1e10 \\\n  --log-w-min ... --log-w-max ... \\\n  --log-n0 ... --log-q0 ... --s0 ... \\\n  --output raw_loca_T210K.csv\n```\n\nPython script responsibilities:\n\n- compute/render initial states from existing Python package;\n- configure/build CMake if needed;\n- run executable once per temperature;\n- parse raw C++/LOCA CSV;\n- recompute/verify residual norms if useful;\n- normalize to schema CSVs;\n- write metadata/diagnostics.\n\nC++ executable responsibilities:\n\n- own C++ model formulas;\n- compute residuals and Sacado Jacobians;\n- run LOCA continuation;\n- emit raw branch rows and LOCA diagnostics.\n\nI would not make C++ write final normalized schema directly at first; Python can normalize, exactly as Episode 3 did for AUTO.\n\nDo you agree with this **C++ raw LOCA executable + Python normalization/orchestration** split?",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-25",
+      "index": 24,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "b2659f99",
+      "parentId": "cee04620",
+      "content": [
+        {
+          "type": "text",
+          "text": "Yes.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-26",
+      "index": 25,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "556312c3",
+      "parentId": "b2659f99",
+      "content": [
+        {
+          "type": "text",
+          "text": "### Question 13\n\nShould the C++ model constants/formulas be manually translated from Python `src/bergner_spichtinger_2026/`, or from the shared AUTO Fortran core?\n\nRecommended answer:\n\n> Translate from the Python package as the semantic reference, while cross-checking against the AUTO Fortran core to catch drift. Document Python as the primary model specification for Episode 4.\n\nReasoning:\n\n- Episode 2’s Python package is the reusable semantic model.\n- Episode 3’s Fortran core mirrors Python, but using it as the source for C++ would make LOCA less independent from AUTO.\n- For validation, tests should compare:\n  - C++ residual values vs Python residuals at fixed environments/states.\n  - C++ AD Jacobian vs Python finite-difference or central-difference Jacobian.\n  - LOCA branch values vs Python and AUTO branch outputs.\n\nThis gives independence without inventing a third undocumented interpretation.\n\nDo you agree: **Python package is semantic source; AUTO Fortran is only a secondary sanity check**?",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-27",
+      "index": 26,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "1ca3ef05",
+      "parentId": "556312c3",
+      "content": [
+        {
+          "type": "text",
+          "text": "Yes. Translate from Python and write legible and well-structured C++, including comments.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-28",
+      "index": 27,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "4ebcd4b9",
+      "parentId": "1ca3ef05",
+      "content": [
+        {
+          "type": "text",
+          "text": "### Question 14\n\nShould Episode 4 include explicit tests for the Sacado AD Jacobian, or is branch-level agreement enough?\n\nRecommended answer:\n\n> Include explicit low-level tests for the C++ residual and AD Jacobian before relying on LOCA branch output.\n\nAcceptance-worthy checks:\n\n- Build smoke test: CMake can configure/build the LOCA executable when Trilinos is present.\n- Residual value test: invoke C++ `residual` at several fixed states and compare to Python `equilibrium_residual` within tight tolerance.\n- Jacobian test: invoke C++ `jacobian` and compare to a Python central-difference Jacobian of the same residual.\n- Continuation schema test: generated `branches_all.csv` has required backend-neutral fields, `backend == \"loca\"`, positive `n/q`, requested `log_w` coverage, finite residuals.\n- Backend comparison test/artifact: LOCA vs Python/AUTO summaries are generated and within documented tolerances or at least reported clearly.\n\nI’d make tests skip cleanly if `/opt/Trilinos`/CMake/g++ are unavailable, similar to external-tool handling in Episode 3.\n\nDo you agree that **AD Jacobian validation is part of Episode 4**, not just branch comparison?",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-29",
+      "index": 28,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "7f403c8f",
+      "parentId": "4ebcd4b9",
+      "content": [
+        {
+          "type": "text",
+          "text": "Yes, include tests, please.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-30",
+      "index": 29,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "b3bbce49",
+      "parentId": "7f403c8f",
+      "content": [
+        {
+          "type": "text",
+          "text": "### Question 15\n\nHow should we define “Done” for Episode 4 outputs: LOCA-only branch artifacts, or full three-backend comparison artifacts?\n\nRecommended answer:\n\n> Episode 4 is done only when both LOCA branch generation and full comparison artifacts exist.\n\nMinimum curated outputs:\n\n- `episodes/004-figure1-loca-continuation/outputs/figure1_loca_branches/`\n  - `branch_T190K.csv`\n  - `branch_T210K.csv`\n  - `branch_T230K.csv`\n  - `branches_all.csv`\n  - `run_metadata.json`\n  - `run_diagnostics.json`\n  - raw per-temperature LOCA output/build provenance under `raw/` or equivalent\n- `episodes/004-figure1-loca-continuation/outputs/figure1_backend_comparison/`\n  - `backend_comparison_details.csv`\n  - `backend_comparison_summary.csv`\n  - `backend_comparison_summary.json`\n  - `figure1_backend_comparison.png`\n  - `figure1_backend_residuals.png`\n  - `run_metadata.json`\n\nThe comparison should include at least:\n\n- LOCA vs Python continuation\n- LOCA vs AUTO continuation\n- LOCA vs Eq. 92–94 approximation\n- LOCA vs Python root-solve checks\n- LOCA vs digitized Figure 1\n\nDo you agree this is the Episode 4 completion bar?",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-31",
+      "index": 30,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "262dcdf6",
+      "parentId": "b3bbce49",
+      "content": [
+        {
+          "type": "text",
+          "text": "Yes.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-32",
+      "index": 31,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "94be6172",
+      "parentId": "262dcdf6",
+      "content": [
+        {
+          "type": "text",
+          "text": "### Question 16\n\nShould Episode 4 be implemented as one backlog task, or split into multiple tasks?\n\nRecommended answer:\n\n> Split Episode 4 into a small sequence of backlog tasks, because LOCA setup has separable risk points and we want clean stopping points.\n\nRecommended task breakdown:\n\n1. **Create Episode 4 scaffolding and planning docs**\n   - README, planning decisions, directory structure.\n   - Document agreed design: serial `LOCA::LAPACK`, Sacado AD state Jacobian, schema reuse, output contract.\n\n2. **Add reusable C++ LOCA model core with Sacado residual/Jacobian validation**\n   - Top-level `loca/src/`.\n   - CMake build against `/opt/Trilinos`.\n   - Executable supports `residual` and `jacobian`.\n   - Tests compare C++ residual/Jacobian to Python.\n\n3. **Run LOCA Figure 1 continuation and normalize branch outputs**\n   - Add `continue` executable path.\n   - Add `run_loca_figure1.py`.\n   - Generate per-temperature raw and normalized branches.\n\n4. **Add Episode 4 backend comparison artifacts**\n   - Add `compare_loca_figure1.py`.\n   - Compare LOCA vs Python/AUTO/analytic/root-solve/digitized.\n   - Generate summary tables and plots.\n\n5. **Post-Episode 4 follow-up: refactor Figure 1 backend comparison utilities**\n   - Extract shared comparison logic from Episodes 3–4 once both exist.\n\nI would not combine all of this into one task; if LOCA build/API work gets gnarly, we want the residual/Jacobian milestone isolated.\n\nDo you agree with this task breakdown?",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-33",
+      "index": 32,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "5e095a48",
+      "parentId": "94be6172",
+      "content": [
+        {
+          "type": "text",
+          "text": "Multiple tasks, and yes, this split looks good.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-34",
+      "index": 33,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "cc253a68",
+      "parentId": "5e095a48",
+      "content": [
+        {
+          "type": "text",
+          "text": "### Question 17\n\nDo you want to create those backlog tasks now, or keep grilling the plan first?\n\nRecommended answer:\n\n> Create the backlog tasks now, because the major design branches are resolved. Include the post-Episode 4 comparison refactor task as a follow-up. Then implementation can start with Task 1 only: scaffolding/docs.\n\nIf we create them, I’ll use the Backlog CLI only, with no implementation plan yet, per repo rules.\n\nShall I create the five tasks now?",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-35",
+      "index": 34,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "405f319f",
+      "parentId": "cc253a68",
+      "content": [
+        {
+          "type": "text",
+          "text": "Yes, create them now please. You can go ahead and write implementation plans for all five right away.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-36",
+      "index": 35,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "02627f8a",
+      "parentId": "a562dc3f",
+      "content": [
+        {
+          "type": "text",
+          "text": "Created the five backlog tasks and added implementation plans/dependencies via the CLI:\n\n- `TASK-014` — Create Episode 4 scaffold and LOCA planning docs\n- `TASK-015` — Add reusable C++ LOCA model core with Sacado residual and Jacobian validation\n- `TASK-016` — Implement LOCA Figure 1 continuation and normalized branch outputs\n- `TASK-017` — Compare LOCA Figure 1 results against Python, AUTO, and paper benchmarks\n- `TASK-018` — Refactor Figure 1 backend comparison utilities after Episode 4\n\nDependencies added:\n\n- `015 → 014`\n- `016 → 015`\n- `017 → 016`\n- `018 → 017`\n\nAll are currently `To Do`.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    }
+  ],
+  "highlights": [],
+  "redactionSummary": [
+    {
+      "kind": "path",
+      "replacement": "[REDACTED_LOCAL_PATH]",
+      "count": 3
+    }
+  ],
+  "redaction": {
+    "status": "needs_review",
+    "reviewNotes": [
+      "Automated public-safety pass completed. Review generated transcript before publishing.",
+      "One or more sensitive-looking values were replaced with explicit redaction markers."
+    ]
+  }
+}

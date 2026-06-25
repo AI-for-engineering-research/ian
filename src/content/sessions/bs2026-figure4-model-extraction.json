@@ -1,0 +1,122 @@
+{
+  "schemaVersion": 1,
+  "title": "B&S2026 model extraction and Figure 4",
+  "source": {
+    "kind": "pi",
+    "importedAt": "2026-06-25T20:09:52.666Z",
+    "sessionStartedAt": "2026-06-21T19:15:42.699Z"
+  },
+  "participants": [
+    {
+      "id": "user",
+      "name": "User",
+      "role": "user"
+    },
+    {
+      "id": "assistant",
+      "name": "Pi",
+      "role": "assistant"
+    }
+  ],
+  "entries": [
+    {
+      "id": "entry-1",
+      "index": 0,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "0b3142c1",
+      "parentId": "01d6e82e",
+      "content": [
+        {
+          "type": "text",
+          "text": "<skill name=\"extract-model\" location=\"[REDACTED_LOCAL_PATH]\">\nReferences are relative to [REDACTED_LOCAL_PATH]\n\n# Extract Model\n\nUse this skill to turn a scientific paper's mathematical model into a reproducible Python extraction workspace. Prioritize physical correctness, source traceability, auditability against the paper, and verification over performance or architectural polish.\n\nThe default output is a **new uv-managed project directory**, not a single module.\n\n## Core Principles\n\n- Work in phases:\n  1. Create the workspace, inspect/normalize sources, record source quality/provenance, and write an implementation specification.\n  2. Pause for user review/clarification before implementing the model.\n  3. Implement the model, tests, examples, and verification notebooks only after explicit approval.\n- Do **not** implement model equations until the user explicitly confirms Phase 2.\n- Prefer semantic source formats over PDFs.\n- Treat PDF/OCR/math extraction as fallible; never silently trust corrupted equations, symbols, units, or tables.\n- Preserve the paper's notation in code as closely as Python allows.\n  - Greek identifiers are fine and encouraged: `ρ`, `κ`, `Ω`, etc.\n  - Subscripts become underscores: `ρ_{ie}` -> `ρ_ie`.\n  - Avoid unnecessarily long identifiers.\n  - Add ASCII aliases only at public API boundaries if genuinely helpful.\n- Prefer literal, equation-by-equation reference implementations over vectorized or optimized code.\n- Use comments and docstrings to map code back to paper equations, tables, sections, assumptions, and source/provenance entries.\n- Never invent validation data or expected numerical results.\n\n## Default Project Layout\n\nFor a new extraction, create a uv project with a layout like:\n\n```text\n<paper-model>/\n  pyproject.toml\n  README.md\n  sources/\n    original/             # user-provided PDF, saved HTML bundle, LaTeX/XML, supplements\n    extracted/\n      raw/                # generated/re-runnable extraction output\n      curated/            # manual corrections for ambiguous/corrupted items\n      provenance.yaml     # structured source/provenance/confidence manifest\n  docs/\n    SOURCE_QUALITY.md\n    MODEL_EXTRACTION.md\n  src/<package>/\n    __init__.py\n    core.py               # numeric, paper-faithful formulas\n    units.py              # Pint-facing validation/conversion wrappers\n    constants.py          # constants/parameters with source references\n  tests/\n  notebooks/\n    00_source_inspection.ipynb\n    01_reproduce_key_figures.ipynb\n  scripts/\n    inspect_html.py\n    extract_pdf_text.py\n    build_extraction_manifest.py\n```\n\nThe exact package/project name should be derived from the paper/model and confirmed or chosen sensibly.\n\nDefault dependencies can be generous because this is an extraction/verification workspace, not the final production package. Include by default where useful:\n\n- `numpy`\n- `scipy`\n- `pandas`\n- `xarray`\n- `matplotlib`\n- `pint`\n- `beautifulsoup4`\n- `lxml`\n- `html5lib`\n- `pypdf`\n- `pyyaml`\n- `pytest`\n- `ipykernel`\n- `jupyterlab`\n\nExternal system tools may be used when available, but do not assume they are installed. Check first and document missing tools.\n\n## Phase 0: Intake, Workspace, and Source Normalization\n\n### 0.1 Create the uv workspace\n\nCreate a new uv-managed project directory unless the user has already created one. Add the default source/docs/scripts/tests/notebooks layout.\n\nSource-processing scripts are allowed before the Phase 2 pause because they support extraction and reproducibility. They should be safe to rerun. Do not overwrite curated/manual files without explicit confirmation.\n\n### 0.2 Identify and register source material\n\nAsk for or locate the best available source material. Prefer, in order:\n\n1. Semantic source formats:\n   - arXiv/source LaTeX\n   - publisher HTML saved locally, including supporting files\n   - JATS/XML or other publisher XML\n   - supplementary code/data/notebooks\n2. Born-digital PDF as visual ground truth and fallback text source.\n3. Scanned/image PDF with OCR only as a last resort.\n4. Pasted excerpts when no complete source is available.\n\nIf the paper is behind institutional access, ask the user to save the publisher HTML page locally, preferably as a complete webpage including supporting files. Do not bypass access controls or scrape authenticated/paywalled sites yourself.\n\n### 0.3 Inspect semantic HTML/source quality\n\nFor saved HTML or publisher/source formats, inspect whether equations/tables/figures are available in useful semantic form. Use tools such as:\n\n- `rg` for quick searches (`MathJax`, `mathml`, `<math`, equation labels, table markup)\n- Python with `beautifulsoup4`, `lxml`, and/or `html5lib`\n- `pandoc` for `.tex`, `.md`, `.html`, `.docx`, and similar non-PDF formats when helpful\n\nCheck and record:\n\n- whether equations are MathML, embedded TeX/LaTeX, MathJax script data, SVG/images with alt text, or image-only;\n- whether equation numbers and cross-references survived;\n- whether tables, captions, section headings, and references survived;\n- whether figures and supplementary data are present.\n\nPublisher HTML with MathJax/MathML/embedded TeX is usually a better extraction source than PDF. HTML quality still varies; verify important equations against the rendered paper/PDF.\n\n### 0.4 PDF extraction policy\n\nPandoc is **not** a PDF OCR or reliable PDF math-extraction tool. Do not require Pandoc for PDFs and do not recommend it as the PDF path.\n\nFor born-digital PDFs, check for `pdftotext` and try text extraction when useful:\n\n```bash\npdftotext -layout paper.pdf sources/extracted/raw/paper.layout.txt\npdftotext -raw paper.pdf sources/extracted/raw/paper.raw.txt\n```\n\n`pdftotext` can be useful for prose but is only medium-good for math-heavy papers. Equations, symbols, subscripts, superscripts, and tables must be checked when they matter.\n\nFor scanned/image PDFs, OCR is a fallback only. Local tools such as `ocrmypdf` and `tesseract` can make prose searchable, but normal OCR is not trustworthy for mathematical notation.\n\nFor math-heavy PDFs, optional specialized tools may help, for example Mathpix, Nougat, Marker, or similar. Treat their output as draft transcription, not ground truth. Record tool, version/settings, and failures. Cloud/API tools require explicit user permission before uploading any document or snippet, especially for paywalled, institutional, unpublished, copyrighted, or sensitive material. Prefer local/offline tools by default.\n\n### 0.5 Raw vs curated extracts\n\nUse:\n\n- `sources/extracted/raw/` for generated, reproducible extraction output;\n- `sources/extracted/curated/` for manual corrections of ambiguous, corrupted, or model-critical extracted material.\n\nDo not require every equation/table to pass through curated files. The default workflow should continue end-to-end when extraction is clear enough. Use curated/manual correction for ambiguous or low-confidence items.\n\n### 0.6 Source quality and provenance artifacts\n\nAlways create/update:\n\n- `docs/SOURCE_QUALITY.md`\n- `sources/extracted/provenance.yaml`\n\n`SOURCE_QUALITY.md` should summarize:\n\n- source files used;\n- extraction tools and commands;\n- HTML/PDF/OCR quality;\n- equation/table/figure extraction quality;\n- manual checks performed;\n- known risks;\n- whether cloud/API tools were used and what permission was given.\n\n`provenance.yaml` should track, where applicable:\n\n```yaml\nequations:\n  eq_12:\n    source: publisher_html\n    source_file: sources/original/paper.html\n    paper_location: section 3.2\n    extraction_method: MathJax TeX from saved HTML\n    used_extract: raw\n    manually_checked_against_rendered_source: true\n    confidence: high\n    notes: \"\"\ntables:\n  table_1:\n    source: pdf\n    extraction_method: manual transcription\n    used_extract: curated\n    manually_checked_against_rendered_source: true\n    confidence: medium\nfigures:\n  figure_3:\n    data_available: false\n    reproduction_plan: digitize curve or request data\n```\n\nUse confidence gates:\n\n- `high`: semantic source, clear extraction, no material ambiguity -> proceed.\n- `medium`: likely interpretation clear but minor formatting risk -> proceed, document risk.\n- `low`: ambiguity affects implementation -> stop, ask the user, or create a curated correction TODO before implementing that item.\n- `blocked`: missing/illegible/contradictory source -> stop.\n\nMedium-confidence items may be implemented if visible in docs/provenance and flagged as verification risks. Low-confidence items block implementation unless the user explicitly approves a stated assumption.\n\n## Phase 1: Extraction Specification\n\nAlways write `docs/MODEL_EXTRACTION.md` before implementation.\n\nThe phase-1 spec must include:\n\n1. **Paper/source citation**\n   - title, authors, year if available\n   - source file/path/URL if available\n2. **Source quality summary**\n   - brief summary from `SOURCE_QUALITY.md`\n   - which source is considered primary for equations/tables\n   - known extraction risks\n3. **Implementation goal**\n   - what model or submodel will be implemented\n   - intended inputs and outputs\n4. **Domain of validity and assumptions**\n   - assumptions stated by the paper\n   - assumptions inferred from implementation needs, clearly labeled\n5. **Unit strategy**\n   - canonical units expected by the numeric core\n   - where Pint will be used\n   - where Pint is intentionally not used\n   - dimensional assumptions and conversions\n6. **Symbol table**\n   - paper notation\n   - Python identifier\n   - units/dimensions\n   - meaning\n   - where defined in the paper\n   - provenance/confidence reference\n7. **Constants and parameters**\n   - values, units, source table/equation\n   - whether fixed, configurable, or unknown\n   - provenance/confidence reference\n8. **Equation inventory**\n   - equation number or section reference\n   - original mathematical expression when possible\n   - plain-language meaning\n   - proposed Python function/name\n   - inputs, outputs, units\n   - provenance/confidence reference\n9. **Evaluation order / algorithm**\n   - step-by-step order matching the paper as closely as possible\n10. **Numerical methods**\n   - solvers, approximations, discretization, interpolation, convergence criteria, etc.\n   - note anything unspecified by the paper\n11. **Ambiguities / required user decisions**\n   - missing constants\n   - undefined symbols\n   - unclear units\n   - inconsistent equations\n   - boundary/initial conditions\n   - low-confidence or blocked extraction items\n12. **Proposed file layout**\n   - implementation files\n   - tests\n   - examples/docs\n   - notebooks\n13. **Test plan**\n   - dimensional/unit tests\n   - equation smoke tests\n   - paper regression/reference tests if data exist\n   - physical sanity tests only where justified\n14. **Verification inventory**\n   - key figures/tables/equations to reproduce\n   - required data/parameters/initial conditions\n   - whether each is available, missing, digitizable, or manually needed\n   - expected artifact: test, notebook cell, plot, table, or TODO\n   - status: not started / blocked / attempted / reproduced\n15. **Example plan**\n   - minimal run\n   - paper scenario, limiting case, table, or figure reproduction if possible\n\nAfter writing the spec, stop and ask the user to review it, especially ambiguities, low-confidence items, and required decisions. Do not proceed until the user confirms Phase 2.\n\nPlaceholder notebooks may be created during Phase 1, but model equations/functions should remain stubs or absent until approval.\n\n## Handling Ambiguity\n\nBe strict about gaps in the paper:\n\n- Do not silently fill gaps from common knowledge unless clearly labeled as an assumption.\n- If ambiguity blocks implementation, ask the user for clarification in Phase 1.\n- If implementation can proceed with placeholders, make them explicit using required parameters, documented TODOs, or `NotImplementedError`.\n- Prefer exposing uncertain constants, closures, parameterizations, and boundary conditions as inputs.\n- Never invent validation data or expected numerical results.\n\n## Phase 2: Implementation\n\nProceed only after explicit user approval.\n\n### Default architecture\n\nImplement two layers by default:\n\n1. `core.py`\n   - numeric, paper-faithful functions;\n   - canonical units documented in comments/docstrings;\n   - minimal internal unit machinery;\n   - formulas visually close to paper expressions.\n\n2. `units.py` or public API wrappers\n   - accept/return Pint quantities where useful;\n   - validate dimensionality;\n   - convert to canonical numeric units;\n   - delegate to `core.py`.\n\nUse `constants.py` for constants/parameters with values, units, and source references.\n\n### Units policy\n\nPrefer a readable numeric core with unit comments over forcing Pint into every equation.\n\nExample core style:\n\n```python\ndef saturation_vapor_pressure(T):\n    \"\"\"Eq. (4). T [K] -> e_s [Pa].\"\"\"\n    # T [K]\n    # returns e_s [Pa]\n    ...\n```\n\nUse Pint for:\n\n- public API wrappers;\n- dimensional validation at boundaries;\n- tests;\n- examples/notebooks where helpful.\n\nUse Pint internally only when it does not obscure the equation. If Pint or NumPy makes units/equations harder to verify, avoid it for that part and comment why.\n\n### Implementation style\n\n- Use flat modules with functions and simple dataclasses.\n- Prefer pure functions for equations.\n- Provide one obvious high-level evaluation function plus lower-level equation functions.\n- Keep parameters explicit.\n- Implement equations in the same order/structure as the paper where possible.\n- Add comments such as `# Eq. (12)` at the corresponding code.\n- Use docstrings for each public function with:\n  - paper equation/section reference;\n  - expected canonical units;\n  - returned units;\n  - assumptions/limitations;\n  - provenance reference when useful.\n- Use lightweight type hints when they improve clarity.\n- Avoid protocols and elaborate generic abstractions unless absolutely necessary.\n\n### Tests\n\nUse `pytest` by default.\n\nRequired test categories:\n\n1. **Dimensional/unit tests**\n   - Pint wrappers accept expected units;\n   - incompatible units are rejected;\n   - canonical conversions are correct.\n2. **Equation smoke tests**\n   - simple hand-checkable values for individual equations/functions.\n3. **Reference/regression tests**\n   - use paper tables, figures, examples, or limiting cases when available.\n4. **Physical sanity tests**\n   - conservation, monotonicity, positivity, asymptotic behavior, etc., only when justified by the paper.\n\nIf the paper lacks reference outputs, say so explicitly and avoid pretending smoke/sanity tests validate the whole model.\n\n### Verification notebooks\n\nAlways create notebooks by default:\n\n- `notebooks/00_source_inspection.ipynb`\n- `notebooks/01_reproduce_key_figures.ipynb`\n\nThe source inspection notebook should summarize source files, extraction quality, and key provenance/confidence issues.\n\nThe figure reproduction notebook should:\n\n- list the paper's key figures/tables relevant to the model;\n- identify required inputs, data, parameters, and initial/boundary conditions;\n- import the implemented model;\n- attempt reproduction where feasible;\n- clearly state missing data or blocked steps;\n- include TODO cells for human verification work.\n\nIf no meaningful figures/tables exist, document what would constitute verification instead: limiting cases, example calculations, benchmark values, or conservation checks.\n\nSynthetic examples are allowed only when clearly labeled as non-validation.\n\n### Examples\n\nExamples may be scripts and/or notebooks. They should:\n\n- reproduce a paper scenario, table, figure, limiting case, or minimal run when possible;\n- map inputs/outputs to paper sections/tables/figures;\n- use `matplotlib` when plots help compare to the paper;\n- clearly label synthetic examples as non-validation.\n\n## Final Response Checklist\n\nWhen Phase 1 is complete, report:\n\n- project/workspace path;\n- path to `docs/SOURCE_QUALITY.md`;\n- path to `sources/extracted/provenance.yaml`;\n- path to `docs/MODEL_EXTRACTION.md`;\n- major ambiguities, low-confidence items, or required decisions;\n- whether implementation is currently blocked;\n- exact confirmation needed to proceed.\n\nWhen Phase 2 is complete, report:\n\n- implementation files changed/created;\n- tests added and commands run;\n- notebooks/examples added;\n- validation status against the paper;\n- figures/tables attempted or left as TODOs;\n- remaining assumptions, medium-confidence risks, or blocked verification items.\n</skill>\n\nPDF is in bergner-spichtinger-2026.pdf, HTML is in bergner-spichtinger-2026.html with ancillary files in bergner-spichtinger-2026_files - please create the Python project in this directory.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [
+        {
+          "kind": "path",
+          "replacement": "[REDACTED_LOCAL_PATH]",
+          "count": 2
+        }
+      ],
+      "truncated": false
+    },
+    {
+      "id": "entry-2",
+      "index": 1,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "6d95d6b1",
+      "parentId": "91857b9c",
+      "content": [
+        {
+          "type": "text",
+          "text": "Phase 1 is complete. I created the uv-managed Python extraction workspace in:\n\n`[REDACTED_LOCAL_PATH]`\n\nKey artifacts:\n\n- Source quality report: `docs/SOURCE_QUALITY.md`\n- Provenance manifest: `sources/extracted/provenance.yaml`\n- Extraction/specification document: `docs/MODEL_EXTRACTION.md`\n- Raw extraction outputs: `sources/extracted/raw/`\n- Placeholder notebooks:\n  - `notebooks/00_source_inspection.ipynb`\n  - `notebooks/01_reproduce_key_figures.ipynb`\n- Placeholder package files:\n  - `src/bergner_spichtinger_2026/core.py`\n  - `src/bergner_spichtinger_2026/constants.py`\n  - `src/bergner_spichtinger_2026/units.py`\n\nI also registered/copied the PDF, HTML, and ancillary files under `sources/original/`, extracted PDF text with `pdftotext`, inspected the HTML with a reproducible script, and added scripts for re-running extraction/manifest generation.\n\nImportant Phase 1 findings / ambiguities:\n\n- HTML has semantic math/MathJax and is the best primary source, but equations still need final visual checking before implementation.\n- Main RHS equations appear implementable, but several constants/functions are marked medium-confidence pending final visual verification, especially `K_T(T)` formatting and unit conventions.\n- Need decision on Phase 2 scope: just the ODE RHS, or also equilibria/Jacobian/bifurcation/figure reproduction.\n- Need confirmation whether to implement optional `s <= 1` evaporation and Eq. (16) regularization.\n- Figure reproduction is blocked until data/initial conditions/solver settings are curated; B2SHARE data are referenced but not downloaded.\n\nImplementation is intentionally not started.\n\nTo proceed, please confirm something like:\n\n> “Proceed to Phase 2. Implement the core ODE RHS first, using SI units and per-dry-air-mass `n`; include/exclude evaporation and regularization as follows: …”",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [
+        {
+          "kind": "path",
+          "replacement": "[REDACTED_LOCAL_PATH]",
+          "count": 1
+        }
+      ],
+      "truncated": false
+    },
+    {
+      "id": "entry-3",
+      "index": 2,
+      "role": "user",
+      "source": "pi",
+      "sourceId": "fe72d913",
+      "parentId": "6d95d6b1",
+      "content": [
+        {
+          "type": "text",
+          "text": "Going through the \"Ambiguities/required user decisions\" in MODEL_EXTRACTION.md:\n\n1. Just core ODE RHS and try to reproduce trajectories shown in Figure 4.\n2. Not sure about the interpretation of n: let's go with what's suggested in the MODEL_EXTRACTION.md.\n3. I don't think the regularization in Eq. (16) is needed: the paper talks about it as something that \"might be applied\", but then goes on (end of the same paragraph) to say that in their case they can assume that n and q are positive, which I think means that the regularization isn't required.\n4. The expression for K_T(T) (Eq. (A34)) is K_T(T) = (a_K * T ^ b_K) / (T + T_K * 10 ^ (c_K / T)).\n5. I only need you to replicate Figure 4 to begin with, so the B2SHARE data is not required.\n\nIs that sufficient information to continue?\n\nIf so, please proceed with phase 2.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    },
+    {
+      "id": "entry-4",
+      "index": 3,
+      "role": "assistant",
+      "source": "pi",
+      "sourceId": "54baf010",
+      "parentId": "1ef6c658",
+      "content": [
+        {
+          "type": "text",
+          "text": "Yes — that was sufficient, and Phase 2 is now implemented.\n\nCreated/updated:\n\n- `src/bergner_spichtinger_2026/constants.py`\n- `src/bergner_spichtinger_2026/core.py`\n- `src/bergner_spichtinger_2026/units.py`\n- `scripts/reproduce_figure4.py`\n- `notebooks/01_reproduce_key_figures.ipynb`\n- `tests/test_core.py`\n- `tests/test_units.py`\n- `docs/PHASE2_IMPLEMENTATION.md`\n\nGenerated:\n\n- `outputs/figure4_reproduction.png`\n\nValidation run:\n\n```bash\nuv run pytest -q\n# 5 passed\n```\n\nFigure 4 reproduction:\n\n```bash\nuv run python scripts/reproduce_figure4.py\n# wrote outputs/figure4_reproduction.png\n```\n\nNotes:\n\n- Implemented the unregularized core ODE RHS only; `n <= 0` or `q <= 0` raises `ValueError`.\n- Used `n` internally as per dry-air mass, as proposed.\n- Used your confirmed `K_T(T)` expression.\n- Did not use/download B2SHARE data.\n- Figure 4 reproduction is qualitative: the paper caption doesn’t give initial conditions, so the script uses `x_eq * 0.99`, matching the nearby paper text about a 1% perturbation from equilibrium.",
+          "format": "plain"
+        }
+      ],
+      "omissions": [],
+      "redactions": [],
+      "truncated": false
+    }
+  ],
+  "highlights": [],
+  "redactionSummary": [
+    {
+      "kind": "path",
+      "replacement": "[REDACTED_LOCAL_PATH]",
+      "count": 3
+    }
+  ],
+  "redaction": {
+    "status": "needs_review",
+    "reviewNotes": [
+      "Automated public-safety pass completed. Review generated transcript before publishing.",
+      "One or more sensitive-looking values were replaced with explicit redaction markers."
+    ]
+  }
+}

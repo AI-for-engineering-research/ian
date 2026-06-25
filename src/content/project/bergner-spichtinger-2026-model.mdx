@@ -1,0 +1,134 @@
+---
+title: "Bergner & Spichtinger 2026 model"
+summary: Bullet-point notes on extracting the Bergner & Spichtinger 2026 ice-cloud oscillator model and qualitatively reproducing Figure 4.
+order: 7
+draft: false
+---
+
+import { withBase } from '../../lib/sitePaths.ts';
+
+export const figure4Url = withBase('/data/bergner-spichtinger-2026-model/figure4-timeseries.json');
+export const font = 'STIX Two Text, Georgia, Times New Roman, serif';
+export const cfg = {
+  config: {
+    font,
+    axis: { labelFont: font, titleFont: font, labelFontSize: 16, titleFontSize: 18 },
+    legend: { labelFont: font, titleFont: font, labelFontSize: 16, titleFontSize: 18 },
+    header: { labelFont: font, titleFont: font, labelFontSize: 18, titleFontSize: 18 },
+  },
+};
+export const variableParam = {
+  name: 'variable',
+  value: 's',
+  bind: {
+    input: 'select',
+    name: 'Quantity ',
+    options: ['s', 'n', 'q'],
+    labels: ['saturation ratio s', 'number concentration n', 'mass concentration q'],
+  },
+};
+export const velocityParam = {
+  name: 'w_m_s',
+  value: 0.1,
+  bind: {
+    input: 'select',
+    name: 'Vertical velocity ',
+    options: [0.01, 0.1, 1.0],
+    labels: ['0.01 m s⁻¹', '0.1 m s⁻¹', '1.0 m s⁻¹'],
+  },
+};
+export const figure4Spec = {
+  $schema: 'https://vega.github.io/schema/vega-lite/v6.json',
+  ...cfg,
+  width: 'container',
+  height: 300,
+  data: { url: figure4Url },
+  params: [variableParam, velocityParam],
+  transform: [{ filter: 'datum.variable == variable' }, { filter: 'datum.w_m_s == w_m_s' }],
+  mark: { type: 'line', clip: true },
+  encoding: {
+    x: { field: 't_h', type: 'quantitative', title: 'Time (h)' },
+    y: { field: 'value', type: 'quantitative', title: null, scale: { zero: false } },
+    color: {
+      field: 'series',
+      type: 'nominal',
+      title: 'series',
+      scale: { domain: ['trajectory', 'equilibrium'], range: ['#b2182b', '#222222'] },
+    },
+    strokeDash: {
+      field: 'series',
+      type: 'nominal',
+      legend: null,
+      scale: { domain: ['trajectory', 'equilibrium'], range: [[], [5, 4]] },
+    },
+    tooltip: [
+      { field: 'case', type: 'nominal' },
+      { field: 'w_m_s', type: 'quantitative', title: 'w', format: '.2g' },
+      { field: 'variable_label', type: 'nominal', title: 'quantity' },
+      { field: 'series', type: 'nominal' },
+      { field: 't_h', type: 'quantitative', title: 'Time (h)', format: '.2f' },
+      { field: 'value', type: 'quantitative', format: '.5g' },
+    ],
+  },
+};
+
+<Callout type="info" title="AI usage">
+This article was drafted by GPT 5.5 as bullet-point notes for later editing.
+</Callout>
+
+- Paper:
+  - Hannah Bergner and Peter Spichtinger, **“Ice clouds as nonlinear oscillators”**, 2026.
+  - Model target here: the low-dimensional ice-cloud microphysics/dynamics system, not the observational data archive.
+  - Local working repository: `bergner-2026`.
+
+- Starting point:
+  - Extract the mathematical model from the saved publisher HTML/PDF.
+  - Implement the core ODE right-hand side first.
+  - Use Figure 4 as the initial qualitative reproduction target.
+
+- Model state:
+  - `n`: ice-particle number concentration.
+  - `q`: ice mass concentration.
+  - `s`: saturation ratio.
+
+- Environmental/control parameters used for the Figure 4 reproduction:
+  - `T = 225 K`.
+  - `p = 300 hPa`.
+  - `F = 1`.
+  - `w ∈ {0.01, 0.1, 1.0} m s⁻¹`.
+
+- Implementation notes:
+  - Reusable Python package code lives in `src/bergner_spichtinger_2026/`.
+  - Episode-specific orchestration lives under `episodes/001-figure4-time-series/`.
+  - Source provenance lives under `sources/`.
+  - Cross-episode notes live under `docs/`.
+
+- Important interpretation choices:
+  - Treat Figure 4 as a qualitative reproduction target.
+  - Do not treat the generated trajectories as digitized point-by-point validation.
+  - Use the paper’s nearby-equilibrium perturbation idea for initial conditions: start at `0.99 × x_eq`.
+  - Do not enable the optional Eq. 16 regularization; assume positive `n` and `q`.
+
+<VegaLite spec={figure4Spec} caption="Qualitative Figure 4-style trajectories generated from the website data exported from the episode code. The selectors switch quantity and vertical velocity." />
+
+- What the plot is meant to show:
+  - Three vertical-velocity regimes.
+  - Nearby-equilibrium trajectories for the extracted model equations.
+  - Equilibrium reference lines for each case.
+  - Qualitative behavior rather than exact paper-curve digitization.
+
+- What counts as success for this first episode:
+  - The model equations can be run reproducibly.
+  - The Figure 4-style scenarios produce interpretable trajectories.
+  - The repository now has enough structure for later continuation episodes.
+
+- Caveats to preserve:
+  - Figure 4 caption details are incomplete for a strict numerical replay.
+  - Constants and formula transcriptions were checked against extracted source text, but this is still an extraction workflow.
+  - This is the first foothold, not the final validation of the paper.
+
+- Useful pointers:
+  - Episode README: `episodes/001-figure4-time-series/README.md`.
+  - Reproduction script: `episodes/001-figure4-time-series/scripts/reproduce_figure4.py`.
+  - Model extraction notes: `docs/MODEL_EXTRACTION.md`.
+  - Source quality notes: `docs/SOURCE_QUALITY.md`.

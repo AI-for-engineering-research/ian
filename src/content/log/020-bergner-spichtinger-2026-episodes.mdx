@@ -1,0 +1,131 @@
+---
+title: "Bergner & Spichtinger 2026 setup work"
+date: 2026-06-25
+summary: Early B&S2026 work extracted the model, reproduced starter figures, and set up Python/AUTO/LOCA continuation on a deliberately easy branch problem.
+tags:
+  - agent-logs
+agents:
+  - Pi
+draft: false
+---
+
+<Callout type="info" title="AI usage">
+This article was written by GPT 5.5 with minimal human input.
+</Callout>
+
+- Project articles:
+  - [Bergner & Spichtinger 2026 model](../../project/bergner-spichtinger-2026-model/)
+  - [Continuation setup for B&S2026 model](../../project/bs2026-continuation-setup/)
+
+- Main transcript links:
+  - [model extraction and Figure 4 setup](../../sessions/bs2026-figure4-model-extraction/)
+  - [Python continuation planning](../../sessions/bs2026-python-continuation-planning/)
+  - [AUTO continuation planning](../../sessions/bs2026-auto-continuation-planning/)
+  - [LOCA continuation planning](../../sessions/bs2026-loca-continuation-planning/)
+
+## Episode 1: getting the model to run
+
+- Starting point:
+  - use the `extract-model` workflow on Bergner & Spichtinger 2026;
+  - extract the core ODE system;
+  - keep the target small enough to verify;
+  - aim first at Figure 4-style time series.
+
+- Useful transcript:
+  - [model extraction and Figure 4 setup](../../sessions/bs2026-figure4-model-extraction/)
+
+- Process notes:
+  - The user made the key scope decisions early:
+    - implement the core ODE RHS;
+    - reproduce Figure 4 trajectories first;
+    - use the proposed interpretation of `n`;
+    - skip optional Eq. 16 regularization for now.
+  - The agent produced a reusable package structure rather than a one-off notebook only.
+  - The Figure 4 reproduction is explicitly qualitative.
+
+- Research state after Episode 1:
+  - model code exists;
+  - source provenance exists;
+  - Figure 4-style trajectories can be generated;
+  - the project has enough structure for continuation work.
+
+## Episode 2: Python continuation as the transparent reference
+
+- Planning transcript:
+  - [Python continuation planning](../../sessions/bs2026-python-continuation-planning/)
+
+- Main idea:
+  - reproduce the paper’s Figure 1 equilibrium curves;
+  - use Python first because it is easiest to inspect;
+  - treat Python as the semantic reference for later backends.
+
+- Important design choices:
+  - continue in `log(w)`;
+  - solve in transformed positive coordinates for `n` and `q`;
+  - write branch outputs as CSV/JSON artifacts;
+  - compare against Eq. 92–94 and digitized Figure 1 curves.
+
+- Useful outcome:
+  - Figure 1 reproduction works well enough to become the reference case.
+  - The missing `N_a` caption detail becomes visible through the saturation-ratio panel.
+  - The high-aerosol value is documented rather than silently baked in.
+
+## Episode 3: AUTO as an independent backend
+
+- Planning transcript:
+  - [AUTO continuation planning](../../sessions/bs2026-auto-continuation-planning/)
+
+- Main idea:
+  - duplicate the same Figure 1 branches with AUTO-07p;
+  - do not move immediately to a harder bifurcation hunt;
+  - first make AUTO agree with the known Python reference.
+
+- Why this matters:
+  - AUTO introduces a different language/runtime/output ecosystem.
+  - Agreement on the easy branch problem tests the mapping between model semantics and backend machinery.
+  - Failure here would be a plumbing problem, not a scientific discovery.
+
+- Resulting research state:
+  - AUTO branch outputs are normalized into the same backend-neutral schema.
+  - AUTO agrees closely with Python for the Figure 1 branches.
+  - The comparison code becomes reusable for later backends.
+
+## Episode 4: LOCA/Trilinos as the third path
+
+- Planning transcript:
+  - [LOCA continuation planning](../../sessions/bs2026-loca-continuation-planning/)
+
+- Main idea:
+  - set up LOCA on the same training-wheels problem;
+  - test C++/Trilinos infrastructure before asking harder questions;
+  - keep Python as the semantic reference and AUTO as an independent check.
+
+- Why this is intentionally conservative:
+  - LOCA setup has more moving parts than the Python reference;
+  - the first task should validate residuals, Jacobians, outputs, and comparison conventions;
+  - the same easy Figure 1 branch family is the right calibration problem.
+
+- Resulting research state:
+  - LOCA branches match Python and AUTO at continuation-tolerance scale.
+  - The project now has a three-backend comparison path.
+  - Later continuation work can start from a tested output contract rather than ad hoc plots.
+
+## What the agent was useful for
+
+- Keeping bookkeeping straight:
+  - episode directories;
+  - source provenance;
+  - backend-specific run files;
+  - normalized branch schemas;
+  - comparison artifacts;
+  - task-level documentation.
+
+- Maintaining discipline:
+  - start with a simple reproduction target;
+  - document assumptions as they are discovered;
+  - avoid interpreting backend failures as physics;
+  - make every plot traceable to generated data.
+
+- Most important pattern:
+  - use the agent to turn vague modelling questions into reproducible artifacts;
+  - then use those artifacts to decide what the next scientific question should be.

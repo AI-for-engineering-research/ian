@@ -1,0 +1,188 @@
+---
+title: "Continuation setup for B&S2026 model"
+summary: Bullet-point notes on duplicating the Bergner & Spichtinger 2026 Figure 1 equilibrium branches with Python, AUTO, and LOCA.
+order: 8
+draft: false
+---
+
+import { withBase } from '../../lib/sitePaths.ts';
+
+export const branchUrl = withBase('/data/bs2026-continuation-setup/figure1-branches.json');
+export const comparisonUrl = withBase('/data/bs2026-continuation-setup/backend-comparison-summary.json');
+export const font = 'STIX Two Text, Georgia, Times New Roman, serif';
+export const cfg = {
+  config: {
+    font,
+    axis: { labelFont: font, titleFont: font, labelFontSize: 16, titleFontSize: 18 },
+    legend: { labelFont: font, titleFont: font, labelFontSize: 16, titleFontSize: 18 },
+    header: { labelFont: font, titleFont: font, labelFontSize: 18, titleFontSize: 18 },
+  },
+};
+export const variableParam = {
+  name: 'variable',
+  value: 's',
+  bind: {
+    input: 'select',
+    name: 'Quantity ',
+    options: ['s', 'n', 'q'],
+    labels: ['saturation ratio s', 'number concentration n', 'mass concentration q'],
+  },
+};
+export const backendSelection = {
+  name: 'backendSelection',
+  select: { type: 'point', fields: ['backend'], toggle: true },
+  bind: 'legend',
+};
+export const branchSpec = {
+  $schema: 'https://vega.github.io/schema/vega-lite/v6.json',
+  ...cfg,
+  width: 'container',
+  height: 360,
+  padding: { left: 90, right: 20, top: 10, bottom: 40 },
+  autosize: { type: 'fit', contains: 'padding' },
+  data: { url: branchUrl },
+  params: [variableParam, backendSelection],
+  transform: [{ filter: 'datum.variable == variable' }],
+  mark: { type: 'line', clip: true },
+  encoding: {
+    x: {
+      field: 'w_m_s',
+      type: 'quantitative',
+      scale: { type: 'log', domain: [0.005, 2.0] },
+      title: 'Vertical velocity w (m s⁻¹)',
+    },
+    y: {
+      field: 'value',
+      type: 'quantitative',
+      scale: {
+        type: 'log',
+        zero: false,
+        domainMin: { expr: "variable == 's' ? 1.4 : null" },
+        domainMax: { expr: "variable == 's' ? 1.6 : null" },
+      },
+      title: null,
+    },
+    color: {
+      field: 'temperature_label',
+      type: 'nominal',
+      title: 'Temperature',
+      scale: { domain: ['190 K', '210 K', '230 K'], range: ['#2166ac', '#666666', '#b2182b'] },
+    },
+    strokeDash: { field: 'backend', type: 'nominal', title: 'Backend' },
+    opacity: { condition: { param: 'backendSelection', value: 1 }, value: 0.08 },
+    tooltip: [
+      { field: 'backend', type: 'nominal', title: 'Backend' },
+      { field: 'temperature_label', type: 'nominal', title: 'Temperature' },
+      { field: 'variable_label', type: 'nominal', title: 'quantity' },
+      { field: 'w_m_s', type: 'quantitative', title: 'w', format: '.4f' },
+      { field: 'value', type: 'quantitative', format: '.5g' },
+    ],
+  },
+};
+export const residualSpec = {
+  $schema: 'https://vega.github.io/schema/vega-lite/v6.json',
+  ...cfg,
+  width: 260,
+  height: 260,
+  data: { url: comparisonUrl },
+  mark: { type: 'circle', filled: true, size: 120 },
+  encoding: {
+    x: { field: 'variable', type: 'nominal', title: 'Quantity', axis: { labelAngle: 0 } },
+    y: {
+      field: 'max_rel_diff',
+      type: 'quantitative',
+      scale: { type: 'log', domain: [1e-10, 1e-5] },
+      title: 'Max relative difference',
+    },
+    color: {
+      field: 'temperature_label',
+      type: 'nominal',
+      title: 'Temperature',
+      scale: { domain: ['190 K', '210 K', '230 K'], range: ['#2166ac', '#666666', '#b2182b'] },
+    },
+    column: { field: 'comparison', type: 'nominal', title: null },
+    tooltip: [
+      { field: 'comparison', type: 'nominal' },
+      { field: 'temperature_label', type: 'nominal', title: 'Temperature' },
+      { field: 'variable', type: 'nominal' },
+      { field: 'max_rel_diff', type: 'quantitative', format: '.3e' },
+      { field: 'sample_count', type: 'quantitative' },
+    ],
+  },
+};
+
+<Callout type="info" title="AI usage">
+This article was drafted by GPT 5.5 as bullet-point notes for later editing.
+</Callout>
+
+- Goal of episodes 2–4:
+  - Reproduce the Figure 1 equilibrium branch family.
+  - Do it three ways: Python, AUTO-07p, and LOCA/Trilinos.
+  - Start with an intentionally simple continuation problem.
+  - Use the same problem as “training wheels” for backend setup.
+
+- Why this is deliberately modest:
+  - The first continuation target is not a dramatic bifurcation claim.
+  - It is a branch-duplication and semantics-alignment exercise.
+  - The question is: can three different systems reproduce the same equilibria?
+  - Only after that should harder continuation tasks be trusted.
+
+- Shared Figure 1 target:
+  - `p = 300 hPa`.
+  - `F = 1`.
+  - `T ∈ {190, 210, 230} K`.
+  - `w ∈ [0.005, 2.0] m s⁻¹`.
+  - continuation coordinate: `log(w)`.
+  - physical outputs: `n`, `q`, `s`.
+
+- Important paper-detail trap:
+  - Figure 1 does not state the aerosol number concentration in the caption.
+  - The reproduction uses `N_a = 1.0e10 m⁻³`.
+  - That value matches the Appendix A2 high-aerosol reference case.
+  - The saturation-ratio panel is the clue that this value is needed.
+
+<VegaLite spec={branchSpec} caption="Figure 1 branch duplication across Python, AUTO, and LOCA. The selector switches between s, n, and q; click Backend legend entries to enable or disable backends." />
+
+- Python continuation:
+  - Role: semantic reference implementation.
+  - Advantage: transparent residuals, direct inspection, easy tests.
+  - Output: branch CSVs, independent root-solve checks, Eq. 92–94 comparisons.
+  - Use case: make the problem legible before introducing external continuation machinery.
+
+- AUTO continuation:
+  - Role: independent continuation backend.
+  - Advantage: mature continuation machinery and familiar bifurcation-workflow conventions.
+  - Cost: Fortran/run-file machinery and backend-specific output normalization.
+  - Result here: close agreement with Python on the Figure 1 branches.
+
+- LOCA/Trilinos continuation:
+  - Role: third backend and infrastructure rehearsal.
+  - Advantage: path toward larger Trilinos-based continuation experiments.
+  - Cost: C++/CMake/toolchain setup and stricter interface discipline.
+  - Result here: close agreement with Python and AUTO on the same branch family.
+
+<VegaLite spec={residualSpec} caption="Backend agreement check using LOCA as the target branch and interpolating Python/AUTO references onto the LOCA grid." />
+
+- Interpretation of the backend agreement plot:
+  - These are solver-to-solver differences, not paper-digitization errors.
+  - LOCA-vs-AUTO maximum relative differences are below about `8e-6` across `n`, `q`, and `s`.
+  - LOCA-vs-Python differences are at the same numerical-continuation scale.
+  - Digitized-paper comparisons are looser because pixel extraction is a different source of uncertainty.
+
+- What this setup buys us:
+  - A backend-neutral branch schema.
+  - A common comparison pipeline.
+  - Tests for residuals, Jacobians, branch fields, and output invariants.
+  - A way to distinguish scientific disagreement from backend plumbing mistakes.
+
+- What it does **not** prove yet:
+  - It does not establish that one backend is best.
+  - It does not reproduce every result in the paper.
+  - It does not yet address harder bifurcation or periodic-orbit claims.
+  - It only says the three tools agree on this training-wheels equilibrium task.
+
+- Episode pointers:
+  - Python continuation: `episodes/002-figure1-python-continuation/`.
+  - AUTO continuation: `episodes/003-figure1-auto-continuation/`.
+  - LOCA continuation: `episodes/004-figure1-loca-continuation/`.
+  - Shared comparison utilities: `src/bergner_spichtinger_2026/figure1_backend_comparison.py`.
