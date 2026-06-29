@@ -13,119 +13,83 @@ draft: false
 This article was written by GPT 5.5 with minimal human input.
 </Callout>
 
-- Project articles:
+This was divided into 4 "episodes" in the [B&S 2026
+repository](https://github.com/ian-ross/bergner-2026/tree/main), written up in
+two project articles:
   - [Bergner & Spichtinger 2026 model](../../project/bergner-spichtinger-2026-model/)
   - [Continuation setup for B&S2026 model](../../project/bs2026-continuation-setup/)
 
-- Main transcript links:
-  - [model extraction and Figure 4 setup](../../sessions/bs2026-figure4-model-extraction/)
-  - [Python continuation planning](../../sessions/bs2026-python-continuation-planning/)
-  - [AUTO continuation planning](../../sessions/bs2026-auto-continuation-planning/)
-  - [LOCA continuation planning](../../sessions/bs2026-loca-continuation-planning/)
 
 ## Episode 1: getting the model to run
 
-- Starting point:
-  - use the `extract-model` workflow on Bergner & Spichtinger 2026;
-  - extract the core ODE system;
-  - keep the target small enough to verify;
-  - aim first at Figure 4-style time series.
+- Useful transcript: [model extraction and Figure 4 setup](../../sessions/bs2026-figure4-model-extraction/).
+- Used the `extract-model` workflow on the Bergner & Spichtinger 2026 paper
+  to extract the 3-variable ODE system.
+- That went smoothly, with only a little guidance needed from me.
+- Replicated Figure 4 from the paper as a first basic check.
+- The session was made very short and simple by spending some time refining
+  the `extract-model` skill. This makes some opinionated choices about code
+  layout and dependencies that mean that the agent doesn't need to ask too
+  many questions to produce a good result.
 
-- Useful transcript:
-  - [model extraction and Figure 4 setup](../../sessions/bs2026-figure4-model-extraction/)
+## Episode 2: Python continuation
 
-- Process notes:
-  - The user made the key scope decisions early:
-    - implement the core ODE RHS;
-    - reproduce Figure 4 trajectories first;
-    - use the proposed interpretation of `n`;
-    - skip optional Eq. 16 regularization for now.
-  - The agent produced a reusable package structure rather than a one-off notebook only.
-  - The Figure 4 reproduction is explicitly qualitative.
-
-- Research state after Episode 1:
-  - model code exists;
-  - source provenance exists;
-  - Figure 4-style trajectories can be generated;
-  - the project has enough structure for continuation work.
-
-## Episode 2: Python continuation as the transparent reference
-
-- Planning transcript:
-  - [Python continuation planning](../../sessions/bs2026-python-continuation-planning/)
-
-- Main idea:
-  - reproduce the paper’s Figure 1 equilibrium curves;
-  - use Python first because it is easiest to inspect;
-  - treat Python as the semantic reference for later backends.
-
-- Important design choices:
-  - continue in `log(w)`;
-  - solve in transformed positive coordinates for `n` and `q`;
-  - write branch outputs as CSV/JSON artifacts;
-  - compare against Eq. 92–94 and digitized Figure 1 curves.
-
-- Useful outcome:
-  - Figure 1 reproduction works well enough to become the reference case.
-  - The missing `N_a` caption detail becomes visible through the saturation-ratio panel.
-  - The high-aerosol value is documented rather than silently baked in.
+- Planning transcript: [Python continuation planning](../../sessions/bs2026-python-continuation-planning/).
+- The main task here was to reproduce Figure 1 from the paper, which shows
+  some equilibrium curves for solutions to the ODE system.
+- I wanted to use Python first for this because it's easier to inspect the
+  code. I was planning to use the Python implementation as a reference for the
+  other implementations.
+- I had a surprisingly short grilling session about this, that mostly
+  consisted of me saying "Yes" to the agent's choices. Things it did well were
+  choosing log scales for some parameters ($n$, $q$ and the continuation
+  parameter, which is the _log_ of the updraft velocity), and picking out the
+  analytical/fitted equations from the paper to compare results against (that
+  was without any prompting from me).
 
 ## Episode 3: AUTO as an independent backend
 
-- Planning transcript:
-  - [AUTO continuation planning](../../sessions/bs2026-auto-continuation-planning/)
-
-- Main idea:
-  - duplicate the same Figure 1 branches with AUTO-07p;
-  - do not move immediately to a harder bifurcation hunt;
-  - first make AUTO agree with the known Python reference.
-
-- Why this matters:
-  - AUTO introduces a different language/runtime/output ecosystem.
-  - Agreement on the easy branch problem tests the mapping between model semantics and backend machinery.
-  - Failure here would be a plumbing problem, not a scientific discovery.
-
-- Resulting research state:
-  - AUTO branch outputs are normalized into the same backend-neutral schema.
-  - AUTO agrees closely with Python for the Figure 1 branches.
-  - The comparison code becomes reusable for later backends.
+- Planning transcript: [AUTO continuation planning](../../sessions/bs2026-auto-continuation-planning/)
+- The idea here was to do more or less the same thing as in episode 2, but
+  using AUTO. Because this is a simple problem, it gives us the opportunity to
+  make sure that the AUTO (Fortran) implementation of the model is correct,
+  and to get the AUTO setup working.
+- All the results agree, so I'm pretty confident that the AUTO model setup is
+  OK.
 
 ## Episode 4: LOCA/Trilinos as the third path
 
-- Planning transcript:
-  - [LOCA continuation planning](../../sessions/bs2026-loca-continuation-planning/)
+- Planning transcript: [LOCA continuation planning](../../sessions/bs2026-loca-continuation-planning/)
 
-- Main idea:
-  - set up LOCA on the same training-wheels problem;
-  - test C++/Trilinos infrastructure before asking harder questions;
-  - keep Python as the semantic reference and AUTO as an independent check.
+- And, finally, LOCA. This is fairly complicated to set up, and I've never got
+  all that far into using it.
+- However, the agent easily produced a C++ version of the model in the format
+  needed, did the continuation and replicated the results.
 
-- Why this is intentionally conservative:
-  - LOCA setup has more moving parts than the Python reference;
-  - the first task should validate residuals, Jacobians, outputs, and comparison conventions;
-  - the same easy Figure 1 branch family is the right calibration problem.
+## What the agent was useful for here
 
-- Resulting research state:
-  - LOCA branches match Python and AUTO at continuation-tolerance scale.
-  - The project now has a three-backend comparison path.
-  - Later continuation work can start from a tested output contract rather than ad hoc plots.
+One thing the agents are very good at is following a pattern, like the
+"episode" setup I'm using here. This is the kind of thing that seems very
+useful and a great idea when you first think of it when you're doing it
+yourself, but that's very hard to stick to. If you do it by hand, keeping
+everything in sync gets difficult quickly and you eventually just let it slide
+and end up with something that kind of follows the pattern you wanted, but not
+very accurately. The agents don't care if they have to make updates to half a
+dozen files to keep things organized, and they can easily gather materials for
+write-ups from all the different places it ends up.
 
-## What the agent was useful for
+In a similar vein, the agents can maintain discipline, writing documentation
+as they go (how often do you do that yourself? I know that I don't!), keeping
+track of the provenance of plots (no more undocumented notebooks floating
+around containing the essential figures for your project).
 
-- Keeping bookkeeping straight:
-  - episode directories;
-  - source provenance;
-  - backend-specific run files;
-  - normalized branch schemas;
-  - comparison artifacts;
-  - task-level documentation.
+Most importantly though, the agent can just plough very quickly through the
+boring stuff. Struggling to set the problem up in LOCA is not scientifically
+interesting, so it's nice to jump straight to the punchline, where you can
+*see* how it's done.
 
-- Maintaining discipline:
-  - start with a simple reproduction target;
-  - document assumptions as they are discovered;
-  - avoid interpreting backend failures as physics;
-  - make every plot traceable to generated data.
+And finally, doing the same thing three different ways in parallel and
+cross-checking them helps to keep the agent honest and to avoid a whole class
+of problems that could occur if you pushed this sort of thing forward using
+just one set of tools.
 
-- Most important pattern:
-  - use the agent to turn vague modelling questions into reproducible artifacts;
-  - then use those artifacts to decide what the next scientific question should be.

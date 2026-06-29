@@ -2,6 +2,7 @@
 // Do not edit directly.
 
 export const citations = {
+  "bergner-spichtinger-2026": { authorLabel: "Bergner and Spichtinger", year: "2026", fullHtml: "Bergner, Hannah, and Peter Spichtinger. 2026. <span>“Ice Clouds as Nonlinear Oscillators.”</span> <em>Chaos: An Interdisciplinary Journal of Nonlinear Science</em> 36 (4): 043115. <a href=\"https://doi.org/10.1063/5.0297531\">https://doi.org/10.1063/5.0297531</a>." },
   "berton-2023": { authorLabel: "Berton", year: "2023", fullHtml: "Berton, Roland P. H. 2023. <span>“Two-Dimensional Dynamics of Ice Crystal Parcels in a Cirrus Uncinus.”</span> <em>Tellus B: Chemical and Physical Meteorology</em>, ahead of print, July. <a href=\"https://doi.org/10.16993/tellusa.3227\">https://doi.org/10.16993/tellusa.3227</a>." },
   "kaercher-corcos-2025": { authorLabel: "Kärcher and Corcos", year: "2025", fullHtml: "Kärcher, Bernd, and Milena Corcos. 2025. <span>“On the Lifetimes of Persistent Contrails and Contrail Cirrus.”</span> <em>Journal of Geophysical Research: Atmospheres</em> 130 (20): e2025JD044488. <a href=\"https://doi.org/10.1029/2025JD044488\">https://doi.org/10.1029/2025JD044488</a>." },
 } as const;

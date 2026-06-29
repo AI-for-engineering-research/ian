@@ -76,59 +76,54 @@ export const figure4Spec = {
 This article was drafted by GPT 5.5 as bullet-point notes for later editing.
 </Callout>
 
-- Paper:
-  - Hannah Bergner and Peter Spichtinger, **“Ice clouds as nonlinear oscillators”**, 2026.
-  - Model target here: the low-dimensional ice-cloud microphysics/dynamics system, not the observational data archive.
-  - Local working repository: `bergner-2026`.
+After mixed success with the Berton 2023 model, I looked around for a
+different low-dimensional cloud model to play with, and found
+<Cite>bergner-spichtinger-2026</Cite>. This paper introduces a different cloud
+model and then does a range of dynamical systems investigations on it. This
+seemed like a good vehicle to explore some of the numerical continuation tools
+I've been looking at. I'm going to start off by replicating the results in the
+paper using custom Python continuation code (as was used for the Berton 2023
+model earlier), AUTO (which didn't work so well for Berton 2023) and the
+[Trilinos LOCA
+package](https://github.com/trilinos/Trilinos/tree/master/packages/nox#readme).
+LOCA is a C++ package intended for performing this kind of analysis on very
+large systems, and I've never had the patience to get it set up, because it's
+quite complicated. Getting the agent to show me how to use it on a real but
+small problem seems like a good way to go.
 
-- Starting point:
-  - Extract the mathematical model from the saved publisher HTML/PDF.
-  - Implement the core ODE right-hand side first.
-  - Use Figure 4 as the initial qualitative reproduction target.
+The first thing I did was to refine the `extract-model` model skill I
+developed for the Berton 2023 model a little, and to use that to produce a
+Python implementation of the core model in the Bergner & Spichtinger paper.
+This is a 2-moment model for the ice-particle number concentration $n$ and the
+ice mass concentration $q$, with an additional equation for the saturation
+ratio $s$. The model extraction worked very well here. There were a couple of
+ambiguous interpretations of things in the paper, where the authors said
+something like "one could do ..." and the agent wasn't sure whether or not it
+should do the thing, and there was one expression it couldn't OCR with high
+confidence, but apart from that, everything went smoothly.
 
-- Model state:
-  - `n`: ice-particle number concentration.
-  - `q`: ice mass concentration.
-  - `s`: saturation ratio.
+I've set things up in a [new
+repository](https://github.com/ian-ross/bergner-2026) following the same
+"episode"-based approach that I used for the Berton 2023 analysis, because
+that seems to work quite well for this kind of semi-structured research
+activity.
 
-- Environmental/control parameters used for the Figure 4 reproduction:
-  - `T = 225 K`.
-  - `p = 300 hPa`.
-  - `F = 1`.
-  - `w ∈ {0.01, 0.1, 1.0} m s⁻¹`.
+I validated the model implementation by getting the agent to reproduce [Figure
+4 from the
+paper](https://pubs.aip.org/view-large/figure/93440660/043115_1_5.0297531.figures.online.f4.jpg),
+which has time series of some model trajectories for selected environmental
+conditions, spanning a range of updraft velocities where the model displays
+different behaviors: for sufficiently weak and sufficiently strong updrafts,
+the model has a stable equilibrium, while for intermediate updraft strengths,
+there is what appears to be a stable limit cycle.
 
-- Implementation notes:
-  - Reusable Python package code lives in `src/bergner_spichtinger_2026/`.
-  - Episode-specific orchestration lives under `episodes/001-figure4-time-series/`.
-  - Source provenance lives under `sources/`.
-  - Cross-episode notes live under `docs/`.
+<VegaLite spec={figure4Spec} caption="Qualitative Figure 4-style trajectories
+generated from the website data exported from the episode code. The selectors
+switch quantity and vertical velocity. (Environmental/control parameters: $T =
+225 \,\mathrm{K}$, $p = 300 \,\mathrm{hPa}$, $F = 1$, $w \in \{0.01, 0.1,
+1.0\} \,\mathrm{m\ s^{-1}}$.)" />
 
-- Important interpretation choices:
-  - Treat Figure 4 as a qualitative reproduction target.
-  - Do not treat the generated trajectories as digitized point-by-point validation.
-  - Use the paper’s nearby-equilibrium perturbation idea for initial conditions: start at `0.99 × x_eq`.
-  - Do not enable the optional Eq. 16 regularization; assume positive `n` and `q`.
-
-<VegaLite spec={figure4Spec} caption="Qualitative Figure 4-style trajectories generated from the website data exported from the episode code. The selectors switch quantity and vertical velocity." />
-
-- What the plot is meant to show:
-  - Three vertical-velocity regimes.
-  - Nearby-equilibrium trajectories for the extracted model equations.
-  - Equilibrium reference lines for each case.
-  - Qualitative behavior rather than exact paper-curve digitization.
-
-- What counts as success for this first episode:
-  - The model equations can be run reproducibly.
-  - The Figure 4-style scenarios produce interpretable trajectories.
-  - The repository now has enough structure for later continuation episodes.
-
-- Caveats to preserve:
-  - Figure 4 caption details are incomplete for a strict numerical replay.
-  - Constants and formula transcriptions were checked against extracted source text, but this is still an extraction workflow.
-  - This is the first foothold, not the final validation of the paper.
-
-- Useful pointers:
-  - Episode README: `episodes/001-figure4-time-series/README.md`.
-  - Reproduction script: `episodes/001-figure4-time-series/scripts/reproduce_figure4.py`.
-  - Model extraction notes: `docs/MODEL_EXTRACTION.md`.
-  - Source quality notes: `docs/SOURCE_QUALITY.md`.
+This isn't any kind of strict validation of the implementation, just some
+indication that the Python code produced by the agent is a fairly good match
+to the model in the paper. We'll be validating aspects of the implementation
+more strictly as we go on.

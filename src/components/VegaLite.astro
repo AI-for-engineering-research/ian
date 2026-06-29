@@ -1,4 +1,6 @@
 ---
+import { renderCaptionMath } from '../lib/renderCaptionMath';
+
 export interface Props {
   spec: Record<string, unknown>;
   caption?: string;
@@ -8,11 +10,12 @@ export interface Props {
 const { spec, caption, layout = 'inline' } = Astro.props;
 const id = `vega-lite-${Math.random().toString(36).slice(2)}`;
 const className = `vega-lite-figure vega-lite-figure--${layout}`;
+const captionHtml = caption ? renderCaptionMath(caption) : undefined;
 ---
 
 <figure class={className}>
   <div id={id} class="vega-lite-chart" data-spec={JSON.stringify(spec)}></div>
-  {caption && <figcaption>{caption}</figcaption>}
+  {captionHtml && <figcaption set:html={captionHtml} />}
 </figure>
 
 <script>

@@ -115,74 +115,59 @@ export const residualSpec = {
 This article was drafted by GPT 5.5 as bullet-point notes for later editing.
 </Callout>
 
-- Goal of episodes 2–4:
-  - Reproduce the Figure 1 equilibrium branch family.
-  - Do it three ways: Python, AUTO-07p, and LOCA/Trilinos.
-  - Start with an intentionally simple continuation problem.
-  - Use the same problem as “training wheels” for backend setup.
+This article covers episodes 2-4 in the
+[repository](https://github.com/ian-ross/bergner-2026/tree/main/episodes). The
+goal here was to reproduce [Figure 1 from the
+paper](https://pubs.aip.org/view-large/figure/93440639/043115_1_5.0297531.figures.online.f1.jpg),
+which is the first real numerical continuation result. It shows equilibrium
+solutions across a range of model parameter choices. It's a simple
+continuation problem to start with, simple enough that the agent asked me a
+couple of times "are you sure you want to do this?", but it's a good test for
+what I want to do.
 
-- Why this is deliberately modest:
-  - The first continuation target is not a dramatic bifurcation claim.
-  - It is a branch-duplication and semantics-alignment exercise.
-  - The question is: can three different systems reproduce the same equilibria?
-  - Only after that should harder continuation tasks be trusted.
+What I'm doing here is using this simple problem as "training wheels" to get
+the three continuation tools I want to use working, which are custom Python
+continuation code, AUTO (which means reimplementing the model in Fortran) and
+LOCA (which means reimplementing the model in C++). There is a lot of
+machinery associated with using AUTO and LOCA, so having a simple problem to
+start with helps to get that all set up.
 
-- Shared Figure 1 target:
-  - `p = 300 hPa`.
-  - `F = 1`.
-  - `T ∈ {190, 210, 230} K`.
-  - `w ∈ [0.005, 2.0] m s⁻¹`.
-  - continuation coordinate: `log(w)`.
-  - physical outputs: `n`, `q`, `s`.
+The figure we're reproducing shows equilibrium solutions for $n$, $q$ and $s$
+under three temperature conditions for three different updraft velocity
+values. The traces for the Python, AUTO and LOCA calculations are essentially
+indistinguishable and match the calculations in the paper (validated by
+digitizing the curves in the paper figure).
 
-- Important paper-detail trap:
-  - Figure 1 does not state the aerosol number concentration in the caption.
-  - The reproduction uses `N_a = 1.0e10 m⁻³`.
-  - That value matches the Appendix A2 high-aerosol reference case.
-  - The saturation-ratio panel is the clue that this value is needed.
+<VegaLite spec={branchSpec} caption="Figure 1 branch duplication across Python, AUTO, and LOCA. The selector switches between $s$, $n$, and $q$; click Backend legend entries to enable or disable backends." />
 
-<VegaLite spec={branchSpec} caption="Figure 1 branch duplication across Python, AUTO, and LOCA. The selector switches between s, n, and q; click Backend legend entries to enable or disable backends." />
+The three continuation methods have different emphases here:
 
-- Python continuation:
-  - Role: semantic reference implementation.
-  - Advantage: transparent residuals, direct inspection, easy tests.
-  - Output: branch CSVs, independent root-solve checks, Eq. 92–94 comparisons.
-  - Use case: make the problem legible before introducing external continuation machinery.
+- **Python continuation**: This is intended as a sort of reference
+  implementation, because it's the most transparent (at least for simple
+  cases) and easy to inspect. At least to begin with, I'm mostly going to get
+  the agent to implement this version of things first before looking at AUTO
+  and LOCA.
+- **AUTO**: This is an independent (and very old-school) continuation and
+  bifurcation toolkit. Old-school means mature and well-tested, but it also
+  means "not very easy to use". I've used it before and never liked it much,
+  but wanted to use it as a kind of difficulty comparison case for seeing how
+  much easier (if any) LOCA is to use.
+- **LOCA/Trilinos continuation**: This is the system that I would use for
+  working with larger systems. Trilinos is HPC-ready in a way that AUTO isn't.
+  Again, not all that easy to use. Or so I thought. But then I saw the
+  [automatic differentiation code for the
+  Jacobian](https://github.com/ian-ross/bergner-2026/blob/c12afbfad2bb5fca5172ac4024e555d620a77109/loca/include/bergner_spichtinger_2026_loca/model.hpp#L216-L228)
+  of the system for tracing the equilibrium branches. It's pretty
+  nice.<Sidenote>One thing that's quite funny about the code that the agent
+  wrote here is that it implemented its own Gauss elimination for solving the
+  3×3 matrix in the Newton corrector. A 3×3 matrix is beneath the
+  consideration of Trilinos...</Sidenote>
 
-- AUTO continuation:
-  - Role: independent continuation backend.
-  - Advantage: mature continuation machinery and familiar bifurcation-workflow conventions.
-  - Cost: Fortran/run-file machinery and backend-specific output normalization.
-  - Result here: close agreement with Python on the Figure 1 branches.
-
-- LOCA/Trilinos continuation:
-  - Role: third backend and infrastructure rehearsal.
-  - Advantage: path toward larger Trilinos-based continuation experiments.
-  - Cost: C++/CMake/toolchain setup and stricter interface discipline.
-  - Result here: close agreement with Python and AUTO on the same branch family.
+Comparing the results from the three solvers isn't that interesting in this
+case, since it's a simple problem, but they are all very close:
 
 <VegaLite spec={residualSpec} caption="Backend agreement check using LOCA as the target branch and interpolating Python/AUTO references onto the LOCA grid." />
 
-- Interpretation of the backend agreement plot:
-  - These are solver-to-solver differences, not paper-digitization errors.
-  - LOCA-vs-AUTO maximum relative differences are below about `8e-6` across `n`, `q`, and `s`.
-  - LOCA-vs-Python differences are at the same numerical-continuation scale.
-  - Digitized-paper comparisons are looser because pixel extraction is a different source of uncertainty.
-
-- What this setup buys us:
-  - A backend-neutral branch schema.
-  - A common comparison pipeline.
-  - Tests for residuals, Jacobians, branch fields, and output invariants.
-  - A way to distinguish scientific disagreement from backend plumbing mistakes.
-
-- What it does **not** prove yet:
-  - It does not establish that one backend is best.
-  - It does not reproduce every result in the paper.
-  - It does not yet address harder bifurcation or periodic-orbit claims.
-  - It only says the three tools agree on this training-wheels equilibrium task.
-
-- Episode pointers:
-  - Python continuation: `episodes/002-figure1-python-continuation/`.
-  - AUTO continuation: `episodes/003-figure1-auto-continuation/`.
-  - LOCA continuation: `episodes/004-figure1-loca-continuation/`.
-  - Shared comparison utilities: `src/bergner_spichtinger_2026/figure1_backend_comparison.py`.
+So, this was a good warm up. Next, we'll move on to something more
+interesting, looking at the Hopf bifurcations that give these oscillatory
+solutions you can see in the previous article.
