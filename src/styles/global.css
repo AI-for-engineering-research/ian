@@ -145,7 +145,8 @@ pre { max-width: 100%; overflow-x: auto; padding: var(--space-3); background: va
 table { display: block; overflow-x: auto; border-collapse: collapse; max-width: 100%; }
 th, td { border-bottom: var(--rule); padding: 0.35rem 0.55rem; text-align: left; }
 .katex { font-size: 1em; }
-.katex-display { max-width: 100%; overflow-x: auto; overflow-y: hidden; padding: 0.25rem 0; }
+.katex-display { max-width: 100%; overflow-x: auto; overflow-y: hidden; padding: 0.25rem 0; text-align: center; }
+.katex-display > .katex { display: inline-block; text-align: initial; }
 
 .content-wide, .wide, .content-figure--wide { width: 100%; max-width: 100%; }
 .content-figure { max-width: var(--measure); }

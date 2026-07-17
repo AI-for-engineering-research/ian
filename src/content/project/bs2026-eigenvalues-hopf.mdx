@@ -1,0 +1,323 @@
+---
+title: "Eigenvalues and Hopf loci for B&S2026"
+summary: Replicate Hopf bifurcation calculations for the Bergner & Spichtinger 2026 model.
+order: 9
+draft: false
+---
+
+import { withBase } from '../../lib/sitePaths.ts';
+
+export const eigenUrl = withBase('/data/bs2026-eigen-hopf/figure2-eigenvalues-long.json');
+export const hopfEstimateUrl = withBase('/data/bs2026-eigen-hopf/figure2-hopf-estimates.json');
+export const hopfLociUrl = withBase('/data/bs2026-eigen-hopf/figure3-hopf-loci.json');
+export const tableFitUrl = withBase('/data/bs2026-eigen-hopf/figure3-table-ii-fits.json');
+export const figure3LinesUrl = withBase('/data/bs2026-eigen-hopf/figure3-lines.json');
+export const font = 'STIX Two Text, Georgia, Times New Roman, serif';
+export const cfg = {
+  config: {
+    font,
+    axis: { labelFont: font, titleFont: font, labelFontSize: 15, titleFontSize: 17 },
+    legend: { labelFont: font, titleFont: font, labelFontSize: 15, titleFontSize: 16 },
+    header: { labelFont: font, titleFont: font, labelFontSize: 16, titleFontSize: 16 },
+  },
+};
+export const figure2RealBackendSelection = {
+  name: 'figure2RealBackendSelection',
+  select: { type: 'point', fields: ['backend'], toggle: true },
+  bind: 'legend',
+};
+export const figure2ImagBackendSelection = {
+  name: 'figure2ImagBackendSelection',
+  select: { type: 'point', fields: ['backend'], toggle: true },
+  bind: 'legend',
+};
+export const figure3BackendSelection = {
+  name: 'figure3BackendSelection',
+  select: { type: 'point', fields: ['backend'], toggle: true },
+  bind: 'legend',
+};
+export const figure2RealSpec = {
+  $schema: 'https://vega.github.io/schema/vega-lite/v6.json',
+  ...cfg,
+  width: 'container',
+  height: 260,
+  padding: { left: 80, right: 20, top: 10, bottom: 30 },
+  data: { url: eigenUrl },
+  params: [figure2RealBackendSelection],
+  transform: [{ filter: "datum.component == 'real'" }],
+  mark: { type: 'line', clip: true },
+  encoding: {
+    x: { field: 'w_m_s', type: 'quantitative', scale: { type: 'log', domain: [0.0005, 2.0] }, title: 'Vertical velocity w (m s⁻¹)' },
+    y: { field: 'value', type: 'quantitative', title: 'Re(λ)' },
+    color: { field: 'backend', type: 'nominal', title: 'Backend' },
+    detail: { field: 'eigen_branch', type: 'nominal' },
+    opacity: { condition: { param: 'figure2RealBackendSelection', value: 1 }, value: 0.08 },
+    tooltip: [
+      { field: 'backend', type: 'nominal' },
+      { field: 'eigen_branch', type: 'nominal', title: 'branch' },
+      { field: 'w_m_s', type: 'quantitative', title: 'w', format: '.4g' },
+      { field: 'value', type: 'quantitative', title: 'Re(λ)', format: '.4e' },
+    ],
+  },
+};
+export const figure2ImagSpec = {
+  $schema: 'https://vega.github.io/schema/vega-lite/v6.json',
+  ...cfg,
+  width: 'container',
+  height: 220,
+  padding: { left: 80, right: 20, top: 5, bottom: 40 },
+  data: { url: eigenUrl },
+  params: [figure2ImagBackendSelection],
+  transform: [{ filter: "datum.component == 'imag'" }],
+  mark: { type: 'line', clip: true },
+  encoding: {
+    x: { field: 'w_m_s', type: 'quantitative', scale: { type: 'log', domain: [0.0005, 2.0] }, title: 'Vertical velocity w (m s⁻¹)' },
+    y: { field: 'value', type: 'quantitative', title: 'Im(λ)', scale: { domain: [-0.04, 0.04] } },
+    color: { field: 'backend', type: 'nominal', title: 'Backend' },
+    detail: { field: 'eigen_branch', type: 'nominal' },
+    opacity: { condition: { param: 'figure2ImagBackendSelection', value: 1 }, value: 0.08 },
+    tooltip: [
+      { field: 'backend', type: 'nominal' },
+      { field: 'eigen_branch', type: 'nominal', title: 'branch' },
+      { field: 'w_m_s', type: 'quantitative', title: 'w', format: '.4g' },
+      { field: 'value', type: 'quantitative', title: 'Im(λ)', format: '.4e' },
+    ],
+  },
+};
+export const figure3Spec = {
+  $schema: 'https://vega.github.io/schema/vega-lite/v6.json',
+  ...cfg,
+  width: 'container',
+  height: 420,
+  padding: { left: 85, right: 25, top: 10, bottom: 45 },
+  data: { url: figure3LinesUrl },
+  params: [figure3BackendSelection],
+  transform: [{ calculate: "datum.backend + '-' + datum.branch_id", as: 'backend_branch' }],
+  mark: { type: 'line', clip: true },
+  encoding: {
+    x: { field: 'T_K', type: 'quantitative', title: 'Temperature T (K)', scale: { domain: [190, 240] } },
+    y: { field: 'w_m_s', type: 'quantitative', title: 'Vertical velocity w (m s⁻¹)', scale: { type: 'log' } },
+    color: {
+      field: 'branch_id',
+      type: 'nominal',
+      title: 'Hopf branch',
+      scale: { domain: ['lower_hopf', 'upper_hopf'], range: ['#2166ac', '#b2182b'] },
+    },
+    strokeDash: {
+      field: 'backend',
+      type: 'nominal',
+      title: 'Backend / Table II',
+      scale: { domain: ['Table II fit', 'python', 'auto', 'loca'] },
+    },
+    detail: { field: 'backend_branch', type: 'nominal' },
+    opacity: {
+      condition: [
+        { test: "datum.backend == 'Table II fit'", value: 0.45 },
+        { param: 'figure3BackendSelection', value: 1 },
+      ],
+      value: 0.08,
+    },
+    strokeWidth: {
+      condition: { test: "datum.backend == 'Table II fit'", value: 3 },
+      value: 1.8,
+    },
+    tooltip: [
+      { field: 'backend', type: 'nominal' },
+      { field: 'branch_id', type: 'nominal' },
+      { field: 'T_K', type: 'quantitative', title: 'T', format: '.1f' },
+      { field: 'w_m_s', type: 'quantitative', title: 'w', format: '.5g' },
+      { field: 'hopf_frequency', type: 'quantitative', title: 'ω', format: '.4e' },
+      { field: 'residual_norm', type: 'quantitative', format: '.2e' },
+      { field: 'loca_native_hopf_stepper', type: 'nominal', title: 'native LOCA Hopf?' },
+    ],
+  },
+};
+
+<Callout type="info" title="AI usage">
+GPT 5.5 made the figures and wrote a bullet-point outline as a starting point.
+</Callout>
+
+The main goal of this project is to learn a bit about using the LOCA package
+from Trilinos for doing bifurcation analysis. The models I've been looking at
+are much smaller than the models you would normally use LOCA for, but they're
+good for learning. In episodes 5 and 6 of the [Bergner & Spichtinger 2026
+repository](https://github.com/ian-ross/bergner-2026/tree/main/episodes), we
+continue from where we left off with the simple equilibrium analyses in the
+earlier episodes and start looking at the most interesting aspect of the
+B&S2026 model, which is the pair of Hopf bifurcations that separate damped
+from sustained oscillations. For any given temperature (within some range that
+I've not identified), there are a pair of critical vertical velocity values.
+Below the lower bound and above the upper bound, displacements of the model
+are damped, while in between these bounds, the model supports self-sustaining
+oscillations.
+
+These points where the stable equilibrium solutions become unstable and a
+limit cycle becomes stable are called <Wikipedia>Hopf
+bifurcations</Wikipedia>. As with most bifurcation points, they can be
+determined by examining the eigenvalues of the Jacobian of the system as a
+bifurcation parameter is varied: at a Hopf point, a pair of complex conjugate
+eigenvalues $y \pm iz$ cross the imaginary axis together.
+
+In episode 5, we do a first pass at finding Hopf points for a fixed set of
+model parameters and duplicate Figure 2 from the paper. Then in episode 6, we
+do a more sophisticated bifurcation analysis where we *track* the location of
+the Hopf bifurcations as the temperature changes.
+
+## Episode 5: Figure 2 eigenvalue sweep
+
+Many questions about the behavior of solutions to ODE systems can be answered
+by looking at the eigenvalues of the system Jacobian. It's often interesting
+to examine the eigenvalues as system parameters are changed: changes in the
+stability of solutions show up in changes in the sign of the real part of
+eigenvalues, and oscillatory behavior is associated with the imaginary part of
+the eigenvalues.
+
+In episode 5, we fix most of the system parameters, sweep the vertical
+velocity and calculate the eigenvalues of the 3 × 3 system Jacobian at each
+vertical velocity value. We do this using each of the three methods we're
+looking at (custom Python continuation code, AUTO, and the Trilinos-based
+NOX/LOCA approach), and the result is the figure below, which matches up with
+Figure 2 from the paper. There are three eigenvalues at each vertical
+velocity, though on the plot of the real part, you often only see two lines
+because two eigenvalues come as a complex conjugate pair. If the real parts of
+all three eigenvalues are negative, you get damped solutions, whose
+oscillation frequencies are determined by the imaginary parts of the
+eigenvalues. However, between $w \approx 0.04853\,\mathrm{m\,s^{⁻¹}}$ and $w
+\approx 0.76868\,\mathrm{m\,s^{⁻¹}}$, one of the eigenvalues has a positive
+real part, indicating unstable solutions. In this interval, the system tends
+towards a stable limit cycle of self-sustained periodic oscillation.
+
+<VegaLite spec={figure2RealSpec} caption="Figure 2-style eigenvalue reproduction at T = 230 K: real parts of the three tracked physical-Jacobian eigenvalue branches. Red vertical markers are the two Hopf estimates. Click Backend legend entries to enable or disable backends." />
+
+<VegaLite spec={figure2ImagSpec} caption="Figure 2-style eigenvalue reproduction at T = 230 K: imaginary parts of the three tracked eigenvalue branches. Click Backend legend entries to enable or disable backends." />
+
+One important technical point here is that for continuation of the equilibrium
+solutions, a *transformed* system in terms of $(\log n, \log q, s)$ is used
+(to improve solver convergence in the corrector steps of the
+predictor-corrector pseudo-arclength continuation process), but the
+eigenvalues show here are computed from the *physical* Jacobian, not the
+Jacobian of the transformed system.
+
+There's actually a little bit of cheating going on in the calculations here:
+the Python code does everything in the way I've described, but AUTO is an
+awkward customer, so the Python code is also used to compute the Jacobian
+eigenvalues at AUTO's continuation solutions. The Trilinos C++ code is also
+more or less as described, but we'll make it even closer to a "real" NOX/LOCA
+application in the next episode.
+
+(The parameters used here were $p = 300\,\mathrm{hPa}$, $T = 230\,\mathrm{K}$,
+$F = 1$, $N_a = 1.0\times 10^{10}\,\mathrm{m^{⁻³}}$, $w =
+0.0005-2.0\,\mathrm{m\,s^{⁻¹}}$.)
+
+## Episode 6: Figure 3 Hopf loci
+
+The plot above allows you to find the Hopf points (the points in parameter
+space where the stability switches from the damped oscillations to the
+sustained oscillations) for a single value of the temperature. Once you have a
+Hopf point at one temperature, you can follow a *branch* of Hopf points as the
+temperature varies. These points are all equilibrium solutions to the system
+where a pair of eigenvalues of the Jacobian cross the imaginary axis, i.e.,
+places where the equilibrium solutions lose stability in favor of a periodic
+solution.
+
+I'm going to concentrate on the way that LOCA does this, using something
+called the Moore-Spence augmented system.
+
+Let's write our ODE system as:
+
+$$
+\dot{u} = f(u; \mu, \eta)
+$$
+
+where the state of the system is $u = (n, q, s)$ ($n$ is ice crystal number
+concentration, $q$ is ice crystal mass concentration and $s$ the saturation
+ratio over ice) and $\mu$ and $\eta$ are the continuation parameters
+(actually, $\mu = \log w$ and $\eta = T$: we'll talk about those in a minute).
+An equilibrium solution is defined by $f(u; \mu, \eta) = 0$.
+
+Because $n$ and $q$ can range over very many orders of magnitude, it's better
+to use a modified system for finding equilibrium solutions, where we use a
+state $x = (\log n, \log q, s)$. The residual for the modified system (the
+equivalent of $f$ above) is:
+
+$$
+F(x; \mu, \eta) = \left( \frac{\dot{n}}{n}, \frac{\dot{q}}{q}, \dot{s}\right)
+$$
+
+We can convert solutions found for the modified system into the equivalent
+solutions for the original system. This is important, because we want to
+compute eigenvalues from the original physical system, not from the modified
+system.
+
+In terms of the modified system, a Hopf point is defined by:
+
+$$
+F(x; \mu, \eta) = 0 \qquad F_x(x; \mu, \eta) v = i \omega v, \omega > 0.
+$$
+
+The first condition is that the point is an equilibrium point, and the second
+is that the system Jacobian has a pure imaginary eigenvalue. We can write the
+complex eigenvector as $v = y + iz$ where $y$ and $z$ are real vectors. Then
+the eigenvalue condition becomes two real conditions
+
+$$
+F_x y + \omega z = 0, \qquad F_x z - \omega y = 0.
+$$
+
+We *augment* the equilibrium condition with this pair of equations and do
+numerical continuation starting from one of the Hopf points we found earlier.
+Solutions to the augmented system are guaranteed to be Hopf points. In
+practice, you need to add some extra conditions to get a well-defined system
+to solve, just to constrain the scale and phase of the eigenvector, but this
+approach of starting with an equation for equilibrium solutions and adding
+some extra conditions to make an augmented system is really common in
+bifurcation analysis. LOCA provides a set of augmented system definitions for
+bifurcation analysis, including this one ("Moore-Spence continuation") for
+following branches of Hopf points. I got the agent to write a pure C++ program
+that uses Trilinos for the whole continuation problem, and (as far as these
+things go), it's pretty compact and easy to follow.
+
+When we do the continuation in temperature, we get the following plot as a
+result, which matches Figure 3 in the paper. There are "lower" and "upper"
+branches of Hopf points which bound the region in the $T/w$-plane where there
+are periodic solutions.
+
+<VegaLite spec={figure3Spec} caption="Figure 3 Hopf loci in the T--w plane. Faint thick curves are the Table II fit references; backend curves are computed Hopf loci from Python, AUTO, and native NOX/LOCA. Click Backend legend entries to enable or disable backends." />
+
+(The parameters used here were $p = 300\,\mathrm{hPa}$, $F = 1$ and the
+temperature was scanned over the range $T = 190 - 240\,\mathrm{K}$.)
+
+## Interesting things here
+
+1. The physical system versus modified system thing happens *all the time*.
+   It's really common in physical problems to want to do continuation in
+   scaled or transformed quantities using some modification of the original
+   physical system, but when you do that, you usually still want to see
+   eigenvalues from the physical system because they correspond to real
+   physical quantities of interest.
+
+2. The LOCA augmented system classes are really easy to use, and Moore-Spence
+   continuation for Hopf points is pleasantly easy to understand. This is the
+   first part of this project where we're using LOCA "for real" (well, not for
+   **real**, because it's a tiny system, but you know what I mean).
+
+3. The results from the three different approaches are identical, although
+   we're starting to get into territory where it makes more sense to use LOCA:
+   writing custom Python continuation code rapidly becomes less practical in
+   more complex cases, and AUTO takes quite a lot of extra glue code to make
+   things work nicely.
+
+## Useful transcripts
+
+- Episode 5:
+  - [Figure 2 eigenvalue planning](../../sessions/bs2026-figure2-planning/)
+  - [Physical Jacobian infrastructure](../../sessions/bs2026-figure2-jacobian-infrastructure/)
+  - [Trilinos-side C++ eigenvalues](../../sessions/bs2026-figure2-loca-eigenvalues/)
+  - [Figure 2 backend comparison](../../sessions/bs2026-figure2-backend-comparison/)
+- Episode 6:
+  - [Figure 3 Hopf planning](../../sessions/bs2026-figure3-planning/)
+  - [Python augmented Hopf continuation](../../sessions/bs2026-figure3-python-hopf/)
+  - [AUTO native Hopf continuation](../../sessions/bs2026-figure3-auto-hopf/)
+  - [NOX/LOCA backend foundation](../../sessions/bs2026-nox-loca-backend/)
+  - [LOCA Moore--Spence Hopf continuation](../../sessions/bs2026-figure3-loca-hopf/)
+  - [Figure 3 backend comparison](../../sessions/bs2026-figure3-backend-comparison/)

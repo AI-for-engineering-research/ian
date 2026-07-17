@@ -1,0 +1,67 @@
+---
+title: "Bergner & Spichtinger 2026 eigenvalue and Hopf work"
+date: 2026-07-14
+summary: Episodes 5 and 6 moved from Figure 2 eigenvalue sweeps to Figure 3 Hopf-locus continuation, including native AUTO and NOX/LOCA bifurcation workflows.
+tags:
+  - agent-logs
+agents:
+  - Pi
+draft: false
+---
+
+<Callout type="info" title="AI usage">
+This article was drafted by GPT 5.5 as bullet-point notes for later editing.
+</Callout>
+
+- This log covers Episodes 5 and 6 in the [Bergner & Spichtinger 2026 repository](https://github.com/ian-ross/bergner-2026/tree/main).
+- It accompanies the project article [Eigenvalues and Hopf loci for B&S2026](../../project/bs2026-eigenvalues-hopf/).
+
+## Episode 5: Figure 2 eigenvalue reproduction
+
+- Useful transcripts:
+  - [Figure 2 eigenvalue planning](../../sessions/bs2026-figure2-planning/)
+  - [Physical Jacobian infrastructure](../../sessions/bs2026-figure2-jacobian-infrastructure/)
+  - [Trilinos-side C++ eigenvalues](../../sessions/bs2026-figure2-loca-eigenvalues/)
+  - [Figure 2 backend comparison](../../sessions/bs2026-figure2-backend-comparison/)
+- The planning discussion resolved the most important semantic issue: Figure 2 should use eigenvalues of the physical ODE Jacobian in physical `(n, q, s)` coordinates.
+- The agent built shared physical-Jacobian and eigenvalue infrastructure before producing backend-specific artifacts.
+- For AUTO: AUTO generated an independent equilibrium branch; Python evaluated
+  the shared physical-Jacobian eigenvalue routine at those AUTO equilibria.
+  (This is less hassle than doing this directly with AUTO.)
+- The Trilinos-side C++ path was more independent for eigenvalues: compute the physical Jacobian; use Sacado for differentiation; use Teuchos/LAPACK for dense eigenvalues.
+- The integrated comparison found two Hopf crossings that became starting points for Episode 6.
+
+## Episode 6: Figure 3 Hopf bifurcation loci
+
+- Useful transcripts:
+  - [Figure 3 Hopf planning](../../sessions/bs2026-figure3-planning/)
+  - [Python augmented Hopf continuation](../../sessions/bs2026-figure3-python-hopf/)
+  - [AUTO native Hopf continuation](../../sessions/bs2026-figure3-auto-hopf/)
+  - [NOX/LOCA backend foundation](../../sessions/bs2026-nox-loca-backend/)
+  - [LOCA Moore--Spence Hopf continuation](../../sessions/bs2026-figure3-loca-hopf/)
+  - [Figure 3 backend comparison](../../sessions/bs2026-figure3-backend-comparison/)
+- The planning discussion resulted in the goal of doing true Hopf-locus
+  continuation using LOCA. (Python and AUTO results were used mostly just for
+  sanity checking.)
+- The LOCA path was the most technically interesting part:
+  - first, a real C++ NOX/LOCA backend foundation was added for the model;
+  - then a runner was added for a `nox-loca-hopf-continue` command;
+  - that command constructed LOCA's native Moore-Spence Hopf extended group;
+  - $\log w$ was used as the Hopf bifurcation parameter;
+  - $T$ was used as the locus direction.
+
+## What the agent was useful for
+
+- The agent kept the episode structure synchronized across:
+  - backlog tasks;
+  - planning docs;
+  - scripts;
+  - generated outputs;
+  - metadata;
+  - comparison summaries.
+- It was useful for enforcing semantic hygiene:
+  - always state which Jacobian is being diagonalized;
+  - distinguish physical eigenvalues from solver-internal eigenvalues.
+- It was particularly useful for LOCA/Trilinos setup:
+  - most of the hard work is interface and build-system plumbing;
+  - the agent could iterate through those details without losing sight of the mathematical output contract.
